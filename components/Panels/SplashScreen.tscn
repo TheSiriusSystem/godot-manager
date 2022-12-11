@@ -56,4 +56,4 @@ margin_top = 118.5
 margin_right = 122.0
 margin_bottom = 167.5
 custom_fonts/font = SubResource( 12 )
-text = "Version 0.2.0"
+text = "Version 0.2.1"
