@@ -28,11 +28,6 @@ public class SceneManager : Control
 			OS.CenterWindow();
 			MainWindow win = mainWindow.Instance<MainWindow>();
 			AddChild(win);
-			
-			if (args.Length > 0) {
-				AppDialogs.ImportProject.ShowDialog(args[0]);
-			}
-		
 			win.Visible = true;
 		}
 	}
