@@ -145,7 +145,33 @@ public class ProjectsPanel : Panel
 	}
 
 	public override void _Input(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseMotion iemmEvent) {
+		if (!Visible) {
+			return;
+		}
+
+		foreach (Control dialog in AppDialogs.Instance.GetChildren()) {
+			if (dialog.Visible) {
+				return;
+			}
+		}
+
+		if (inputEvent is InputEventKey iekEvent) {
+			if (Input.IsActionJustPressed("ui_accept"))
+			{
+				if (_currentPIE != null)
+				{
+					OnIconEntry_DoubleClicked(_currentPIE);
+				}
+				else if (_currentPLE != null)
+				{
+					OnListEntry_DoubleClicked(_currentPLE);
+				}
+			}
+			else if (Input.IsActionJustPressed("remove_project"))
+			{
+				OnRemoveKeyPressed();
+			}
+		} else if (inputEvent is InputEventMouseMotion iemmEvent) {
 			if (!dragging)
 				return;
 			if (iemmEvent.Position.y <= _topBorder)
@@ -163,22 +189,6 @@ public class ProjectsPanel : Panel
 			else if (_scrollSpeed != 0)
 			{
 				_scrollSpeed = 0;
-			}
-		} else if (inputEvent is InputEventKey) {
-			if (Input.IsActionJustPressed("ui_accept"))
-			{
-				if (_currentPIE != null)
-				{
-					OnIconEntry_DoubleClicked(_currentPIE);
-				}
-				else if (_currentPLE != null)
-				{
-					OnListEntry_DoubleClicked(_currentPLE);
-				}
-			}
-			else if (Input.IsActionJustPressed("remove_project"))
-			{
-				OnRemoveKeyPressed();
 			}
 		}
 	}
@@ -273,8 +283,11 @@ public class ProjectsPanel : Panel
 		await this.IdleFrame();
 
 		foreach(string dir in scanDirs) {
-			var projs = Dir.EnumerateFiles(dir, "project.godot", SearchOption.AllDirectories);
-			foreach(string proj in projs)
+			var projsV1 = Dir.EnumerateFiles(dir, "engine.cfg", SearchOption.AllDirectories);
+			var projsV3 = Dir.EnumerateFiles(dir, "project.godot", SearchOption.AllDirectories);
+			foreach(string proj in projsV1)
+				projects.Add(proj);
+			foreach(string proj in projsV3)
 				projects.Add(proj);
 		}
 		return projects;
@@ -291,9 +304,10 @@ public class ProjectsPanel : Panel
 			{
 				await this.IdleFrame();
 			} else {
-				ProjectFile pf = ProjectFile.ReadFromFile(proj.NormalizePath());
+				ProjectFile pf = ProjectFile.ReadFromFile(proj.NormalizePath(), 1);
+				if (pf == null) pf = ProjectFile.ReadFromFile(proj.NormalizePath(), 3);
 				if (pf == null) continue;
-				pf.GodotVersion = CentralStore.Settings.DefaultEngine;
+				pf.GodotId = CentralStore.Settings.DefaultEngine;
 				CentralStore.Projects.Add(pf);
 				added.Add(proj);
 			}
@@ -314,8 +328,7 @@ public class ProjectsPanel : Panel
 		}
 
 		if (scanDirs.Count == 0) {
-			var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Scan Project Folders"),
-				Tr("There are currently no valid Directories to scan, would you like to add one?"));
+			var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Scan Projects"), Tr("There are currently no valid directories to scan. Would you like to add one?"));
 			while (!res.IsCompleted)
 				await this.IdleFrame();
 			
@@ -330,15 +343,15 @@ public class ProjectsPanel : Panel
 				return;
 		}
 
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Scanning for Projects..."));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Scanning for Project files...."));
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Scan Projects"));
+		AppDialogs.BusyDialog.UpdateByline(Tr("Scanning for project files..."));
 		AppDialogs.BusyDialog.ShowDialog();
 
 		var projsTask = ScanDirectories(scanDirs);
 		while (!projsTask.IsCompleted)
 			await this.IdleFrame();
 
-		AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Processing 0/{0}..."),projsTask.Result.Count));
+		AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Processing 0/{0}..."), projsTask.Result.Count));
 
 		var addedTask = UpdateProjects(projsTask.Result);
 		while (!addedTask.IsCompleted)
@@ -350,7 +363,7 @@ public class ProjectsPanel : Panel
 		else
 		{
 			AppDialogs.MessageDialog.ShowMessage(Tr("Scan Projects"),
-				string.Format(Tr("Found {0} new projects, and added to database."),addedTask.Result.Count));
+				string.Format(Tr("Found {0} new projects, and added to database."), addedTask.Result.Count));
 			CentralStore.Instance.SaveDatabase();
 			PopulateListing();
 		}
@@ -576,10 +589,12 @@ public class ProjectsPanel : Panel
 			_categoryView.RemoveChild(node);
 
 		foreach (Category cat in CentralStore.Instance.GetPinnedCategories())
-			_categoryView.AddChild(catCache[cat]);
+			if (catCache.ContainsKey(cat))
+				_categoryView.AddChild(catCache[cat]);
 		
 		foreach (Category cat in CentralStore.Instance.GetUnpinnedCategories())
-			_categoryView.AddChild(catCache[cat]);
+			if (catCache.ContainsKey(cat))
+				_categoryView.AddChild(catCache[cat]);
 		
 		_categoryView.AddChild(clFavorites);
 		_categoryView.AddChild(clUncategorized);
@@ -667,6 +682,7 @@ public class ProjectsPanel : Panel
 	}
 
 	void OnListEntry_RightClicked(ProjectLineEntry ple) {
+		OnListEntry_Clicked(ple);
 		_popupMenu.ProjectLineEntry = ple;
 		_popupMenu.ProjectIconEntry = null;
 		_popupMenu.Popup_(new Rect2(GetGlobalMousePosition(), _popupMenu.RectSize));
@@ -704,6 +720,7 @@ public class ProjectsPanel : Panel
 	}
 
 	void OnIconEntry_RightClicked(ProjectIconEntry pie) {
+		OnIconEntry_Clicked(pie);
 		_popupMenu.ProjectLineEntry = null;
 		_popupMenu.ProjectIconEntry = pie;
 		_popupMenu.Popup_(new Rect2(GetGlobalMousePosition(), _popupMenu.RectSize));
@@ -806,7 +823,7 @@ public class ProjectsPanel : Panel
 
 	private void ExecuteProject(ProjectFile pf)
 	{
-		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotVersion);
+		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
 		if (gv == null)
 			return;
 		
@@ -823,45 +840,56 @@ public class ProjectsPanel : Panel
 	private void UpdateIconsExcept(ProjectIconEntry pie) {
 		foreach(ProjectIconEntry cpie in _gridView.GetChildren()) {
 			if (cpie != pie)
-				cpie.SelfModulate = new Color("00FFFFFF");
+				cpie.SelfModulate = new Color("00ffffff");
 		}
 	}
 
 	private async void ExecuteEditorProject(ProjectFile pf)
 	{
-		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotVersion);
+		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
 		if (gv == null)
 		{
 			var ynd = AppDialogs.YesNoDialog;
-			var res = await ynd.ShowDialog("Missing Godot Version",
+			var res = await ynd.ShowDialog("Missing Editor Version",
 				string.Format(
-					Tr("Godot Version was not found for project {0}, do you wish to use the default engine {1}?"),
-					pf.Name,
+					Tr("The associated editor version for this project was not found. Do you wish to use the default one '{0}'?"),
 					CentralStore.Instance.FindVersion(CentralStore.Settings.DefaultEngine).Tag
 					)
 			);
 			if (res)
 			{
-				pf.GodotVersion = CentralStore.Settings.DefaultEngine;
+				pf.GodotId = CentralStore.Settings.DefaultEngine;
 				gv = CentralStore.Instance.FindVersion(CentralStore.Settings.DefaultEngine);
 				CentralStore.Instance.SaveDatabase();
 				if (gv == null)
 				{
 					var ld = AppDialogs.MessageDialog;
-					ld.ShowMessage("Failed to Launch Project", "Default Godot Version cannot be found, please select a default version of Godot to use.");
+					ld.ShowMessage("Failed to Launch Project", "The default editor version cannot be found. Please select a default version of Godot to use.");
 				}
 			}
 			else
 			{
 				var md = AppDialogs.MessageDialog;
-				md.ShowMessage("Failed to Launch Project", "Godot Version for Project does not exist, cannot open project in Editor!");
+				md.ShowMessage("Failed to Launch Project", "The associated editor version for this project does not exist. Cannot open project in Editor!");
 				return;
 			}
 		}
 
 		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
 		{
-			OS.Alert(string.Format(Tr("Executable path does not exist!  Please check the Versions folder at: {0} for {1}."),gv.Location, gv.Tag), "Execution Error");
+			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), string.Format(Tr("Executable path does not exist! Please check the Versions folder at: {0} for {1}."), gv.Location, gv.Tag));
+			return;
+		}
+
+		int gvn = gv.GetVersion();
+		if (gvn <= 2 && pf.Location.EndsWith("project.godot"))
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), Tr("Cannot open Godot v3.x+ projects in this editor version!"));
+			return;
+		}
+		else if (gvn >= 3 && pf.Location.EndsWith("engine.cfg"))
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), Tr("Cannot open Godot v1.x-v2.x projects in this editor version!"));
 			return;
 		}
 
@@ -872,7 +900,7 @@ public class ProjectsPanel : Panel
 			{
 				gv.SharedSettings = string.Empty;
 				var md = AppDialogs.MessageDialog;
-				md.ShowMessage("Shared Settings Invalid", "Instance of Shared Settings that was setup for this version of Godot, no longer exists, and has been removed.");
+				md.ShowMessage("Shared Settings Invalid", "Instance of Shared Settings that was setup for this editor version no longer exists and has been removed.");
 				CentralStore.Instance.SaveDatabase();
 			}
 			else
@@ -884,7 +912,7 @@ public class ProjectsPanel : Panel
 					fromPath.Join("feature_profiles"),
 					fromPath.Join("script_templates"),
 					fromPath.Join("text_editor_themes"),
-					(gv.IsGodot4() && ssgv.IsGodot4()) ? fromPath.Join("editor_settings-4.tres") :
+					(gv.GetVersion() >= 4 && ssgv.GetVersion() >= 4) ? fromPath.Join("editor_settings-4.tres") :
 						fromPath.Join("editor_settings-3.tres")
 				};
 				foreach(var path in copies)
@@ -955,7 +983,7 @@ public class ProjectsPanel : Panel
 				await OnRemoveKeyPressed();
 				break;
 			case 6:
-				var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Missing Projects..."), 
+				var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Missing Projects"), 
 					Tr("Are you sure you want to remove any missing projects?"));
 				await res;
 				if (res.Result)
@@ -998,8 +1026,8 @@ public class ProjectsPanel : Panel
 	private async Task RemoveProject(ProjectFile pf)
 	{
 		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Remove Project"),
-				string.Format(Tr("You are about to remove Project {0}.\nDo you wish to remove the files as well?"),pf.Name),
-			Tr("Project and Files"), Tr("Just Project"));
+				string.Format(Tr("You are about to remove project '{0}'.\nDo you wish to remove the files as well?"), pf.Name),
+				Tr("Project and Files"), Tr("Just Project"));
 		while (!task.IsCompleted)
 			await this.IdleFrame();
 		switch (task.Result)
@@ -1083,12 +1111,12 @@ public class ProjectsPanel : Panel
 		// Sort by Godot Version
 		} else {
 			if (_godotVersion.Direction == HeaderButton.SortDirection.Up) {
-				fav = CentralStore.Projects.OrderBy(pf => CentralStore.Instance.GetVersion(pf.GodotVersion).Tag)
-						.ThenBy(pf => !CentralStore.Instance.GetVersion(pf.GodotVersion).IsMono);
+				fav = CentralStore.Projects.OrderBy(pf => CentralStore.Instance.GetVersion(pf.GodotId).Tag)
+						.ThenBy(pf => !CentralStore.Instance.GetVersion(pf.GodotId).IsMono);
 				non_fav = null;
 			} else {
-				fav = CentralStore.Projects.OrderByDescending(pf => CentralStore.Instance.GetVersion(pf.GodotVersion).Tag)
-						.ThenByDescending(pf => !CentralStore.Instance.GetVersion(pf.GodotVersion).IsMono);
+				fav = CentralStore.Projects.OrderByDescending(pf => CentralStore.Instance.GetVersion(pf.GodotId).Tag)
+						.ThenByDescending(pf => !CentralStore.Instance.GetVersion(pf.GodotId).IsMono);
 				non_fav = null;
 			}
 		}
