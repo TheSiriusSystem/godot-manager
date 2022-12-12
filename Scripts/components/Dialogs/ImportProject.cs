@@ -72,15 +72,14 @@ public class ImportProject : ReferenceRect
 			return;
 		}
 		if (_godotVersions.Selected == -1) {
-			AppDialogs.MessageDialog.ShowMessage(Tr("No Godot Version Selected"),
-				Tr("You need to select a Godot Version to use with this Project."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("No Editor Version Selected"),
+				Tr("You need to select an editor version to associate with this project."));
 			return;
 		}
-		int id = _godotVersions.GetItemId(_godotVersions.Selected);
-		GodotVersion gdVers = CentralStore.Instance.FindVersion(_godotVersions.GetItemMetadata(id) as string);
-		ProjectFile pf = ProjectFile.ReadFromFile(_locationValue.Text);
-		if (gdVers != null)
-			pf.GodotVersion = gdVers.Id;
+		GodotVersion gdVers = CentralStore.Instance.FindVersion(_godotVersions.GetSelectedMetadata() as string);
+		ProjectFile pf = ProjectFile.ReadFromFile(_locationValue.Text, gdVers.GetVersion());
+		if (gdVers != null && gdVers.Id != null)
+			pf.GodotId = gdVers.Id;
 		CentralStore.Projects.Add(pf);
 		CentralStore.Instance.SaveDatabase();
 		EmitSignal("update_projects");
@@ -95,7 +94,7 @@ public class ImportProject : ReferenceRect
 	[SignalHandler("pressed", nameof(_locationBrowse))]
 	void OnLocationBrowsePressed() {
 		AppDialogs.ImportFileDialog.WindowTitle = Tr("Open Godot Project...");
-		AppDialogs.ImportFileDialog.Filters = new string[] { "*.godot" };
+		AppDialogs.ImportFileDialog.Filters = new string[] { "*.godot", "engine.cfg" };
 		AppDialogs.ImportFileDialog.CurrentFile = "";
 		AppDialogs.ImportFileDialog.CurrentPath = _locationValue.Text == "" ? CentralStore.Settings.ProjectPath : _locationValue.Text;
 		AppDialogs.ImportFileDialog.PopupCentered(new Vector2(510, 390));
