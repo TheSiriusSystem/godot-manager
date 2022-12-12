@@ -38,7 +38,7 @@ public class ProjectLineEntry : ColorRect
 
 #region Preload Resources
 	private Texture _missingIcon = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
-	private Texture _defaultIcon = GD.Load<Texture>("res://Assets/Icons/default_project_icon.png");
+	private Texture _defaultIcon = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v3.png");
 #endregion
 
 #region Private Variables
@@ -64,7 +64,7 @@ public class ProjectLineEntry : ColorRect
 			Description = value.Description;
 			Icon = value.Location.GetResourceBase(value.Icon);
 			Location = MissingProject ? Tr("Unknown Location") : value.Location;
-			GodotVersion = value.GodotVersion;
+			GodotId = value.GodotId;
 			if (HeartIcon != null) {
 				HeartIcon.SetCheck(value.Favorite);
 			}
@@ -142,7 +142,7 @@ public class ProjectLineEntry : ColorRect
 		}
 	}
 
-	public string GodotVersion {
+	public string GodotId {
 		get {
 			return sGodotVersion;
 		}
@@ -169,7 +169,7 @@ public class ProjectLineEntry : ColorRect
 		Name = sName;
 		Description = sDesc;
 		Location = sLocation;
-		GodotVersion = sGodotVersion;
+		GodotId = sGodotVersion;
 		HeartIcon.SetCheck(ProjectFile.Favorite);
 	}
 
