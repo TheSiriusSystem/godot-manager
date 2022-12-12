@@ -22,6 +22,7 @@ config/custom_user_dir_name="Godot-Manager"
 run/low_processor_mode=true
 boot_splash/show_image=false
 boot_splash/fullsize=false
+boot_splash/use_filter=false
 config/icon="res://godot-manager.png"
 
 [display]
@@ -29,6 +30,10 @@ config/icon="res://godot-manager.png"
 window/size/height=700
 window/size/resizable=false
 window/size/borderless=true
+
+[filesystem]
+
+import/fbx/use_fbx=false
 
 [gui]
 
@@ -49,9 +54,38 @@ translations=PoolStringArray( "res://locale/en_US.po" )
 
 [mono]
 
+runtime/unhandled_exception_policy=1
 project/assembly_name="Godot-Manager"
 debugger_agent/wait_timeout=7000
 
 [rendering]
 
-environment/default_environment="res://default_env.tres"
+quality/driver/fallback_to_gles2=true
+quality/intended_usage/framebuffer_allocation=1
+quality/intended_usage/framebuffer_allocation.mobile=1
+vram_compression/import_etc2=false
+quality/directional_shadow/size=256
+quality/directional_shadow/size.mobile=256
+quality/shadow_atlas/size=256
+quality/shadow_atlas/size.mobile=256
+quality/shadow_atlas/cubemap_size=64
+quality/shadow_atlas/quadrant_0_subdiv=0
+quality/shadow_atlas/quadrant_1_subdiv=0
+quality/shadow_atlas/quadrant_2_subdiv=0
+quality/shadow_atlas/quadrant_3_subdiv=0
+quality/shadows/filter_mode=0
+quality/reflections/texture_array_reflections=false
+quality/reflections/high_quality_ggx=false
+quality/shading/force_vertex_shading=true
+quality/shading/force_lambert_over_burley=true
+quality/shading/force_blinn_over_ggx=true
+quality/filters/anisotropic_filter_level=1
+gles2/compatibility/disable_half_float=true
+limits/rendering/max_renderable_elements=1024
+limits/rendering/max_renderable_lights=16
+limits/rendering/max_renderable_reflections=8
+limits/rendering/max_lights_per_object=8
+cpu_lightmapper/quality/low_quality_ray_count=0
+cpu_lightmapper/quality/medium_quality_ray_count=0
+cpu_lightmapper/quality/high_quality_ray_count=0
+cpu_lightmapper/quality/ultra_quality_ray_count=0
