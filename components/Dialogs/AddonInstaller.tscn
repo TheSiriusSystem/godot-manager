@@ -99,7 +99,7 @@ WindowMain = NodePath("../../../../../../../..")
 [node name="MCContent" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_top = 30.0
 margin_right = 470.0
-margin_bottom = 411.0
+margin_bottom = 410.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/margin_right = 8
@@ -111,61 +111,61 @@ custom_constants/margin_bottom = 8
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 462.0
-margin_bottom = 373.0
+margin_bottom = 372.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="DetailLabel" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
 margin_right = 454.0
-margin_bottom = 31.0
+margin_bottom = 37.0
 text = "Contents of asset {Asset.Title}
 Select files to Install:"
 clip_text = true
 max_lines_visible = 2
 
 [node name="SC" type="ScrollContainer" parent="PC/CC/P/VB/MCContent/VB"]
-margin_top = 35.0
+margin_top = 41.0
 margin_right = 454.0
-margin_bottom = 365.0
+margin_bottom = 364.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/VB/SC"]
 margin_right = 454.0
-margin_bottom = 330.0
+margin_bottom = 323.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="AddonTree" type="Tree" parent="PC/CC/P/VB/MCContent/VB/SC/VBoxContainer"]
 margin_right = 454.0
-margin_bottom = 330.0
+margin_bottom = 323.0
 size_flags_vertical = 3
 
 [node name="MCButtons" type="MarginContainer" parent="PC/CC/P/VB"]
-margin_top = 415.0
+margin_top = 414.0
 margin_right = 470.0
 margin_bottom = 450.0
 custom_constants/margin_bottom = 15
 
 [node name="HB" type="HBoxContainer" parent="PC/CC/P/VB/MCButtons"]
 margin_right = 470.0
-margin_bottom = 20.0
+margin_bottom = 21.0
 
 [node name="Sep2" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
-margin_right = 216.0
-margin_bottom = 20.0
+margin_right = 220.0
+margin_bottom = 21.0
 size_flags_horizontal = 3
 
 [node name="OkButton" type="Button" parent="PC/CC/P/VB/MCButtons/HB"]
-margin_left = 220.0
-margin_right = 250.0
-margin_bottom = 20.0
+margin_left = 224.0
+margin_right = 245.0
+margin_bottom = 21.0
 text = "Ok"
 
 [node name="Sep3" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
-margin_left = 254.0
+margin_left = 249.0
 margin_right = 470.0
-margin_bottom = 20.0
+margin_bottom = 21.0
 size_flags_horizontal = 3
 
 [node name="DownloadSpeedTimer" type="Timer" parent="."]

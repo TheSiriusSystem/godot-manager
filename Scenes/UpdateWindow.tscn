@@ -20,24 +20,24 @@ size_flags_vertical = 3
 
 [node name="vb" type="VBoxContainer" parent="bg/cc"]
 margin_left = 216.0
-margin_top = 329.0
+margin_top = 330.0
 margin_right = 808.0
-margin_bottom = 371.0
+margin_bottom = 370.0
 rect_min_size = Vector2( 592, 0 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="Label" type="Label" parent="bg/cc/vb"]
 margin_right = 592.0
-margin_bottom = 18.0
+margin_bottom = 17.0
 size_flags_horizontal = 3
 size_flags_vertical = 6
 text = "Update Progress...."
 
 [node name="ProgressBar" type="ProgressBar" parent="bg/cc/vb"]
-margin_top = 22.0
+margin_top = 21.0
 margin_right = 592.0
-margin_bottom = 42.0
+margin_bottom = 40.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 

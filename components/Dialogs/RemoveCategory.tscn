@@ -99,7 +99,7 @@ WindowMain = NodePath("../../../../../../../..")
 [node name="MCContent" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_top = 30.0
 margin_right = 320.0
-margin_bottom = 279.0
+margin_bottom = 280.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/margin_right = 8
@@ -111,7 +111,7 @@ custom_constants/margin_bottom = 8
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 312.0
-margin_bottom = 241.0
+margin_bottom = 242.0
 custom_constants/separation = 10
 
 [node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
@@ -123,45 +123,45 @@ text = "Select Category to Remove:"
 [node name="Categories" type="ItemList" parent="PC/CC/P/VB/MCContent/VB"]
 margin_top = 29.0
 margin_right = 304.0
-margin_bottom = 233.0
+margin_bottom = 234.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="MCButtons" type="MarginContainer" parent="PC/CC/P/VB"]
-margin_top = 283.0
+margin_top = 284.0
 margin_right = 320.0
 margin_bottom = 320.0
 custom_constants/margin_bottom = 15
 
 [node name="HB" type="HBoxContainer" parent="PC/CC/P/VB/MCButtons"]
 margin_right = 320.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 
 [node name="Sep1" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_right = 67.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 size_flags_horizontal = 3
 
 [node name="RemoveBtn" type="Button" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_left = 71.0
 margin_right = 127.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 text = "Remove"
 
 [node name="Sep2" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_left = 131.0
 margin_right = 199.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 size_flags_horizontal = 3
 
 [node name="CancelBtn" type="Button" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_left = 203.0
 margin_right = 248.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 text = "Cancel"
 
 [node name="Sep3" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_left = 252.0
 margin_right = 320.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 size_flags_horizontal = 3

@@ -86,14 +86,14 @@ max_lines_visible = 5
 [node name="MessageText" type="Label" parent="PC/CC/P/VB/MCContent/VC"]
 margin_top = 23.0
 margin_right = 364.0
-margin_bottom = 41.0
+margin_bottom = 40.0
 size_flags_vertical = 1
 custom_fonts/font = ExtResource( 1 )
 text = "There was a conflict between the following files:"
 autowrap = true
 
 [node name="GridContainer" type="GridContainer" parent="PC/CC/P/VB/MCContent/VC"]
-margin_top = 45.0
+margin_top = 44.0
 margin_right = 364.0
 margin_bottom = 108.0
 size_flags_horizontal = 3
@@ -112,7 +112,7 @@ margin_right = 364.0
 modulate = Color( 0.945098, 1, 0, 1 )
 margin_top = 10.0
 margin_right = 79.0
-margin_bottom = 28.0
+margin_bottom = 27.0
 text = "Archive File:"
 
 [node name="ArchiveFile" type="Label" parent="PC/CC/P/VB/MCContent/VC/GridContainer"]
@@ -120,24 +120,24 @@ modulate = Color( 0.8, 0.819608, 0.439216, 1 )
 margin_left = 83.0
 margin_top = 10.0
 margin_right = 364.0
-margin_bottom = 28.0
+margin_bottom = 27.0
 size_flags_horizontal = 3
 text = "addon/file.gd"
 clip_text = true
 
 [node name="Label3" type="Label" parent="PC/CC/P/VB/MCContent/VC/GridContainer"]
 modulate = Color( 0, 1, 0.0862745, 1 )
-margin_top = 38.0
+margin_top = 37.0
 margin_right = 79.0
-margin_bottom = 56.0
+margin_bottom = 54.0
 text = "Destination:	"
 
 [node name="DestinationFile" type="Label" parent="PC/CC/P/VB/MCContent/VC/GridContainer"]
 modulate = Color( 0.364706, 0.741176, 0.431373, 1 )
 margin_left = 83.0
-margin_top = 38.0
+margin_top = 37.0
 margin_right = 364.0
-margin_bottom = 56.0
+margin_bottom = 54.0
 size_flags_horizontal = 3
 text = "res://addon/file.gd"
 clip_text = true
