@@ -345,7 +345,7 @@ public class SettingsPanel : Panel
 			GetTree().Root.GetNode<Control>("SceneManager/MainWindow/bg/Shell/VC/VisibleSpacer").Visible = false;
 		}
 
-		foreach(GodotVersion version in CentralStore.Versions) {
+		foreach (GodotVersion version in CentralStore.Versions) {
 			if (_editorProfiles.Pressed) {
 				File fh = new File();
 				fh.Open($"{version.Location}/._sc_".GetOSDir().NormalizePath(), File.ModeFlags.Write);
@@ -729,7 +729,7 @@ public class SettingsPanel : Panel
 				GD.Print($"Execre: {execre}");
 				if (execre > 0)
 				{
-					AppDialogs.MessageDialog.ShowMessage(Tr("Install Shortcut"), Tr("Failed to install Shortcut."));
+					AppDialogs.MessageDialog.ShowMessage(Tr("Install Shortcut"), Tr("Failed to install shortcut."));
 					return;
 				}
 				System.IO.File.Delete("/tmp/godot-installer.sh");
@@ -768,7 +768,7 @@ public class SettingsPanel : Panel
 					GD.Print($"execre: {execre}");
 					if (execre > 0)
 					{
-						AppDialogs.MessageDialog.ShowMessage(Tr("Remove Shortcut"), Tr("Failed to remove Shortcut.") );
+						AppDialogs.MessageDialog.ShowMessage(Tr("Remove Shortcut"), Tr("Failed to remove shortcut.") );
 						return;
 					}
 					System.IO.File.Delete("/tmp/godot-uninstaller.sh");
@@ -1092,7 +1092,7 @@ public class SettingsPanel : Panel
 
 	[SignalHandler("pressed", nameof(_checkForUpdatesGM))]
 	async void OnCheckForUpdatesGM_Pressed() {
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Checking for updates for Godot Manager..."));
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Check for Updates"));
 		AppDialogs.BusyDialog.UpdateByline(Tr("Connecting to GitHub..."));
 		AppDialogs.BusyDialog.ShowDialog();
 		var res = Github.Github.Instance.GetLatestManagerRelease();
@@ -1102,8 +1102,8 @@ public class SettingsPanel : Panel
 
 		if (res.Result == null) {
 			AppDialogs.BusyDialog.HideDialog();
-			AppDialogs.MessageDialog.ShowMessage(Tr("Godot Manager - Check for Updates"), 
-				Tr("Failed to get release information from Github"));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Check for Updates"), 
+				Tr("Failed to get release information from GitHub."));
 			return;
 		}
 
@@ -1114,8 +1114,8 @@ public class SettingsPanel : Panel
 			AppDialogs.NewVersion.Connect("download_manager_update", this, "OnDownloadManagerUpdate");
 		} else {
 			AppDialogs.BusyDialog.HideDialog();
-			AppDialogs.MessageDialog.ShowMessage(Tr("Check for Godot Manager Updates"),
-				Tr("Currently on latest version of Godot Manager."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Check for Updates"),
+				Tr("Godot Manager is up-to-date."));
 		}
 	}
 

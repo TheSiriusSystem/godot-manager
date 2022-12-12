@@ -45,7 +45,7 @@ Button _CancelBtn = null;
 
 #region Resources
 [Resource("res://components/AddonLineEntry.tscn")] private PackedScene ALineEntry = null;
-[Resource("res://Assets/Icons/default_project_icon.png")] private Texture DefaultIcon = null;
+[Resource("res://Assets/Icons/default_project_icon_v3.png")] private Texture DefaultIcon = null;
 #endregion
 
 #region Private Variables
@@ -59,7 +59,7 @@ Button _CancelBtn = null;
 	struct EPData {
 		public string IconPath;
 		public string ProjectName;
-		public string GodotVersion;
+		public string GodotId;
 		public string Description;
 		public Array<string> QueueAddons;
 	}
@@ -76,9 +76,9 @@ Button _CancelBtn = null;
 		set => _data.ProjectName = value;
 	}
 
-	public string GodotVersion { 
-		get => _data.GodotVersion;
-		set => _data.GodotVersion = value;
+	public string GodotId { 
+		get => _data.GodotId;
+		set => _data.GodotId = value;
 	}
 
 	public string Description {
@@ -92,7 +92,7 @@ Button _CancelBtn = null;
 			_pf = value;
 			IconPath = _pf.Icon;
 			ProjectName = _pf.Name;
-			GodotVersion = _pf.GodotVersion;
+			GodotId = _pf.GodotId;
 			Description = _pf.Description;
 		}
 	}
@@ -148,7 +148,7 @@ Button _CancelBtn = null;
 				gdName += Tr(" (Default)");
 			_GodotVersion.AddItem(gdName);
 			_GodotVersion.SetItemMetadata(_GodotVersion.GetItemCount()-1, gdver.Id);
-			if (ProjectFile.GodotVersion == gdver.Id)
+			if (ProjectFile.GodotId == gdver.Id)
 				_GodotVersion.Selected = _GodotVersion.GetItemCount()-1;
 		}
 
@@ -226,7 +226,7 @@ Button _CancelBtn = null;
 		ProjectFile.Name = ProjectName;
 		ProjectFile.Description = Description;
 		ProjectFile.Icon = IconPath;
-		ProjectFile.GodotVersion = GodotVersion;
+		ProjectFile.GodotId = GodotId;
 		ProjectFile.WriteUpdatedData();
 		UpdatePlugins();
 		CentralStore.Instance.SaveDatabase();
@@ -270,14 +270,12 @@ Button _CancelBtn = null;
 			IconPath = pfpath.GetProjectRoot(path);
 		else {
 			var ret = AppDialogs.YesNoDialog.ShowDialog(Tr("Icon Selection"),
-				Tr("This file is outside your project structure, do you want to copy it to the root of your project?"));
+				Tr("This file is outside your project structure. Do you want to copy it to the root of your project?"));
 			await ret;
 			if (ret.Result) {
 				SFile.Copy(path, pfpath.PlusFile(path.GetFile()));
 				IconPath = pfpath.GetProjectRoot(path);
 			} else {
-				AppDialogs.MessageDialog.ShowMessage(Tr("Icon Selection"),
-					Tr("Icon not copied, unable to use icon for Project."));
 				AppDialogs.ImageFileDialog.Visible = false;
 				return;
 			}
@@ -301,7 +299,7 @@ Button _CancelBtn = null;
 
 	[SignalHandler("item_selected", nameof(_GodotVersion))]
 	void OnGodotVersionItemSelected(int index) {
-		GodotVersion = _GodotVersion.GetItemMetadata(index) as string;
+		GodotId = _GodotVersion.GetItemMetadata(index) as string;
 		_isDirty = true;
 		_SaveBtn.Disabled = false;
 	}
