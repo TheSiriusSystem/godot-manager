@@ -9,34 +9,59 @@ public class ProjectFile : Godot.Object {
 	[JsonProperty] public string Name;
 	[JsonProperty] public string Description;
 	[JsonProperty] public string Location;
-	[JsonProperty] public string GodotVersion;
+	[JsonProperty] public string GodotId;
 	[JsonProperty] public int CategoryId;
 	[JsonProperty] public bool Favorite;
 	[JsonProperty] public DateTime LastAccessed;
 	[JsonProperty] public Array<string> Assets;
 
-	public static ProjectFile ReadFromFile(string filePath) {
+	public static ProjectFile ReadFromFile(string filePath, int compatLevel = 3) {
 		ProjectFile projectFile = null;
 		ProjectConfig project = new ProjectConfig();
 		var ret = project.Load(filePath);
 		if (ret == Error.Ok) {
-			if (!project.HasSectionKey("header","config_version"))
+			if (!project.HasSection("application")) {
+				AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Section 'application' does not exist in the project file.");
 				return projectFile;
-			if (!project.HasSection("application"))
-				return projectFile;
-			if (!project.HasSectionKey("application","config/name"))
-				return projectFile;
-			if (project.GetValue("header","config_version") == "4" || project.GetValue("header","config_version") == "5") {
+			}
+			if (compatLevel <= 2) {
+				if (!project.HasSectionKey("application", "name")) {
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key 'name' does not exist in the project file.");
+				}
+
 				projectFile = new ProjectFile();
-				projectFile.Name = project.GetValue("application", "config/name");
-				projectFile.Description = project.GetValue("application", "config/description", projectFile.Tr("No Description"));
+				projectFile.Name = project.GetValue("application", "name");
+				projectFile.Description = projectFile.Tr("No Description");
 				projectFile.Location = filePath.NormalizePath();
-				projectFile.Icon = project.GetValue("application", "config/icon", "res://icon.png");
-			} else {
-				GD.PrintErr($"{filePath}: Project Version does not match version 4 or 5.");
+				projectFile.Icon = project.GetValue("application", "icon", "res://icon.png");
+				return projectFile;
+			} else if (compatLevel >= 3) {
+				if (!project.HasSection("header")) {
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Section 'header' does not exist in the project file.");
+					return projectFile;
+				}
+				if (!project.HasSectionKey("header", "config_version")) {
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key 'config_version' does not exist in the project file.");
+					return projectFile;
+				}
+				if (!project.HasSectionKey("application", "config/name")) {
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key 'config/name' does not exist in the project file.");
+					return projectFile;
+				}
+
+				int configVersion = project.GetValue("header", "config_version").ToInt();
+				if (configVersion >= 3) {
+					projectFile = new ProjectFile();
+					projectFile.Name = project.GetValue("application", "config/name");
+					projectFile.Description = project.GetValue("application", "config/description", projectFile.Tr("No Description"));
+					projectFile.Location = filePath.NormalizePath();
+					projectFile.Icon = project.GetValue("application", "config/icon", "res://icon.png");
+				} else {
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", $"{filePath}: Project Version does not match version 3+.");
+				}
 			}
 		} else {
-			GD.PrintErr($"Failed to load Project file: {filePath}, Error: {ret}");
+			AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", $"{filePath}: {ret}");
 		}
 		return projectFile;
 	}
@@ -63,7 +88,7 @@ public class ProjectFile : Godot.Object {
 		Name = "";
 		Description = "";
 		Location = "";
-		GodotVersion = "";
+		GodotId = "";
 		CategoryId = -1;
 		Favorite = false;
 		LastAccessed = DateTime.UtcNow;
