@@ -37,9 +37,6 @@ anchor_bottom = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="VC" type="VBoxContainer" parent="."]
 anchor_right = 1.0
@@ -191,7 +188,8 @@ columns = 3
 
 [node name="CategoryView" type="VBoxContainer" parent="VC/SC/MarginContainer/ProjectList"]
 visible = false
+margin_top = 296.0
 margin_right = 1004.0
-margin_bottom = 536.0
+margin_bottom = 588.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
