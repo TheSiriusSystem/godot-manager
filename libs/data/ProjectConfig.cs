@@ -144,8 +144,10 @@ public class ProjectConfig : Object {
 		using (StreamWriter writer = new StreamWriter(fileName)) {
 			writer.WriteLine(HEADER);
 
-			foreach(string key in sections["header"].Keys) {
-				writer.WriteLine($"{key}={sections["header"][key]}");
+			if (sections.ContainsKey("header")) {
+				foreach(string key in sections["header"].Keys) {
+					writer.WriteLine($"{key}={sections["header"][key]}");
+				}
 			}
 
 			writer.WriteLine("");
