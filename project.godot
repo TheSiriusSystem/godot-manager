@@ -15,7 +15,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Godot Manager"
-config/description="A complete solution for Godot, allowing you to manage projects and versions of the Godot Engine on the fly."
+config/description="A Complete solution for Godot, allowing you to manage Projects and versions of the Godot Engine on the fly."
 run/main_scene="res://components/Panels/SplashScreen.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Godot-Manager"
@@ -23,7 +23,7 @@ run/low_processor_mode=true
 boot_splash/show_image=false
 boot_splash/fullsize=false
 boot_splash/use_filter=false
-config/icon="res://godot-manager.png"
+config/icon="res://icon.png"
 
 [display]
 
@@ -82,11 +82,12 @@ quality/shading/force_lambert_over_burley=true
 quality/shading/force_blinn_over_ggx=true
 quality/filters/anisotropic_filter_level=1
 gles2/compatibility/disable_half_float=true
-environment/default_clear_color=Color( 0.301961, 0.301961, 0.301961, 1 )
+environment/default_clear_color=Color( 0.137255, 0.14902, 0.180392, 1 )
 cpu_lightmapper/quality/low_quality_ray_count=0
 cpu_lightmapper/quality/medium_quality_ray_count=0
 cpu_lightmapper/quality/high_quality_ray_count=0
 cpu_lightmapper/quality/ultra_quality_ray_count=0
+quality/depth/hdr=false
 limits/rendering/max_renderable_elements=1024
 limits/rendering/max_renderable_lights=16
 limits/rendering/max_renderable_reflections=8
