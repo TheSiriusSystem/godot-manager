@@ -515,8 +515,8 @@ msgid "Edit Project"
 msgstr "Edit Project"
 
 #: ../Scripts/components/Dialogs/EditProject.cs:242
-msgid "There is unsaved changes, do you wish to continue?"
-msgstr "There is unsaved changes, do you wish to continue?"
+msgid "You have unsaved changes, do you wish to stop editing?"
+msgstr "You have unsaved changes, do you wish to stop editing?"
 
 #: ../Scripts/components/Dialogs/FirstRunWizard.cs:122
 msgid "Location for Godot Engines"

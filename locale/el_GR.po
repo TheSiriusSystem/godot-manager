@@ -373,7 +373,7 @@ msgid "Edit Project"
 msgstr "Επεξεργασία έργου"
 
 #: ../Scripts/components/Dialogs/EditProject.cs:226
-msgid "There is unsaved changes, do you wish to continue?"
+msgid "You have unsaved changes, do you wish to stop editing?"
 msgstr "Υπάρχουν μη αποθηκευμένες αλλαγές, επιθυμείτε να συνεχίσετε;"
 
 #: ../Scripts/components/Dialogs/ImportProject.cs:71

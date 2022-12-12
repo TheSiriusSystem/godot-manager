@@ -239,7 +239,7 @@ Button _CancelBtn = null;
 	[SignalHandler("pressed", nameof(_CancelBtn))]
 	async void OnCancelBtnPressed() {
 		if (_isDirty) {
-			var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Edit Project"), Tr("There is unsaved changes, do you wish to continue?"));
+			var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Edit Project"), Tr("You have unsaved changes, do you wish to stop editing?"));
 			await res;
 			if (res.Result) {
 				Visible = false;
