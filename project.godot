@@ -14,7 +14,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="Godot-Manager"
+config/name="Godot Manager"
 config/description="A Complete solution for Godot, allowing you to manage Projects and versions of the Godot Engine on the fly."
 run/main_scene="res://components/Panels/SplashScreen.tscn"
 config/use_custom_user_dir=true
