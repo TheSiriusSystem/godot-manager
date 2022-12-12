@@ -936,22 +936,7 @@ public class ProjectsPanel : Panel
                 AppDialogs.RemoveCategory.ShowDialog();
                 break;
 			case 5: // Remove Project (May be removed completely)
-				ProjectFile pf = null;
-				if (_currentView == View.GridView)
-				{
-					if (_currentPIE != null)
-						pf = _currentPIE.ProjectFile;
-				}
-				else
-				{
-					if (_currentPLE != null)
-						pf = _currentPLE.ProjectFile;
-				}
-
-				if (pf == null)
-					return;
-
-				await RemoveProject(pf);
+				await OnRemoveKeyPressed();
 				break;
             case 6:
                 var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Missing Projects..."), 
@@ -962,6 +947,26 @@ public class ProjectsPanel : Panel
                 break;
 		}
     }
+
+    private async Task OnRemoveKeyPressed()
+	{
+		ProjectFile pf = null;
+		if (_currentView == View.GridView)
+		{
+			if (_currentPIE != null)
+				pf = _currentPIE.ProjectFile;
+		}
+		else
+		{
+			if (_currentPLE != null)
+				pf = _currentPLE.ProjectFile;
+		}
+		
+		if (pf == null)
+			return;
+		
+		await RemoveProject(pf);
+	}
 
 	private async Task RemoveProject(ProjectFile pf)
 	{
@@ -985,8 +990,6 @@ public class ProjectsPanel : Panel
 				PopulateListing();
 				break;
 			case YesNoCancelDialog.ActionResult.CancelAction:
-				AppDialogs.MessageDialog.ShowMessage(Tr("Remove Project"), 
-                    Tr("Remove Project has been cancelled."));
 				break;
 		}
 	}
@@ -1008,6 +1011,26 @@ public class ProjectsPanel : Panel
         dir.Open(path.GetBaseDir());
         dir.Remove(path.GetFile());
     }
+
+    private async Task OnRemoveKeyPressed()
+	{
+		ProjectFile pf = null;
+		if (_currentView == View.GridView)
+		{
+			if (_currentPIE != null)
+				pf = _currentPIE.ProjectFile;
+		}
+		else
+		{
+			if (_currentPLE != null)
+				pf = _currentPLE.ProjectFile;
+		}
+		
+		if (pf == null)
+			return;
+		
+		await RemoveProject(pf);
+	}
 
     [SignalHandler("Clicked", nameof(_viewSelector))]
     void OnViewSelector_Clicked(int page) {
