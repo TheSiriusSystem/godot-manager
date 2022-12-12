@@ -27,7 +27,7 @@ public class ProjectIconEntry : ColorRect
 
 #region Preload Resources
     private Texture _missingIcon = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
-    private Texture _defaultIcon = GD.Load<Texture>("res://Assets/Icons/default_project_icon.png");
+    private Texture _defaultIcon = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v3.png");
 #endregion
 
 #region Private Variables
@@ -130,11 +130,11 @@ public class ProjectIconEntry : ColorRect
             ProjectName = value.Name;
             Icon = value.Location.GetResourceBase(value.Icon);
             Location = MissingProject ? Tr("Unknown Location") : value.Location;
-            GodotVersion = value.GodotVersion;
+            GodotId = value.GodotId;
         }
     }
 
-    public string GodotVersion {
+    public string GodotId {
         get {
             return sGodotVersion;
         }
@@ -166,7 +166,7 @@ public class ProjectIconEntry : ColorRect
         Icon = sIcon;
         ProjectName = sProjectName;
         Location = sProjectLocation;
-        GodotVersion = sGodotVersion;
+        GodotId = sGodotVersion;
     }
 
     [SignalHandler("gui_input")]
