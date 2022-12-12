@@ -196,7 +196,6 @@ public class DownloadGodotManager : ReferenceRect
 
 		if (result.Cancelled)
 		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Download Cancelled"), Tr("Download of update was cancelled."));
 			CleanupClient();
 			Visible = false;
 			return false;

@@ -233,8 +233,6 @@ public class DownloadAddon : ReferenceRect
 
 		if (result.Cancelled)
 		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Download Cancelled"),
-				string.Format(Tr($"Addon download '{0}' cancelled."),Asset.Title));
 			CleanupClient();
 			Visible = false;
 			return false;
