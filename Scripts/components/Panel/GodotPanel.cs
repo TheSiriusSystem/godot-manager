@@ -452,8 +452,8 @@ public class GodotPanel : Panel
 
 		if (result.Result) {
 			foreach(ProjectFile pf in CentralStore.Projects) {
-				if (pf.GodotVersion == gle.GodotVersion.Id) {
-					pf.GodotVersion = Guid.Empty.ToString();
+				if (pf.GodotId == gle.GodotVersion.Id) {
+					pf.GodotId = Guid.Empty.ToString();
 				}
 			}
 
@@ -477,7 +477,7 @@ public class GodotPanel : Panel
 					GodotVersion gv = CentralStore.Versions[0];
 					foreach (ProjectFile pf in CentralStore.Projects)
 					{
-						pf.GodotVersion = gv.Id;
+						pf.GodotId = gv.Id;
 					}
 
 					CentralStore.Settings.DefaultEngine = gv.Id;
@@ -536,12 +536,12 @@ public class GodotPanel : Panel
 			return;
 		}
 		var list = new Godot.Collections.Dictionary<string, string>();
-		if (gle.GodotVersion.IsGodot4())
+		if (gle.GodotVersion.GetVersion() >= 4)
 		{
 			foreach (var id in CentralStore.Settings.SettingsShare)
 			{
 				var gv = CentralStore.Instance.FindVersion(id);
-				if (!gv.IsGodot4()) continue;
+				if (gv.GetVersion() <= 3) continue;
 				list[gv.Tag] = id;
 			}
 		}
@@ -550,7 +550,7 @@ public class GodotPanel : Panel
 			foreach (var id in CentralStore.Settings.SettingsShare)
 			{
 				var gv = CentralStore.Instance.FindVersion(id);
-				if (gv.IsGodot4()) continue;
+				if (gv.GetVersion() >= 4) continue;
 				list[gv.Tag] = id;
 			}
 		}
