@@ -12,17 +12,11 @@ anchor_right = 1.0
 rect_min_size = Vector2( 0, 64 )
 color = Color( 1, 1, 1, 0.192157 )
 script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="hc" type="HBoxContainer" parent="."]
 self_modulate = Color( 0.501961, 0.501961, 0.501961, 1 )
 anchor_right = 1.0
 margin_bottom = 64.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ProjectIcon" type="TextureRect" parent="hc"]
 margin_right = 64.0
@@ -53,7 +47,7 @@ clip_text = true
 [node name="ProjectDesc" type="Label" parent="hc/vc"]
 margin_top = 23.0
 margin_right = 516.0
-margin_bottom = 41.0
+margin_bottom = 40.0
 mouse_filter = 1
 mouse_default_cursor_shape = 2
 size_flags_horizontal = 5
@@ -63,9 +57,9 @@ clip_text = true
 max_lines_visible = 1
 
 [node name="ProjectLocation" type="Label" parent="hc/vc"]
-margin_top = 45.0
+margin_top = 44.0
 margin_right = 516.0
-margin_bottom = 63.0
+margin_bottom = 61.0
 mouse_filter = 1
 mouse_default_cursor_shape = 2
 size_flags_horizontal = 5
