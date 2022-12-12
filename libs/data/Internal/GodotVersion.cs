@@ -30,7 +30,13 @@ public class GodotVersion : Object {
 		SharedSettings = string.Empty;
 	}
 
-	public bool IsGodot4() => Tag.StartsWith("4") || Tag.StartsWith("v4");
+	public int GetVersion() {
+		int position = 0;
+		if (Tag.ToLower().StartsWith("v")) {
+			position = 1;
+		}
+		return Tag[position].ToString().ToInt();
+	}
 
 	public string GetDisplayName() {
 		return $"Godot {Tag + (IsMono ? " - Mono" : "")}";
