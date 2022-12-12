@@ -338,7 +338,7 @@ public class AssetLibPanel : Panel
             asset.Author = cfg.GetValue("plugin","author") as string;
             asset.VersionString = cfg.GetValue("plugin","version") as string;
             asset.Description = cfg.GetValue("plugin","description") as string;
-            asset.IconUrl = "res://Assets/Icons/default_project_icon.png";
+            asset.IconUrl = "res://Assets/Icons/default_project_icon_v3.png";
         } else {
             ProjectConfig pc = new ProjectConfig(filepath);
             pc.Load();
@@ -395,7 +395,7 @@ public class AssetLibPanel : Panel
             asset.Author = cfg.GetValue("plugin","author") as string;
             asset.VersionString = cfg.GetValue("plugin","version") as string;
             asset.Description = cfg.GetValue("plugin","description") as string;
-            asset.IconUrl = "res://Assets/Icons/default_project_icon.png";
+            asset.IconUrl = "res://Assets/Icons/default_project_icon_v3.png";
         } else {
             ProjectConfig pc = new ProjectConfig();
             bool found = false;
