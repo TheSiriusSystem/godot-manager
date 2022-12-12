@@ -164,6 +164,22 @@ public class ProjectsPanel : Panel
             {
                 _scrollSpeed = 0;
             }
+        } else if (inputEvent is InputEventKey) {
+            if (Input.IsActionJustPressed("ui_accept"))
+            {
+                if (_currentPIE != null)
+                {
+                    OnIconEntry_DoubleClicked(_currentPIE);
+                }
+                else if (_currentPLE != null)
+                {
+                    OnListEntry_DoubleClicked(_currentPLE);
+                }
+            }
+            else if (Input.IsActionJustPressed("remove_project"))
+            {
+                OnRemoveKeyPressed();
+            }
         }
     }
 
@@ -968,6 +984,17 @@ public class ProjectsPanel : Panel
 		await RemoveProject(pf);
 	}
 
+    private void RemoveProjectListing(ProjectFile pf, bool deleteFiles)
+    {
+        _currentPIE = null;
+        _currentPLE = null;
+        if (deleteFiles)
+            RemoveFolders(pf.Location.GetBaseDir());
+        CentralStore.Projects.Remove(pf);
+        CentralStore.Instance.SaveDatabase();
+        PopulateListing();
+    }
+
 	private async Task RemoveProject(ProjectFile pf)
 	{
 		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Remove Project"),
@@ -978,16 +1005,10 @@ public class ProjectsPanel : Panel
 		switch (task.Result)
 		{
 			case YesNoCancelDialog.ActionResult.FirstAction:
-				string path = pf.Location.GetBaseDir();
-				RemoveFolders(path);
-				CentralStore.Projects.Remove(pf);
-				CentralStore.Instance.SaveDatabase();
-				PopulateListing();
+				RemoveProjectListing(pf, true);
 				break;
 			case YesNoCancelDialog.ActionResult.SecondAction:
-				CentralStore.Projects.Remove(pf);
-				CentralStore.Instance.SaveDatabase();
-				PopulateListing();
+				RemoveProjectListing(pf, false);
 				break;
 			case YesNoCancelDialog.ActionResult.CancelAction:
 				break;
@@ -1011,26 +1032,6 @@ public class ProjectsPanel : Panel
         dir.Open(path.GetBaseDir());
         dir.Remove(path.GetFile());
     }
-
-    private async Task OnRemoveKeyPressed()
-	{
-		ProjectFile pf = null;
-		if (_currentView == View.GridView)
-		{
-			if (_currentPIE != null)
-				pf = _currentPIE.ProjectFile;
-		}
-		else
-		{
-			if (_currentPLE != null)
-				pf = _currentPLE.ProjectFile;
-		}
-		
-		if (pf == null)
-			return;
-		
-		await RemoveProject(pf);
-	}
 
     [SignalHandler("Clicked", nameof(_viewSelector))]
     void OnViewSelector_Clicked(int page) {
