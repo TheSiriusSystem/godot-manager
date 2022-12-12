@@ -8,12 +8,14 @@ public class NewProject : Object {
 	public string ProjectName;
 	public string ProjectLocation;
 	public AssetProject Template;
-	public string GodotVersion;
-	public bool Gles3 = true;
-	public bool Godot4 = false;
+	public string GodotId;
+	public int GodotVersion;
 	public Array<AssetPlugin> Plugins;
+	public bool UseAdvRenderer;
 
 	public bool CreateProject() {
+		string configFileName = GodotVersion <= 2 ? "engine.cfg" : "project.godot";
+
 		if (Template == null)
 		{
 			// Need to create the Project File ourselves.
@@ -27,14 +29,14 @@ public class NewProject : Object {
 			// Project file should be provided in the Template.
 			ExtractTemplate();
 			ProjectConfig pf = new ProjectConfig();
-			pf.Load(ProjectLocation.PlusFile("project.godot").NormalizePath());
-			pf.SetValue("application", "config/name", $"\"{ProjectName}\"");
+			pf.Load(ProjectLocation.PlusFile(configFileName).NormalizePath());
+			pf.SetValue("application", GodotVersion <= 2 ? "name" : "config/name", $"\"{ProjectName}\"");
 
 			// Need way to compile Assets before Enabling Plugins
 			// if (Plugins.Count > 0)
 			// 	SetupPlugins(pf);
 
-			pf.Save(ProjectLocation.PlusFile("project.godot"));
+			pf.Save(ProjectLocation.PlusFile(configFileName));
 			ExtractPlugins();
 		}
 		
@@ -59,53 +61,73 @@ public class NewProject : Object {
 
 	private void ExtractPlugins()
 	{
-		if (!Directory.Exists(ProjectLocation.PlusFile("addons").NormalizePath()))
-			Directory.CreateDirectory(ProjectLocation.PlusFile("addons"));
-		
-		foreach(AssetPlugin plgn in Plugins) {
-			PluginInstaller installer = new PluginInstaller(plgn);
-			installer.Install(ProjectLocation);
+		if (GodotVersion >= 2) {
+			if (!Directory.Exists(ProjectLocation.PlusFile("addons").NormalizePath()))
+				Directory.CreateDirectory(ProjectLocation.PlusFile("addons"));
+
+			foreach(AssetPlugin plgn in Plugins) {
+				PluginInstaller installer = new PluginInstaller(plgn);
+				installer.Install(ProjectLocation);
+			}
 		}
 	}
 
 	private void CopyIcon()
 	{
-		var image = GD.Load<Texture>("res://Assets/Icons/default_project_icon.png");
+		Texture image = null;
+		if (GodotVersion <= 2) {
+			image = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v1.png");
+		} else if (GodotVersion == 3) {
+			image = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v3.png");
+		} else if (GodotVersion >= 4) {
+			image = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v3.png");
+		}
 		image.GetData().SavePng(ProjectLocation.PlusFile("icon.png").NormalizePath());
 	}
 
 	private void CreateDefaultEnvironment()
 	{
-		using (StreamWriter writer = new StreamWriter(ProjectLocation.PlusFile("default_env.tres").NormalizePath())) {
-			writer.WriteLine("[gd_resource type=\"Environment\" load_steps=2 format=2]");
-			writer.WriteLine("");
-			writer.WriteLine("[sub_resource type=\"ProceduralSky\" id=1]");
-			writer.WriteLine("");
-			writer.WriteLine("[resource]");
-			writer.WriteLine("background_mode = 2");
-			writer.WriteLine("background_sky = SubResource(1)");
+		if (GodotVersion >= 3) {
+			using (StreamWriter writer = new StreamWriter(ProjectLocation.PlusFile("default_env.tres").NormalizePath())) {
+				writer.WriteLine("[gd_resource type=\"Environment\" load_steps=2 format=2]");
+				writer.WriteLine("");
+				writer.WriteLine("[sub_resource type=\"ProceduralSky\" id=1]");
+				writer.WriteLine("");
+				writer.WriteLine("[resource]");
+				writer.WriteLine("background_mode = 2");
+				writer.WriteLine("background_sky = SubResource(1)");
+			}
 		}
 	}
 
 	private void CreateProjectFile()
 	{
 		ProjectConfig pf = new ProjectConfig();
-		pf.SetValue("header", "config_version", "4");
-		pf.SetValue("application", "config/name", $"\"{ProjectName}\"");
-		pf.SetValue("application", "config/description", "\"Enter an interesting project description here!\"");
-		pf.SetValue("application", "config/icon", "\"res://icon.png\"");
-
-		if (Godot4) {
-			pf.SetValue("header", "config_version", "5");
-			pf.SetValue("application", "config/features", "PackedStringArray(\"4.0\", \"Vulkan Clustered\")");
+		if (GodotVersion <= 2) {
+			pf.SetValue("application", "name", $"\"{ProjectName}\"");
+			pf.SetValue("application", "icon", "\"res://icon.png\"");
 		} else {
-			if (CentralStore.Instance.FindVersion(GodotVersion).IsMono)
-			{
-				pf.SetValue("mono", "debugger_agent/wait_timeout", "7000");
-				pf.SetValue("rendering", "environment/default_environment", "\"res://default_env.tres\"");
+			pf.SetValue("header", "config_version", GodotVersion == 4 ? "5" : "4");
+			pf.SetValue("application", "config/name", $"\"{ProjectName}\"");
+			pf.SetValue("application", "config/icon", "\"res://icon.png\"");
+			if (GodotVersion >= 4) {
+				pf.SetValue("application", "config/features", "PackedStringArray(\"4.0\", \"Vulkan Clustered\")");
+				if (!UseAdvRenderer)
+				{
+					pf.SetValue("rendering", "renderer/rendering_method", "\"mobile\"");
+				}
+			} else {
+				if (!UseAdvRenderer)
+				{
+					pf.SetValue("rendering", "quality/driver/driver_name", "\"GLES2\"");
+				}
+				if (CentralStore.Instance.FindVersion(GodotId).IsMono)
+				{
+					pf.SetValue("mono", "debugger_agent/wait_timeout", "7000");
+				}
 			}
+			pf.SetValue("rendering", "environment/default_environment", "\"res://default_env.tres\"");
 		}
-
-		pf.Save(ProjectLocation.PlusFile("project.godot").NormalizePath());
+		pf.Save(ProjectLocation.PlusFile(GodotVersion <= 2 ? "engine.cfg" : "project.godot").NormalizePath());
 	}
 }
