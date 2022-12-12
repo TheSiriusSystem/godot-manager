@@ -4,11 +4,8 @@ using Godot.Collections;
 using ActionStack = System.Collections.Generic.Stack<System.Action>;
 using Uri = System.Uri;
 using TimeSpan = System.TimeSpan;
-using Dir = System.IO.Directory;
-using SFile = System.IO.File;
 using System.IO.Compression;
 using System.Diagnostics;
-using System.Text;
 using System.Text.RegularExpressions;
 
 public class SettingsPanel : Panel

@@ -2,9 +2,6 @@ using Godot;
 using Godot.Sharp.Extras;
 using Godot.Collections;
 using Directory = System.IO.Directory;
-using SFile = System.IO.File;
-using System;
-using System.Linq;
 
 public class MainWindow : Control
 {

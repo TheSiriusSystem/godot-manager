@@ -1,14 +1,9 @@
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
-using System.Threading.Tasks;
-using System.IO.Compression;
 using System.Linq;
 using DateTime = System.DateTime;
 using TimeSpan = System.TimeSpan;
-using Uri = System.Uri;
-using Guid = System.Guid;
-using Environment = System.Environment;
 
 public class GodotLineEntry : HBoxContainer
 {

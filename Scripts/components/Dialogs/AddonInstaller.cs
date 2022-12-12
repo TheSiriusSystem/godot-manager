@@ -1,9 +1,6 @@
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
-using Newtonsoft.Json;
-using System.IO.Compression;
-using SFile = System.IO.File;
 
 public class AddonInstaller : ReferenceRect
 {

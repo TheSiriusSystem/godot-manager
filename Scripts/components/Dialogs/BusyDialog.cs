@@ -1,6 +1,5 @@
 using Godot;
 using Godot.Sharp.Extras;
-using System;
 
 public class BusyDialog : ReferenceRect
 {

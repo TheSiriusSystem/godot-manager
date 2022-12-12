@@ -1,7 +1,5 @@
 using Godot;
 using Godot.Sharp.Extras;
-using Godot.Collections;
-using System;
 using System.Threading.Tasks;
 
 public class FileConflictDialog : ReferenceRect

@@ -1,5 +1,4 @@
 using Godot;
-using Godot.Collections;
 using Godot.Sharp.Extras;
 using Uri = System.Uri;
 using File = System.IO.File;

@@ -3,7 +3,6 @@ using Uri = System.Uri;
 using Godot;
 using Godot.Collections;
 using Newtonsoft.Json;
-using DateTimeOffset = System.DateTimeOffset;
 
 namespace Mirrors {
 	public class MirrorManager : Node {

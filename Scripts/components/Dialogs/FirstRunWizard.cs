@@ -1,10 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
 using Directory = System.IO.Directory;
-using File = Godot.File;
 
 [SuppressMessage("ReSharper", "CheckNamespace")]
 [SuppressMessage("ReSharper", "InconsistentNaming")]

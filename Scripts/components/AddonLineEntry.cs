@@ -1,5 +1,4 @@
 using Godot;
-using Godot.Collections;
 using Godot.Sharp.Extras;
 
 public class AddonLineEntry : ColorRect

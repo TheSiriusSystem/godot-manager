@@ -1,7 +1,5 @@
 using Godot;
-using Godot.Collections;
 using Godot.Sharp.Extras;
-using System;
 
 public class NewVersion : ReferenceRect
 {

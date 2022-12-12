@@ -1,6 +1,5 @@
 using System.IO;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Gif;
 
 public class GifTexture : Godot.ImageTexture {
 	public GifTexture(string file) {

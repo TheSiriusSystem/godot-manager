@@ -2,9 +2,7 @@ using Godot;
 using Godot.Collections;
 using System.IO.Compression;
 using Directory = System.IO.Directory;
-using SFile = System.IO.File;
 using StreamWriter = System.IO.StreamWriter;
-using BinaryWriter = System.IO.BinaryWriter;
 
 public class NewProject : Object {
 	public string ProjectName;

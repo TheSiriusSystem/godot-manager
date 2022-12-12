@@ -2,9 +2,7 @@ using Godot;
 using Godot.Sharp.Extras;
 using Godot.Collections;
 using System.Linq;
-using Directory = System.IO.Directory;
 using SFile = System.IO.File;
-using System.IO.Compression;
 using System.Text.RegularExpressions;
 
 public class EditProject : ReferenceRect

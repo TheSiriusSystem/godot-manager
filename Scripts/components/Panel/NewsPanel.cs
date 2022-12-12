@@ -1,11 +1,9 @@
-using System;
 using Uri = System.Uri;
 using SFile = System.IO.File;
 using System.Threading.Tasks;
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
-using Array = Godot.Collections.Array;
 
 public class NewsPanel : Panel
 {

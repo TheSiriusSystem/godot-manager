@@ -1,7 +1,6 @@
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
-using System;
 using System.Linq;
 
 [Tool]

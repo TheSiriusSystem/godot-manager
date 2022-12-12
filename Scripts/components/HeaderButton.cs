@@ -1,6 +1,5 @@
 using Godot;
 using Godot.Sharp.Extras;
-using System;
 
 [Tool]
 public class HeaderButton : PanelContainer
