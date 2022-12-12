@@ -80,13 +80,13 @@ __meta__ = {
 }
 
 [node name="Title" type="Label" parent="PC/CC/P/VB/MC/TitleBarBG/HB"]
-margin_left = 57.0
+margin_left = 58.0
 margin_top = 2.0
-margin_right = 204.0
+margin_right = 203.0
 margin_bottom = 21.0
 size_flags_horizontal = 6
 custom_fonts/font = ExtResource( 2 )
-text = "Add Custom Godot"
+text = "Add Editor Version"
 
 [node name="Close" parent="PC/CC/P/VB/MC/TitleBarBG/HB" instance=ExtResource( 3 )]
 margin_left = 266.0
@@ -116,7 +116,7 @@ custom_constants/separation = 10
 margin_right = 304.0
 margin_bottom = 19.0
 custom_fonts/font = ExtResource( 2 )
-text = "Godot Engine Tag:"
+text = "Tag:"
 
 [node name="Name" type="LineEdit" parent="PC/CC/P/VB/MCContent/VB"]
 margin_top = 29.0

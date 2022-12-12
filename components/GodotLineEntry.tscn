@@ -1,6 +1,6 @@
 [gd_scene load_steps=13 format=2]
 
-[ext_resource path="res://Assets/Icons/default_project_icon.png" type="Texture" id=1]
+[ext_resource path="res://Assets/Icons/default_project_icon_v3.png" type="Texture" id=1]
 [ext_resource path="res://Assets/Icons/download.svg" type="Texture" id=2]
 [ext_resource path="res://Assets/Icons/default.svg" type="Texture" id=3]
 [ext_resource path="res://Scripts/components/GodotLineEntry.cs" type="Script" id=4]

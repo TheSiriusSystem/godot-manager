@@ -1,10 +1,11 @@
 [gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://Assets/Icons/default_project_icon.png" type="Texture" id=1]
+[ext_resource path="res://Assets/Icons/default_project_icon_v3.png" type="Texture" id=1]
 [ext_resource path="res://Scripts/components/AssetLibEntry.cs" type="Script" id=2]
 [ext_resource path="res://Resources/Fonts/droid-bold-14.tres" type="DynamicFont" id=3]
 [ext_resource path="res://Resources/Fonts/droid-regular-13.tres" type="DynamicFont" id=4]
 [ext_resource path="res://Assets/Icons/download.svg" type="Texture" id=5]
+
 
 [node name="AssetLibEntry" type="ColorRect"]
 anchor_right = 1.0
