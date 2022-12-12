@@ -68,7 +68,7 @@ public class PaginatedListing : ScrollContainer
             ale.Downloaded = false;
             _listing.AddChild(ale);
             if (plgn.Asset.IconUrl == null || plgn.Asset.IconUrl == "") {
-                ale.Icon = Util.LoadImage("res://Assets/Icons/default_project_icon.png");
+                ale.Icon = Util.LoadImage("res://Assets/Icons/default_project_icon_v3.png");
             } else {
                 if (plgn.Asset.IconUrl.StartsWith("res://")) {
                     ale.Icon = Util.LoadImage(plgn.Asset.IconUrl);
