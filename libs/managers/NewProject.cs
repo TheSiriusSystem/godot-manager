@@ -20,6 +20,8 @@ public class NewProject : Object {
 		{
 			// Need to create the Project File ourselves.
 			CreateProjectFile();
+			if (!Directory.Exists(ProjectLocation.PlusFile(".builds").NormalizePath()))
+				Directory.CreateDirectory(ProjectLocation.PlusFile(".builds"));
 			CreateDefaultEnvironment();
 			CopyIcon();
 			ExtractPlugins();
