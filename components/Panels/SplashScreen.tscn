@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Assets/Icons/godot.svg" type="Texture" id=1]
 [ext_resource path="res://components/Panels/SplashScreen.cs" type="Script" id=2]
+[ext_resource path="res://Resources/Fonts/droid-bold-22.tres" type="DynamicFont" id=3]
 
 [sub_resource type="DynamicFontData" id=4]
 font_path = "res://Assets/Fonts/DroidSans-Bold.ttf"
@@ -45,6 +46,8 @@ margin_right = 747.0
 margin_bottom = 450.0
 custom_fonts/font = SubResource( 11 )
 text = "Godot Manager"
+align = 1
+valign = 1
 
 [node name="VersionInfo" type="Label" parent="."]
 anchor_left = 0.5
@@ -57,3 +60,16 @@ margin_right = 122.0
 margin_bottom = 167.5
 custom_fonts/font = SubResource( 12 )
 text = "Version 0.2.1"
+align = 1
+valign = 1
+
+[node name="LoadingLabel" type="Label" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -127.0
+margin_bottom = -100.0
+custom_fonts/font = ExtResource( 3 )
+text = "Loading..."
+align = 1
+valign = 1
