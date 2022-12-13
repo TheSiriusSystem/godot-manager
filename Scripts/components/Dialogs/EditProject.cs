@@ -266,20 +266,9 @@ Button _CancelBtn = null;
 		if (path == "")
 			return;
 		var pfpath = ProjectFile.Location.GetBaseDir().Replace(@"\", "/");
-		if (path.StartsWith(pfpath))
-			IconPath = pfpath.GetProjectRoot(path);
-		else {
-			var ret = AppDialogs.YesNoDialog.ShowDialog(Tr("Icon Selection"),
-				Tr("This file is outside your project structure. Do you want to copy it to the root of your project?"));
-			await ret;
-			if (ret.Result) {
-				SFile.Copy(path, pfpath.PlusFile(path.GetFile()));
-				IconPath = pfpath.GetProjectRoot(path);
-			} else {
-				AppDialogs.ImageFileDialog.Visible = false;
-				return;
-			}
-		}
+		if (!path.StartsWith(pfpath))
+			SFile.Copy(path, pfpath.PlusFile(path.GetFile()));
+		IconPath = pfpath.GetProjectRoot(path);
 		_Icon.Texture = Util.LoadImage(path);
 		AppDialogs.ImageFileDialog.Visible = false;
 		_isDirty = true;
