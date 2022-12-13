@@ -58,11 +58,14 @@ public class CreateProject : ReferenceRect
 	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/SimpleRenderer/SimpleRendererDesc")]
 	Label _simpleRendererDesc = null;
 
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Addons/ScrollContainer")]
+	ScrollContainer _sc = null;
+
 	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Addons/ScrollContainer/List")]
 	VBoxContainer _pluginList = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Addons/Warning")]
-	Label _pluginWarning = null;
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Addons/ErrorText")]
+	Label _pluginErrorText = null;
 
 	[NodePath("PC/CC/P/VB/MCButtons/HB/CreateBtn")]
 	Button _createBtn = null;
@@ -254,13 +257,12 @@ public class CreateProject : ReferenceRect
 		GodotVersion gdVers = (GodotVersion)_godotVersion.GetSelectedMetadata();
 		int gdVersNum = gdVers.GetVersion();
 		string gdVersTag = gdVers.Tag.ToLower();
-		ScrollContainer sc = (ScrollContainer)_pluginList.GetParent();
 		if (gdVersNum <= 1 || (gdVersNum == 2 && (gdVersTag.StartsWith("2.0") || gdVersTag.StartsWith("v2.0")))) {
-			sc.Visible = false;
-			_pluginWarning.Visible = true;
+			_sc.Visible = false;
+			_pluginErrorText.Visible = true;
 		} else {
-			sc.Visible = true;
-			_pluginWarning.Visible = false;
+			_sc.Visible = true;
+
 			foreach (AssetPlugin plgn in CentralStore.Plugins)
 			{
 				string imgLoc =
@@ -276,6 +278,8 @@ public class CreateProject : ReferenceRect
 				ale.SetMeta("asset", plgn);
 				_pluginList.AddChild(ale);
 			}
+
+			_pluginErrorText.Visible = false;
 		}
 	}
 
@@ -299,14 +303,12 @@ public class CreateProject : ReferenceRect
 		int defaultGodot = -1;
 		for (int indx = 0; indx < CentralStore.Versions.Count; indx++)
 		{
-			string gdName = CentralStore.Versions[indx].GetDisplayName();
 			if (CentralStore.Versions[indx].Id == (string)CentralStore.Settings.DefaultEngine)
 			{
 				defaultGodot = indx;
-				gdName += " (Default)";
 			}
 
-			_godotVersion.AddItem(gdName, indx);
+			_godotVersion.AddItem(CentralStore.Versions[indx].GetDisplayName(), indx);
 			_godotVersion.SetItemMetadata(indx, CentralStore.Versions[indx]);
 		}
 
