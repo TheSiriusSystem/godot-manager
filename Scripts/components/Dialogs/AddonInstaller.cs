@@ -89,9 +89,15 @@ public class AddonInstaller : ReferenceRect
 		IgnoreFiles.Add("res://project.godot");
 		IgnoreFiles.Add("res://default_env.tres");
 		IgnoreFiles.Add("res://.gitignore");
+		IgnoreFiles.Add("res://.gitattributes");
+		IgnoreFiles.Add("res://README");
 		IgnoreFiles.Add("res://README.md");
 		IgnoreFiles.Add("res://LICENSE");
 		IgnoreFiles.Add("res://LICENSE.md");
+		IgnoreFiles.Add("res://CREDITS");
+		IgnoreFiles.Add("res://CREDITS.md");
+		IgnoreFiles.Add("res://CHANGELOG");
+		IgnoreFiles.Add("res://CHANGELOG.md");
 	}
 
 	public override void _Ready()
