@@ -129,9 +129,9 @@ margin_right = 1014.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 140, 0 )
 hint_tooltip = "Select a Mirror to Download From."
-text = "TuxFamily.org"
+text = "Github"
 items = [ "Github", null, false, 0, null, "TuxFamily.org", null, false, 1, null ]
-selected = 1
+selected = 0
 
 [node name="SC" type="ScrollContainer" parent="VB"]
 margin_top = 44.0
