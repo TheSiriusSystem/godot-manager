@@ -1082,8 +1082,8 @@ public class ProjectsPanel : Panel
 
 		// Default Behavior
 		if (_projectName.Direction == HeaderButton.SortDirection.Indeterminate &&
-			 _godotVersion.Direction == HeaderButton.SortDirection.Indeterminate ||
-			 @default) {
+			_godotVersion.Direction == HeaderButton.SortDirection.Indeterminate ||
+			@default) {
 			fav = CentralStore.Projects.Where(pf => pf.Favorite)
 						.OrderByDescending(pf => pf.LastAccessed);
 
