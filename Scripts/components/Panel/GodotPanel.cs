@@ -77,6 +77,7 @@ public class GodotPanel : Panel
 		{
 			GetParent<TabContainer>().Connect("tab_changed", this, "OnPageChanged");
 			AppDialogs.AddCustomGodot.Connect("added_custom_godot", this, "PopulateList");
+			AppDialogs.EditCustomGodot.Connect("edited_custom_godot", this, "PopulateList");
 		}
 
 		DownloadSource.Clear();
@@ -642,22 +643,20 @@ public class GodotPanel : Panel
 	void OnRightClicked_Installable(GodotLineEntry gle)
 	{
 		_enginePopup.GodotLineEntry = gle;
-		_enginePopup.SetItemText(0,"Install");
-		_enginePopup.SetItemDisabled(2,true);
-		_enginePopup.SetItemDisabled(3,true);
-		_enginePopup.SetItemDisabled(5, true);
-		_enginePopup.SetItemDisabled(6, true);
+		_enginePopup.SetItemText(0, "Download");
+		for (int indx = 1; indx < _enginePopup.GetItemCount(); indx++) {
+			_enginePopup.SetItemDisabled(indx, true);
+		}
 		_enginePopup.Popup_(new Rect2(GetGlobalMousePosition(), _enginePopup.RectSize));
 	}
 
 	void OnRightClicked_Installed(GodotLineEntry gle)
 	{
 		_enginePopup.GodotLineEntry = gle;
-		_enginePopup.SetItemText(0, "Uninstall");
-		_enginePopup.SetItemDisabled(2, false);
-		_enginePopup.SetItemDisabled(3, false);
-		_enginePopup.SetItemDisabled(5, false);
-		_enginePopup.SetItemDisabled(6, false);
+		_enginePopup.SetItemText(0, "Remove");
+		for (int indx = 1; indx < _enginePopup.GetItemCount(); indx++) {
+			_enginePopup.SetItemDisabled(indx, false);
+		}
 		_enginePopup.Popup_(new Rect2(GetGlobalMousePosition(), _enginePopup.RectSize));
 	}
 
@@ -668,27 +667,28 @@ public class GodotPanel : Panel
 			case 0:
 				if (_enginePopup.GodotLineEntry.Downloaded)
 				{
-					// Uninstall
+					// Remove
 					OnUninstallClicked(_enginePopup.GodotLineEntry);
 				}
 				else
 				{
-					// Install
+					// Download
 					OnInstallClicked(_enginePopup.GodotLineEntry);
 				}
-
+				break;
+			case 1:
+				AppDialogs.EditCustomGodot.ShowDialog(_enginePopup.GodotLineEntry);
 				break;
 			case 2:
+				OS.Clipboard = _enginePopup.GodotLineEntry.GodotVersion.GetExecutablePath();
+				break;
+			case 4:
 				OnDefaultSelected(_enginePopup.GodotLineEntry);
 				break;
-			case 3:
+			case 5:
 				_enginePopup.GodotLineEntry.EmitSignal("settings_shared_clicked", _enginePopup.GodotLineEntry);
 				break;
-			case 5:
-				OS.Clipboard = _enginePopup.GodotLineEntry.GodotVersion.GetExecutablePath();
-				OS.Alert(Tr("Location copied to Clipboard"), Tr("Copy Engine Location"));
-				break;
-			case 6:
+			case 7:
 				OS.ShellOpen("file://" + _enginePopup.GodotLineEntry.GodotVersion.GetExecutablePath().GetBaseDir());
 				break;
 		}
