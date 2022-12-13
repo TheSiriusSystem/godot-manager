@@ -1003,7 +1003,7 @@ public class ProjectsPanel : Panel
 		await RemoveProject(pf);
 	}
 
-	private void RemoveProjectListing(ProjectFile pf, bool deleteFiles)
+	private void RemoveProjectListing(ProjectFile pf, bool deleteFiles = false)
 	{
 		_currentPIE = null;
 		_currentPLE = null;
