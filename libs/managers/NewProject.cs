@@ -108,10 +108,11 @@ public class NewProject : Object {
 			pf.SetValue("application", "name", $"\"{ProjectName}\"");
 			pf.SetValue("application", "icon", "\"res://icon.png\"");
 		} else {
-			int cfgVer = 3;
-			string gdVersTag = CentralStore.Instance.GetVersion(GodotId).Tag.ToLower();
-			if (!gdVersTag.StartsWith("3.0") && !gdVersTag.StartsWith("v3.0")) {
-				cfgVer = 4;
+			GodotVersion gdVers = CentralStore.Instance.GetVersion(GodotId);
+			string gdVersTag = gdVers.Tag.ToLower();
+			int cfgVer = 4;
+			if (gdVersTag.StartsWith("3.0") || gdVersTag.StartsWith("v3.0")) {
+				cfgVer = 3;
 			} else if (GodotVersion >= 4)
 			{
 				cfgVer = 5;
@@ -125,7 +126,7 @@ public class NewProject : Object {
 				{
 					pf.SetValue("rendering", "quality/driver/driver_name", "\"GLES2\"");
 				}
-				if (CentralStore.Instance.FindVersion(GodotId).IsMono)
+				if (gdVers.IsMono)
 				{
 					pf.SetValue("mono", "debugger_agent/wait_timeout", "7000");
 				}
