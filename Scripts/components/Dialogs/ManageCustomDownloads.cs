@@ -106,8 +106,8 @@ public class ManageCustomDownloads : ReferenceRect
 
 		if (installed)
 		{
-			var res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Custom Engine Download"),
-				Tr("There is a version of this engine installed, do you wish to uninstall it?"));
+			var res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Editor Download"),
+				Tr("This editor version is on your computer. Do you wish to remove it?"));
 			if (res)
 			{
 				var installer = GodotInstaller.FromVersion(installedGv);
@@ -121,7 +121,7 @@ public class ManageCustomDownloads : ReferenceRect
 		}
 		else
 		{
-			var res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Custom Engine Donwload"),
+			var res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Editor Donwload"),
 				string.Format(Tr("Are you sure you want to delete '{0}' from your list of downloads?"),delCed.Name));
 			if (res)
 			{
