@@ -431,7 +431,6 @@ public class GodotPanel : Panel
 		await installer.Download();
 	}
 
-
 	async void OnUninstallClicked(GodotLineEntry gle) {
 		Task<bool> result;
 		GodotInstaller installer = GodotInstaller.FromVersion(gle.GodotVersion);
@@ -483,7 +482,7 @@ public class GodotPanel : Panel
 					CentralStore.Settings.DefaultEngine = gv.Id;
 				}
 			}
-			
+
 			CentralStore.Instance.SaveDatabase();
 
 			if (gle.GodotVersion.GithubVersion != null || gle.GodotVersion.MirrorVersion != null || gle.GodotVersion.CustomEngine != null)

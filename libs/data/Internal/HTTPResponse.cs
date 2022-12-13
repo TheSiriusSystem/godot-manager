@@ -1,6 +1,5 @@
 using Godot;
 using Godot.Collections;
-using ByteList = System.Collections.Generic.List<byte>;
 using Task = System.Threading.Tasks.Task;
 using Exception = System.Exception;
 using SPath = System.IO.Path;

@@ -1,5 +1,3 @@
-using Godot;
-using Godot.Collections;
 using DateTime = System.DateTime;
 
 namespace Github {
