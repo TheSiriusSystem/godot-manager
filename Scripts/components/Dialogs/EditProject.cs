@@ -1,8 +1,10 @@
+using System.Threading.Tasks;
 using Godot;
 using Godot.Sharp.Extras;
 using Godot.Collections;
 using System.Linq;
 using SFile = System.IO.File;
+using SDirectory = System.IO.Directory;
 using System.Text.RegularExpressions;
 
 public class EditProject : ReferenceRect
@@ -30,8 +32,14 @@ TextEdit _ProjectDescription = null;
 #endregion
 
 #region Plugins Tab
-[NodePath("PC/CC/P/VB/MCContent/TC/Addons/Project Plugins/ScrollContainer/MC/List")]
+[NodePath("PC/CC/P/VB/MCContent/TC/Addons/VBoxContainer")]
+VBoxContainer _VBC = null;
+
+[NodePath("PC/CC/P/VB/MCContent/TC/Addons/VBoxContainer/ScrollContainer/MC/List")]
 VBoxContainer _PluginList = null;
+
+[NodePath("PC/CC/P/VB/MCContent/TC/Addons/ErrorText")]
+Label _PluginErrorText = null;
 #endregion
 
 #region Dialog Controls
@@ -107,46 +115,41 @@ Button _CancelBtn = null;
 
 #region Public Functions
 	public void ShowDialog(ProjectFile pf) {
-		foreach(AddonLineEntry node in _PluginList.GetChildren()) {
-			node.QueueFree();
-		}
+		foreach (AddonLineEntry node in _PluginList.GetChildren()) node.QueueFree();
 
-		foreach(AssetPlugin plgn in CentralStore.Plugins)
-		{
-			string imgLoc =
-				$"{CentralStore.Settings.CachePath}/images/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
-					.NormalizePath();
-			AddonLineEntry ale = ALineEntry.Instance<AddonLineEntry>();
-			
-			ale.Icon = Util.LoadImage(imgLoc);
-			if (ale.Icon == null) ale.Icon = DefaultIcon;
-			
-			ale.Title = plgn.Asset.Title;
-			ale.Version = plgn.Asset.VersionString;
-			ale.SetMeta("asset", plgn);
-			_PluginList.AddChild(ale);
-			ale.Connect("install_clicked", this, "OnToggledPlugin");
+		if (pf.Location.EndsWith("engine.cfg") && !SDirectory.Exists(pf.Location.GetBaseDir() + "/addons")) {
+			_VBC.Visible = false;
+			_PluginErrorText.Visible = true;
+		} else {
+			_VBC.Visible = true;
+
+			foreach (AssetPlugin plgn in CentralStore.Plugins)
+			{
+				string imgLoc =
+					$"{CentralStore.Settings.CachePath}/images/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
+						.NormalizePath();
+				AddonLineEntry ale = ALineEntry.Instance<AddonLineEntry>();
+
+				ale.Icon = Util.LoadImage(imgLoc);
+				if (ale.Icon == null) ale.Icon = DefaultIcon;
+
+				ale.Title = plgn.Asset.Title;
+				ale.Version = plgn.Asset.VersionString;
+				ale.SetMeta("asset", plgn);
+				_PluginList.AddChild(ale);
+				ale.Connect("install_clicked", this, "OnToggledPlugin");
+			}
+
+			_PluginErrorText.Visible = false;
 		}
 
 		ProjectFile = pf;
-		PopulateData();
-		Visible = true;
-		_PluginList.GetParent().GetParent<ScrollContainer>().ScrollVertical = 0;
-		_TabContainer.CurrentTab = 0;
-	}
-#endregion
-
-#region Private Functions
-	void PopulateData() {
 		_Icon.Texture = Util.LoadImage(ProjectFile.Location.GetResourceBase(IconPath));
 		_ProjectName.Text = ProjectName;
 		_ProjectDescription.Text = Description;
 		_GodotVersion.Clear();
 		foreach(GodotVersion gdver in CentralStore.Versions) {
-			string gdName = gdver.GetDisplayName();
-			if (gdver.Id == CentralStore.Settings.DefaultEngine)
-				gdName += Tr(" (Default)");
-			_GodotVersion.AddItem(gdName);
+			_GodotVersion.AddItem(gdver.GetDisplayName());
 			_GodotVersion.SetItemMetadata(_GodotVersion.GetItemCount()-1, gdver.Id);
 			if (ProjectFile.GodotId == gdver.Id)
 				_GodotVersion.Selected = _GodotVersion.GetItemCount()-1;
@@ -159,7 +162,7 @@ Button _CancelBtn = null;
 
 		if (ProjectFile.Assets == null)
 			ProjectFile.Assets = new Array<string>();
-		
+
 		foreach(string assetId in ProjectFile.Assets) {
 			foreach(AddonLineEntry ale in _PluginList.GetChildren()) {
 				AssetPlugin plugin = (AssetPlugin)ale.GetMeta("asset");
@@ -169,11 +172,16 @@ Button _CancelBtn = null;
 				}
 			}
 		}
-		
+
 		_isDirty = false;
 		_SaveBtn.Disabled = true;
+		Visible = true;
+		_PluginList.GetParent().GetParent<ScrollContainer>().ScrollVertical = 0;
+		_TabContainer.CurrentTab = 0;
 	}
+#endregion
 
+#region Private Functions
 	void UpdatePlugins() {
 		Array<AssetPlugin> plugins = new Array<AssetPlugin>();
 		Array<AssetPlugin> install = new Array<AssetPlugin>();
@@ -237,9 +245,8 @@ Button _CancelBtn = null;
 	[SignalHandler("pressed", nameof(_CancelBtn))]
 	async void OnCancelBtnPressed() {
 		if (_isDirty) {
-			var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Edit Project"), Tr("You have unsaved changes, do you wish to stop editing?"));
-			await res;
-			if (res.Result) {
+			bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Edit Project"), Tr("You have unsaved changes. Do you wish to stop editing?"));
+			if (res) {
 				Visible = false;
 			}
 		} else {
@@ -262,14 +269,28 @@ Button _CancelBtn = null;
 		}
 	}
 
-	async void OnFileSelected(string path) {
+	async Task OnFileSelected(string path) {
 		if (path == "")
 			return;
-		var pfpath = ProjectFile.Location.GetBaseDir().Replace(@"\", "/");
-		if (!path.StartsWith(pfpath))
-			SFile.Copy(path, pfpath.PlusFile(path.GetFile()));
-		IconPath = pfpath.GetProjectRoot(path);
-		_Icon.Texture = Util.LoadImage(path);
+		var pfPath = ProjectFile.Location.GetBaseDir().Replace(@"\", "/");
+		var copyPath = pfPath.PlusFile(path.GetFile());
+		if (path.StartsWith(pfPath)) {
+			IconPath = pfPath.GetProjectRoot(path);
+			_Icon.Texture = Util.LoadImage(path);
+		} else {
+			if (SFile.Exists(copyPath)) {
+				bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Edit Project"), Tr("A icon of the same name already exists in your project's root. Do you want to overwrite it?"));
+				if (res) {
+					SFile.Delete(copyPath);
+				} else {
+					AppDialogs.ImageFileDialog.Visible = false;
+					return;
+				}
+			}
+			SFile.Copy(path, copyPath);
+			IconPath = pfPath.GetProjectRoot(copyPath);
+			_Icon.Texture = Util.LoadImage(copyPath);
+		}
 		AppDialogs.ImageFileDialog.Visible = false;
 		_isDirty = true;
 		_SaveBtn.Disabled = false;

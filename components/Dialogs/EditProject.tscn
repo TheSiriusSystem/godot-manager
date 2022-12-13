@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Scripts/components/Dialogs/EditProject.cs" type="Script" id=1]
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=2]
-[ext_resource path="res://Assets/Icons/godot.svg" type="Texture" id=3]
+[ext_resource path="res://Assets/Icons/missing_icon.svg" type="Texture" id=3]
 [ext_resource path="res://components/SysButton.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Resources/Fonts/droid-bold-40.tres" type="DynamicFont" id=5]
 
 [sub_resource type="StyleBoxFlat" id=6]
 bg_color = Color( 0.180392, 0.192157, 0.231373, 1 )
@@ -75,9 +76,6 @@ color = Color( 0.219608, 0.239216, 0.290196, 1 )
 [node name="HB" type="HBoxContainer" parent="PC/CC/P/VB/MC/TitleBarBG"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Title" type="Label" parent="PC/CC/P/VB/MC/TitleBarBG/HB"]
 margin_left = 184.0
@@ -161,30 +159,30 @@ margin_bottom = 59.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/TC/General/VC/HC/MC/VC"]
+[node name="Header" type="Label" parent="PC/CC/P/VB/MCContent/TC/General/VC/HC/MC/VC"]
 margin_right = 446.0
 margin_bottom = 19.0
 custom_fonts/font = ExtResource( 2 )
-text = "Project Name:"
+text = "Name:"
 
 [node name="ProjectName" type="LineEdit" parent="PC/CC/P/VB/MCContent/TC/General/VC/HC/MC/VC"]
 margin_top = 23.0
 margin_right = 446.0
 margin_bottom = 44.0
 
-[node name="Label2" type="Label" parent="PC/CC/P/VB/MCContent/TC/General/VC"]
+[node name="GodotVersionHeader" type="Label" parent="PC/CC/P/VB/MCContent/TC/General/VC"]
 margin_top = 71.0
 margin_right = 524.0
 margin_bottom = 90.0
 custom_fonts/font = ExtResource( 2 )
-text = "Godot Version:"
+text = "Editor Version:"
 
 [node name="GodotVersion" type="OptionButton" parent="PC/CC/P/VB/MCContent/TC/General/VC"]
 margin_top = 97.0
 margin_right = 524.0
 margin_bottom = 118.0
 
-[node name="Label3" type="Label" parent="PC/CC/P/VB/MCContent/TC/General/VC"]
+[node name="ProjectDescriptionHeader" type="Label" parent="PC/CC/P/VB/MCContent/TC/General/VC"]
 margin_top = 125.0
 margin_right = 524.0
 margin_bottom = 144.0
@@ -204,19 +202,19 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 27.0
 
-[node name="Project Plugins" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TC/Addons"]
+[node name="VBoxContainer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TC/Addons"]
 margin_right = 534.0
 margin_bottom = 307.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PC/CC/P/VB/MCContent/TC/Addons/Project Plugins"]
+[node name="ScrollContainer" type="ScrollContainer" parent="PC/CC/P/VB/MCContent/TC/Addons/VBoxContainer"]
 margin_right = 534.0
 margin_bottom = 307.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="MC" type="MarginContainer" parent="PC/CC/P/VB/MCContent/TC/Addons/Project Plugins/ScrollContainer"]
+[node name="MC" type="MarginContainer" parent="PC/CC/P/VB/MCContent/TC/Addons/VBoxContainer/ScrollContainer"]
 margin_right = 534.0
 margin_bottom = 307.0
 size_flags_horizontal = 3
@@ -226,13 +224,26 @@ custom_constants/margin_top = 5
 custom_constants/margin_left = 5
 custom_constants/margin_bottom = 5
 
-[node name="List" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TC/Addons/Project Plugins/ScrollContainer/MC"]
+[node name="List" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TC/Addons/VBoxContainer/ScrollContainer/MC"]
 margin_left = 5.0
 margin_top = 5.0
 margin_right = 529.0
 margin_bottom = 302.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+[node name="ErrorText" type="Label" parent="PC/CC/P/VB/MCContent/TC/Addons"]
+visible = false
+margin_top = 4.0
+margin_right = 534.0
+margin_bottom = 311.0
+rect_min_size = Vector2( 534, 307 )
+custom_fonts/font = ExtResource( 5 )
+text = "Addons are only available
+in projects made with
+Godot v2.1+!"
+align = 1
+valign = 1
 
 [node name="MCButtons" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_top = 384.0
