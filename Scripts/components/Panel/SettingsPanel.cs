@@ -386,7 +386,6 @@ public class SettingsPanel : Panel
 			int indx = CentralStore.Versions.IndexOf(version);
 			if (version.Id == (string)CentralStore.Settings.DefaultEngine) {
 				defaultGodot = indx;
-				//gdName += " (Default)";
 			}
 			_defaultEngine.AddItem(gdName, indx);
 			_defaultEngine.SetItemMetadata(indx, version.Id);
