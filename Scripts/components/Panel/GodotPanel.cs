@@ -81,7 +81,7 @@ public class GodotPanel : Panel
 		}
 
 		DownloadSource.Clear();
-		DownloadSource.AddItem("Github");
+		DownloadSource.AddItem("GitHub");
 
 		if (CentralStore.Mirrors.Count == 0 || CentralStore.Settings.LastMirrorCheck < (DateTime.UtcNow - CentralStore.Settings.CheckInterval)) {
 			var res = MirrorManager.Instance.GetMirrors();
@@ -361,9 +361,9 @@ public class GodotPanel : Panel
 		await PopulateList();
 	}
 
-	void OnUpdateList()
+	async void OnUpdateList()
 	{
-		PopulateList();
+		await PopulateList();
 	}
 
 	async void OnDownloadFailed(GodotInstaller installer, HTTPClient.Status status, GodotLineEntry gle) {
@@ -484,6 +484,7 @@ public class GodotPanel : Panel
 
 	void OnSettingsSharedClicked(GodotLineEntry gle)
 	{
+		gle.SettingsShared = !gle.SettingsShared;
 		if (gle.SettingsShared)
 		{
 			CentralStore.Settings.SettingsShare.Remove(gle.GodotVersion.Id);
@@ -492,8 +493,7 @@ public class GodotPanel : Panel
 		{
 			CentralStore.Settings.SettingsShare.Add(gle.GodotVersion.Id);
 		}
-
-		gle.SettingsShared = !gle.SettingsShared;
+		CentralStore.Instance.SaveDatabase();
 	}
 
 	async void OnLinkSettingsClicked(GodotLineEntry gle)
