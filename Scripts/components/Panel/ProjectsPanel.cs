@@ -840,8 +840,7 @@ public class ProjectsPanel : Panel
 		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
 		if (gv == null)
 		{
-			var ynd = AppDialogs.YesNoDialog;
-			var res = await ynd.ShowDialog("Missing Editor Version",
+			bool res = await AppDialogs.YesNoDialog.ShowDialog("Missing Editor Version",
 				string.Format(
 					Tr("The associated editor version for this project was not found. Do you wish to use the default one '{0}'?"),
 					CentralStore.Instance.FindVersion(CentralStore.Settings.DefaultEngine).Tag
@@ -854,14 +853,13 @@ public class ProjectsPanel : Panel
 				CentralStore.Instance.SaveDatabase();
 				if (gv == null)
 				{
-					var ld = AppDialogs.MessageDialog;
-					ld.ShowMessage("Failed to Launch Project", "The default editor version cannot be found. Please select a default version of Godot to use.");
+					AppDialogs.MessageDialog.ShowMessage("Failed to Launch Project", "The default editor version cannot be found. Please select a default version of Godot to use.");
+					return;
 				}
 			}
 			else
 			{
-				var md = AppDialogs.MessageDialog;
-				md.ShowMessage("Failed to Launch Project", "The associated editor version for this project does not exist. Cannot open project in Editor!");
+				AppDialogs.MessageDialog.ShowMessage("Failed to Launch Project", "The associated editor version for this project does not exist. Cannot open project in Editor!");
 				return;
 			}
 		}

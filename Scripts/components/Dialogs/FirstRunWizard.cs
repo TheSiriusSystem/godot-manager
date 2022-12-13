@@ -279,9 +279,9 @@ StartupNotify=true
 	[SignalHandler("pressed", nameof(Cancel))]
 	async void OnPressed_Cancel()
 	{
-		var res = await AppDialogs.YesNoDialog.ShowDialog(Tr("First Run Wizard"),
+		bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("First Run Wizard"),
 			Tr("Are you sure you want to cancel this first run wizard? " +
-			   " Any settings you have changed, will be lost."));
+				" Any settings you have changed, will be lost."));
 		if (res)
 		{
 			// System.IO.Compression.FileSystem

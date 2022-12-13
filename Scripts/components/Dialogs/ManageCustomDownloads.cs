@@ -106,7 +106,7 @@ public class ManageCustomDownloads : ReferenceRect
 
 		if (installed)
 		{
-			var res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Editor Download"),
+			bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Editor Download"),
 				Tr("This editor version is on your computer. Do you wish to remove it?"));
 			if (res)
 			{
@@ -121,7 +121,7 @@ public class ManageCustomDownloads : ReferenceRect
 		}
 		else
 		{
-			var res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Editor Donwload"),
+			bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Editor Donwload"),
 				string.Format(Tr("Are you sure you want to delete '{0}' from your list of downloads?"),delCed.Name));
 			if (res)
 			{

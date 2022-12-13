@@ -401,7 +401,7 @@ public class GodotPanel : Panel
 				break;
 		}
 
-		var res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Download Engine Failed"), errDesc, Tr("Retry"), Tr("Cancel"));
+		bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Download Engine Failed"), errDesc, Tr("Retry"), Tr("Cancel"));
 		if (res)
 			await OnInstallClicked(gle);
 	}
@@ -500,7 +500,7 @@ public class GodotPanel : Panel
 	{
 		if (gle.SettingsLinked)
 		{
-			var res = await AppDialogs.YesNoDialog.ShowDialog("Unlink Settings", "Do you want to unlink the settings for this version of Godot?");
+			bool res = await AppDialogs.YesNoDialog.ShowDialog("Unlink Settings", "Do you want to unlink the settings for this version of Godot?");
 			if (res)
 			{
 				gle.GodotVersion.SharedSettings = string.Empty;
