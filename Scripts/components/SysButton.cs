@@ -56,6 +56,7 @@ public class SysButton : ColorRect
                     GetTree().Quit();
                 } else {
                     WindowHandle.Visible = false;
+                    Color = BaseColor;
                 }
                 break;
             case TYPES.minimize:
