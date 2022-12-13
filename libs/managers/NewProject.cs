@@ -81,7 +81,7 @@ public class NewProject : Object {
 		} else if (GodotVersion == 3) {
 			image = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v3.png");
 		} else if (GodotVersion >= 4) {
-			image = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v3.png");
+			image = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v4.png");
 		}
 		image.GetData().SavePng(ProjectLocation.PlusFile("icon.png").NormalizePath());
 	}
