@@ -406,6 +406,23 @@ public class GodotPanel : Panel
 			await OnInstallClicked(gle);
 	}
 
+	async void RemoveGodot(GodotLineEntry gle, bool deleteFiles) {
+		if (deleteFiles) {
+			GodotInstaller.FromVersion(gle.GodotVersion).Uninstall();
+		}
+		foreach(ProjectFile pf in CentralStore.Projects) {
+			if (pf.GodotId == gle.GodotVersion.Id) {
+				pf.GodotId = Guid.Empty.ToString();
+			}
+		}
+		if (CentralStore.Settings.DefaultEngine == gle.GodotVersion.Id) {
+			CentralStore.Settings.DefaultEngine = Guid.Empty.ToString();
+		}
+		CentralStore.Versions.Remove(gle.GodotVersion);
+		CentralStore.Instance.SaveDatabase();
+		await PopulateList();
+	}
+
 	async Task OnInstallClicked(GodotLineEntry gle) {
 		Available.List.RemoveChild(gle);
 		Downloading.List.AddChild(gle);
@@ -433,65 +450,22 @@ public class GodotPanel : Panel
 	}
 
 	async void OnUninstallClicked(GodotLineEntry gle) {
-		Task<bool> result;
-		GodotInstaller installer = GodotInstaller.FromVersion(gle.GodotVersion);
-		if (gle.Source == gle.GodotVersion.Location) {
-			result = AppDialogs.YesNoDialog.ShowDialog(
-				Tr("Remove Godot Install"),
-				string.Format(Tr("You are about to remove the reference to {0}, are you sure you want to continue?"),gle.GodotVersion.Tag)
-			);
-		} else {
-			result = AppDialogs.YesNoDialog.ShowDialog(
-				Tr("Remove Godot Install"),
-				string.Format(Tr("You are about to uninstall {0}, are you sure you want to continue?"),gle.GodotVersion.Tag)
-			);
-		}
-
-		while (!result.IsCompleted)
+		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Remove Editor Version"),
+				string.Format(Tr("You are about to remove {0}.\nDo you wish to remove the files as well?"), gle.GodotVersion.GetDisplayName()),
+				Tr("Editor and Files"), Tr("Just Editor"));
+		while (!task.IsCompleted)
 			await this.IdleFrame();
-
-		if (result.Result) {
-			foreach(ProjectFile pf in CentralStore.Projects) {
-				if (pf.GodotId == gle.GodotVersion.Id) {
-					pf.GodotId = Guid.Empty.ToString();
-				}
-			}
-
-			if (CentralStore.Settings.DefaultEngine == gle.GodotVersion.Id) {
-				CentralStore.Settings.DefaultEngine = Guid.Empty.ToString();
-			}
-
-			CentralStore.Versions.Remove(gle.GodotVersion);
-			
-			if (CentralStore.Versions.Count == 1)
-			{
-				result = AppDialogs.YesNoDialog.ShowDialog(
-						Tr("Remove Godot Install"),
-						Tr("You only have 1 version of Godot Engine installed, do you wish to set it as your default and associate it with projects?"));
-
-				while (!result.IsCompleted)
-					await this.IdleFrame();
-
-				if (result.Result)
-				{
-					GodotVersion gv = CentralStore.Versions[0];
-					foreach (ProjectFile pf in CentralStore.Projects)
-					{
-						pf.GodotId = gv.Id;
-					}
-
-					CentralStore.Settings.DefaultEngine = gv.Id;
-				}
-			}
-
-			CentralStore.Instance.SaveDatabase();
-
-			if (gle.GodotVersion.GithubVersion != null || gle.GodotVersion.MirrorVersion != null || gle.GodotVersion.CustomEngine != null)
-				installer.Uninstall();
-
-			await PopulateList();
-		} else
-			gle.ToggleDownloadUninstall(true);
+		switch (task.Result)
+		{
+			case YesNoCancelDialog.ActionResult.FirstAction:
+				RemoveGodot(gle, true);
+				break;
+			case YesNoCancelDialog.ActionResult.SecondAction:
+				RemoveGodot(gle, false);
+				break;
+			case YesNoCancelDialog.ActionResult.CancelAction:
+				break;
+		}
 	}
 
 	void OnDefaultSelected(GodotLineEntry gle) {
