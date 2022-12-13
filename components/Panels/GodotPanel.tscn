@@ -76,7 +76,7 @@ margin_left = 418.0
 margin_right = 506.0
 margin_bottom = 40.0
 Icons = [ ExtResource( 5 ), ExtResource( 6 ), ExtResource( 7 ) ]
-HelpText = [ "Add Custom Godot", "Download from Website", "Check for Updates to Godot Engine" ]
+HelpText = [ "Add Editor Version", "Download from Website", "Check for Updates to Godot Engine" ]
 
 [node name="Spacer2" type="Control" parent="VB/MC/HC"]
 margin_left = 514.0

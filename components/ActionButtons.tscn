@@ -21,10 +21,8 @@ margin_right = 14.0
 margin_bottom = 14.0
 custom_styles/panel = SubResource( 1 )
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 Icons = [ ExtResource( 2 ), ExtResource( 3 ), ExtResource( 4 ) ]
+HelpText = [  ]
 
 [node name="Buttons" type="HBoxContainer" parent="."]
 margin_left = 10.0

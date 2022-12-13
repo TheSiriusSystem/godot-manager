@@ -100,7 +100,7 @@ WindowMain = NodePath("../../../../../../../..")
 [node name="MCContent" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_top = 30.0
 margin_right = 320.0
-margin_bottom = 106.0
+margin_bottom = 105.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/margin_right = 8
@@ -112,7 +112,7 @@ custom_constants/margin_bottom = 8
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 312.0
-margin_bottom = 68.0
+margin_bottom = 67.0
 custom_constants/separation = 10
 
 [node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
@@ -124,45 +124,45 @@ text = "Category Name:"
 [node name="CategoryName" type="LineEdit" parent="PC/CC/P/VB/MCContent/VB"]
 margin_top = 29.0
 margin_right = 304.0
-margin_bottom = 57.0
+margin_bottom = 50.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 2 )
 
 [node name="MCButtons" type="MarginContainer" parent="PC/CC/P/VB"]
-margin_top = 110.0
+margin_top = 109.0
 margin_right = 320.0
 margin_bottom = 145.0
 custom_constants/margin_bottom = 15
 
 [node name="HB" type="HBoxContainer" parent="PC/CC/P/VB/MCButtons"]
 margin_right = 320.0
-margin_bottom = 20.0
+margin_bottom = 21.0
 
 [node name="Sep1" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
-margin_right = 65.0
-margin_bottom = 20.0
+margin_right = 71.0
+margin_bottom = 21.0
 size_flags_horizontal = 3
 
 [node name="CreateBtn" type="Button" parent="PC/CC/P/VB/MCButtons/HB"]
-margin_left = 69.0
-margin_right = 122.0
-margin_bottom = 20.0
+margin_left = 75.0
+margin_right = 121.0
+margin_bottom = 21.0
 text = "Create"
 
 [node name="Sep2" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
-margin_left = 126.0
-margin_right = 192.0
-margin_bottom = 20.0
+margin_left = 125.0
+margin_right = 196.0
+margin_bottom = 21.0
 size_flags_horizontal = 3
 
 [node name="CancelBtn" type="Button" parent="PC/CC/P/VB/MCButtons/HB"]
-margin_left = 196.0
-margin_right = 250.0
-margin_bottom = 20.0
+margin_left = 200.0
+margin_right = 245.0
+margin_bottom = 21.0
 text = "Cancel"
 
 [node name="Sep3" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
-margin_left = 254.0
+margin_left = 249.0
 margin_right = 320.0
-margin_bottom = 20.0
+margin_bottom = 21.0
 size_flags_horizontal = 3
