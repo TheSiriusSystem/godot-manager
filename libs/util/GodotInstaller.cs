@@ -267,10 +267,11 @@ public class GodotInstaller : Object {
 		foreach(string file in RecurseDirectory(_version.Location)) {
 			if (SDirectory.Exists(file))
 				SDirectory.Delete(file);
-			else
+			else if (SFile.Exists(file))
 				SFile.Delete(file);
 		}
-
-		SFile.Delete(_version.CacheLocation);
+		if (SFile.Exists(_version.CacheLocation)) {
+			SFile.Delete(_version.CacheLocation);
+		}
 	}
 }
