@@ -13,50 +13,56 @@ public class CreateProject : ReferenceRect
 #endregion
 
 #region Node Paths
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectName/ProjectName")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer")]
+	TabContainer _tabs = null;
+
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectName/ProjectName")]
 	LineEdit _projectName = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectName/CreateFolder")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectName/CreateFolder")]
 	Button _createFolder = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectLocation/ProjectLocation")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectLocation/ProjectLocation")]
 	LineEdit _projectLocation = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectLocation/Browse")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectLocation/Browse")]
 	Button _browseLocation = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectLocation/ErrorIcon")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectLocation/ErrorIcon")]
 	TextureRect _errorIcon = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ErrorText")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/ErrorText")]
 	Label _errorText = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/TemplateProject")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/TemplateProject")]
 	OptionButton _templateProject = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers")]
 	VBoxContainer _renderers = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Message")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Message")]
 	Label _message = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/GodotVersion")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/GodotVersion")]
 	OptionButton _godotVersion = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes/AdvRenderer/AdvRenderer")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/AdvRenderer/AdvRenderer")]
 	CheckBox _advRenderer = null;
 	
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes/AdvRenderer/AdvRendererDesc")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/AdvRenderer/AdvRendererDesc")]
 	Label _advRendererDesc = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes/SimpleRenderer/SimpleRenderer")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/SimpleRenderer/SimpleRenderer")]
 	CheckBox _simpleRenderer = null;
 	
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes/SimpleRenderer/SimpleRendererDesc")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/SimpleRenderer/SimpleRendererDesc")]
 	Label _simpleRendererDesc = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/ProjectPlugins/ScrollContainer/List")]
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Addons/ScrollContainer/List")]
 	VBoxContainer _pluginList = null;
+
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Addons/Warning")]
+	Label _pluginWarning = null;
 
 	[NodePath("PC/CC/P/VB/MCButtons/HB/CreateBtn")]
 	Button _createBtn = null;
@@ -127,7 +133,7 @@ public class CreateProject : ReferenceRect
 		};
 		if (_templateProject.Selected > 0)
 			prj.Template = _templateProject.GetSelectedMetadata() as AssetProject;
-		
+
 		foreach(AddonLineEntry ale in _pluginList.GetChildren()) {
 			if (ale.Installed) {
 				prj.Plugins.Add(ale.GetMeta("asset") as AssetPlugin);
@@ -138,10 +144,10 @@ public class CreateProject : ReferenceRect
 		ProjectFile pf = ProjectFile.ReadFromFile(prj.ProjectLocation.PlusFile(gdVersNum <= 2 ? "engine.cfg" : "project.godot").NormalizePath(), gdVersNum);
 		pf.GodotId = prj.GodotId;
 		pf.Assets = new Array<string>();
-		
+
 		foreach(AssetPlugin plugin in prj.Plugins)
 			pf.Assets.Add(plugin.Asset.AssetId);
-		
+
 		CentralStore.Projects.Add(pf);
 		CentralStore.Instance.SaveDatabase();
 		EmitSignal("project_created", pf);
@@ -172,7 +178,7 @@ public class CreateProject : ReferenceRect
 		AppDialogs.BrowseFolderDialog.Visible = false;
 		AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnDirSelected");
 		TestPath(bfdir);
-		if (bfdir.IsDirEmpty() && _projectName.Text == "Untitled Project")
+		if (bfdir.IsDirEmpty() && _projectName.Text == "New Game Project")
 			_projectName.Text = bfdir.GetFile().Capitalize();
 	}
 
@@ -189,58 +195,87 @@ public class CreateProject : ReferenceRect
 
 	[SignalHandler("item_selected", nameof(_godotVersion))]
 	void OnVersionSelected(int index) {
-		GodotVersion versionData = (GodotVersion)_godotVersion.GetSelectedMetadata();
-		int version = versionData.GetVersion();
-		if (version <= 1)
+		GodotVersion gdVers = (GodotVersion)_godotVersion.GetSelectedMetadata();
+		int gdVersNum = gdVers.GetVersion();
+		string gdVersTag = gdVers.Tag.ToLower();
+
+		if (gdVersNum <= 2)
 		{
 			_renderers.Visible = false;
-			_message.Text = Tr(@"The renderer cannot be changed and addons are not available in v1.x projects.");
+			_message.Text = Tr(@"The renderer cannot be changed in this editor version.");
 		}
-		else if (version == 2)
+		else
 		{
-			string tag = versionData.Tag.ToLower();
-			_renderers.Visible = false;
-			if (tag.StartsWith("2.1") || tag.StartsWith("v2.1"))
+			if (gdVersTag.StartsWith("3.0") || gdVersTag.StartsWith("v3.0"))
 			{
-				_message.Text = Tr(@"The renderer cannot be changed in v2.x projects.");
-			} else
+				_renderers.Visible = false;
+				_message.Text = Tr(@"The renderer cannot be changed in this editor version.");
+			}
+			else
 			{
-				_message.Text = Tr(@"The renderer cannot be changed in v2.x projects.
-									Addons are only available in v2.1+ projects.");
+				_renderers.Visible = true;
+				_advRenderer.Pressed = true;
+				_simpleRenderer.Pressed = false;
+				if (gdVersNum == 3)
+				{
+					_advRenderer.Text = Tr("OpenGL ES 3.0");
+					_simpleRenderer.Text = Tr("OpenGL ES 2.0");
+					_advRendererDesc.Text = Tr(@"Higher visual quality.
+											All features available.
+											Incompatible with older hardware.
+											Not recommended for web games.");
+					_simpleRendererDesc.Text = Tr(@"Lower visual quality.
+											Some features not available.
+											Works on most hardware.
+											Recommended for web games.");
+				}
+				else if (gdVersNum >= 4)
+				{
+					_advRenderer.Text = Tr("Forward+");
+					_simpleRenderer.Text = Tr("Mobile");
+					_advRendererDesc.Text = Tr(@"Supports desktop platforms only.
+										Advanced 3D graphics available.
+										Can scale to large complex scenes.
+										Slower rendering of simple scenes.");
+					_simpleRendererDesc.Text = Tr(@"Supports desktop + mobile platforms.
+										Less advanced 3D graphics.
+										Less scalable for complex scenes.
+										Faster rendering of simple scenes.");
+				}
+				_message.Text = "The renderer can be changed later, but scenes may need to be adjusted.";
 			}
 		}
-		else if (version >= 3)
-		{
-			_renderers.Visible = true;
-			_advRenderer.Pressed = true;
-			_simpleRenderer.Pressed = false;
-			if (version == 3)
+		PopulatePlugins();
+	}
+
+	private void PopulatePlugins() {
+		foreach (AddonLineEntry node in _pluginList.GetChildren()) node.QueueFree();
+
+		GodotVersion gdVers = (GodotVersion)_godotVersion.GetSelectedMetadata();
+		int gdVersNum = gdVers.GetVersion();
+		string gdVersTag = gdVers.Tag.ToLower();
+		ScrollContainer sc = (ScrollContainer)_pluginList.GetParent();
+		if (gdVersNum <= 1 || (gdVersNum == 2 && (gdVersTag.StartsWith("2.0") || gdVersTag.StartsWith("v2.0")))) {
+			sc.Visible = false;
+			_pluginWarning.Visible = true;
+		} else {
+			sc.Visible = true;
+			_pluginWarning.Visible = false;
+			foreach (AssetPlugin plgn in CentralStore.Plugins)
 			{
-				_advRenderer.Text = Tr("OpenGL ES 3.0");
-				_simpleRenderer.Text = Tr("OpenGL ES 2.0");
-				_advRendererDesc.Text = Tr(@"Higher visual quality.
-										All features available.
-										Incompatible with older hardware.
-										Not recommended for web games.");
-				_simpleRendererDesc.Text = Tr(@"Lower visual quality.
-										Some features not available.
-										Works on most hardware.
-										Recommended for web games.");
+				string imgLoc =
+					$"{CentralStore.Settings.CachePath}/images/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
+						.NormalizePath();
+				AddonLineEntry ale = ALineEntry.Instance<AddonLineEntry>();
+
+				ale.Icon = Util.LoadImage(imgLoc);
+				if (ale.Icon == null) ale.Icon = DefaultIcon;
+
+				ale.Title = plgn.Asset.Title;
+				ale.Version = plgn.Asset.VersionString;
+				ale.SetMeta("asset", plgn);
+				_pluginList.AddChild(ale);
 			}
-			else if (version >= 4)
-			{
-				_advRenderer.Text = Tr("Forward+");
-				_simpleRenderer.Text = Tr("Mobile");
-				_advRendererDesc.Text = Tr(@"Supports desktop platforms only.
-									Advanced 3D graphics available.
-									Can scale to large complex scenes.
-									Slower rendering of simple scenes.");
-				_simpleRendererDesc.Text = Tr(@"Supports desktop + mobile platforms.
-									Less advanced 3D graphics.
-									Less scalable for complex scenes.
-									Faster rendering of simple scenes.");
-			}
-			_message.Text = "The renderer can be changed later, but scenes may need to be adjusted.";
 		}
 	}
 
@@ -278,7 +313,8 @@ public class CreateProject : ReferenceRect
 		if (defaultGodot != -1)
 			_godotVersion.Select(defaultGodot);
 
-		_projectName.Text = "Untitled Project";
+		_tabs.CurrentTab = 0;
+		_projectName.Text = "New Game Project";
 		_projectLocation.Text = CentralStore.Settings.ProjectPath;
 		TestPath(CentralStore.Settings.ProjectPath);
 		OnVersionSelected(_godotVersion.Selected);
@@ -289,24 +325,7 @@ public class CreateProject : ReferenceRect
 			_templateProject.AddItem(gdName);
 			_templateProject.SetItemMetadata(CentralStore.Templates.IndexOf(tmpl)+1, tmpl);
 		}
-
-		foreach (AddonLineEntry node in _pluginList.GetChildren()) node.QueueFree();
-
-		foreach (AssetPlugin plgn in CentralStore.Plugins)
-		{
-			string imgLoc =
-				$"{CentralStore.Settings.CachePath}/images/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
-					.NormalizePath();
-			AddonLineEntry ale = ALineEntry.Instance<AddonLineEntry>();
-
-			ale.Icon = Util.LoadImage(imgLoc);
-			if (ale.Icon == null) ale.Icon = DefaultIcon;
-
-			ale.Title = plgn.Asset.Title;
-			ale.Version = plgn.Asset.VersionString;
-			ale.SetMeta("asset", plgn);
-			_pluginList.AddChild(ale);
-		}
+		PopulatePlugins();
 
 		Visible = true;
 	}
