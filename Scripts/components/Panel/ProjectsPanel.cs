@@ -263,7 +263,6 @@ public class ProjectsPanel : Panel
 			ple.Connect("Clicked", this, "OnListEntry_Clicked");
 			ple.Connect("DoubleClicked", this, "OnListEntry_DoubleClicked");
 			ple.Connect("RightClicked", this, "OnListEntry_RightClicked");
-			ple.Connect("RightDoubleClicked", this, "OnListEntry_RightDoubleClicked");
 			ple.Connect("FavoriteUpdated", this, "OnListEntry_FavoriteUpdated");
 			if (isCategory) {
 				ple.Connect("DragStarted", this, "OnDragStarted");
@@ -273,7 +272,6 @@ public class ProjectsPanel : Panel
 			pie.Connect("Clicked", this, "OnIconEntry_Clicked");
 			pie.Connect("DoubleClicked", this, "OnIconEntry_DoubleClicked");
 			pie.Connect("RightClicked", this, "OnIconEntry_RightClicked");
-			pie.Connect("RightDoubleClicked", this, "OnIconEntry_RightDoubleClicked");
 		}
 	}
 
@@ -409,6 +407,8 @@ public class ProjectsPanel : Panel
 		// Create our Categories
 		foreach (Category cat in CentralStore.Categories)
 		{
+			if (cat == null)
+				continue;
 			if (catCache.ContainsKey(cat))
 				continue;
 			clt = NewCL(cat.Name);
@@ -589,13 +589,13 @@ public class ProjectsPanel : Panel
 			_categoryView.RemoveChild(node);
 
 		foreach (Category cat in CentralStore.Instance.GetPinnedCategories())
-			if (catCache.ContainsKey(cat))
+			if (cat != null && catCache.ContainsKey(cat))
 				_categoryView.AddChild(catCache[cat]);
-		
+
 		foreach (Category cat in CentralStore.Instance.GetUnpinnedCategories())
-			if (catCache.ContainsKey(cat))
+			if (cat != null && catCache.ContainsKey(cat))
 				_categoryView.AddChild(catCache[cat]);
-		
+
 		_categoryView.AddChild(clFavorites);
 		_categoryView.AddChild(clUncategorized);
 
@@ -688,10 +688,6 @@ public class ProjectsPanel : Panel
 		_popupMenu.Popup_(new Rect2(GetGlobalMousePosition(), _popupMenu.RectSize));
 	}
 
-	void OnListEntry_RightDoubleClicked(ProjectLineEntry ple) {
-
-	}
-
 	void OnListEntry_FavoriteUpdated(ProjectLineEntry ple) { 
 		PopulateListing();
 	}
@@ -725,11 +721,6 @@ public class ProjectsPanel : Panel
 		_popupMenu.ProjectIconEntry = pie;
 		_popupMenu.Popup_(new Rect2(GetGlobalMousePosition(), _popupMenu.RectSize));
 	}
-
-	void OnIconEntry_RightDoubleClicked(ProjectIconEntry pie) {
-
-	}
-
 
 	public async void _IdPressed(int id) {
 		ProjectFile pf;
