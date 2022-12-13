@@ -6,6 +6,7 @@ public class AppDialogs : Control
 #region Node Paths
     public FirstRunWizard FirstRunWizard_ = null;
     public AddCustomGodot AddCustomGodot_ = null;
+    public EditCustomGodot EditCustomGodot_ = null;
     public BusyDialog BusyDialog_ = null;
     public NewVersion NewVersion_ = null;
     public YesNoDialog YesNoDialog_ = null;
@@ -33,6 +34,7 @@ public class AppDialogs : Control
 #region Singleton Variables to access in program
     public static FirstRunWizard FirstRunWizard => Instance.FirstRunWizard_;
     public static AddCustomGodot AddCustomGodot => Instance.AddCustomGodot_;
+    public static EditCustomGodot EditCustomGodot => Instance.EditCustomGodot_;
     public static BusyDialog BusyDialog => Instance.BusyDialog_;
     public static NewVersion NewVersion => Instance.NewVersion_;
     public static YesNoDialog YesNoDialog => Instance.YesNoDialog_;
@@ -76,6 +78,7 @@ public class AppDialogs : Control
         // Initialize Dialogs
         FirstRunWizard_ = GD.Load<PackedScene>("res://components/Dialogs/FirstRunWizard.tscn").Instance<FirstRunWizard>();
         AddCustomGodot_ = GD.Load<PackedScene>("res://components/Dialogs/AddCustomGodot.tscn").Instance<AddCustomGodot>();
+        EditCustomGodot_ = GD.Load<PackedScene>("res://components/Dialogs/EditCustomGodot.tscn").Instance<EditCustomGodot>();
         BusyDialog_ = GD.Load<PackedScene>("res://components/Dialogs/BusyDialog.tscn").Instance<BusyDialog>();
         NewVersion_ = GD.Load<PackedScene>("res://components/Dialogs/NewVersion.tscn").Instance<NewVersion>();
         YesNoDialog_ = GD.Load<PackedScene>("res://components/Dialogs/YesNoDialog.tscn").Instance<YesNoDialog>();
@@ -110,7 +113,7 @@ public class AppDialogs : Control
         ImportFileDialog_.Mode = FileDialog.ModeEnum.OpenFile;
         ImportFileDialog_.Access = FileDialog.AccessEnum.Filesystem;
         ImportFileDialog_.WindowTitle = Tr("Open Godot Project...");
-        ImportFileDialog_.Filters = new string[] {"*.godot"};
+        ImportFileDialog_.Filters = new string[] {"engine.cfg", "*.godot"};
         ImportFileDialog_.RectMinSize = new Vector2(510, 390);
         ImportFileDialog_.Theme = GD.Load<Theme>("res://Resources/DefaultTheme.tres");
 
@@ -129,13 +132,14 @@ public class AppDialogs : Control
         BrowseGodotDialog_.Mode = FileDialog.ModeEnum.OpenFile;
         BrowseGodotDialog_.Access = FileDialog.AccessEnum.Filesystem;
         BrowseGodotDialog_.WindowTitle = Tr("Find Godot...");
-        BrowseGodotDialog_.Filters = new string[] { "*.exe", "*.x86_64", "*.x86", "*.64", "*.32", ".app", "godot"};
+        BrowseGodotDialog_.Filters = new string[] {"*.exe", "*.x86_64", "*.x86", "*.64", "*.32", ".app", "godot"};
         BrowseGodotDialog_.RectMinSize = new Vector2(510, 390);
         BrowseGodotDialog_.Theme = GD.Load<Theme>("res://Resources/DefaultTheme.tres");
 
         dialogs = new Array<ReferenceRect> {    // Hierarchy of Dialogs in window, for proper displaying
             FirstRunWizard_,                    // First Run Wizard Helper
             AddCustomGodot_, NewVersion_,       // Add Custom Godot / New Godot Version Prompt
+            EditCustomGodot_,
             CreateProject_, ImportProject_,     // Create Project / Import Project
             EditProject_,                       // Edit Project
             AssetLibPreview_, DownloadAddon_,   // Asset Library Preview / Download Addon/Project
@@ -158,7 +162,7 @@ public class AppDialogs : Control
 
     public override void _EnterTree() {
         // Setup Full Rect for dialogs:
-        foreach(ReferenceRect dlg in dialogs ) {
+        foreach(ReferenceRect dlg in dialogs) {
             dlg.SetAnchorsAndMarginsPreset(LayoutPreset.Wide);
             dlg.Visible = false;
             AddChild(dlg);
