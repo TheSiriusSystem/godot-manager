@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Assets/Icons/icon_status_error.svg" type="Texture" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://Resources/Fonts/droid-regular-16.tres" type="DynamicFont" id=6]
 [ext_resource path="res://Resources/Fonts/droid-regular-13.tres" type="DynamicFont" id=7]
 [ext_resource path="res://Resources/TabContainer.tres" type="Theme" id=8]
+[ext_resource path="res://Resources/Fonts/droid-bold-22.tres" type="DynamicFont" id=9]
 
 [sub_resource type="StyleBoxFlat" id=4]
 bg_color = Color( 0, 0, 0, 0.509804 )
@@ -108,7 +109,7 @@ margin_right = 522.0
 margin_bottom = 472.0
 theme = ExtResource( 8 )
 
-[node name="ProjectSettings" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer"]
+[node name="Settings" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 10.0
@@ -117,61 +118,62 @@ margin_right = -10.0
 margin_bottom = -4.0
 custom_constants/separation = 10
 
-[node name="ProjectNameHeader" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="ProjectNameHeader" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_right = 494.0
 margin_bottom = 19.0
 custom_fonts/font = ExtResource( 6 )
 text = "Project Name:"
 
-[node name="ProjectName" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="ProjectName" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 29.0
 margin_right = 494.0
 margin_bottom = 50.0
 custom_constants/separation = 10
 
-[node name="Spacer1" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectName"]
+[node name="Spacer1" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectName"]
 margin_bottom = 21.0
 
-[node name="ProjectName" type="LineEdit" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectName"]
+[node name="ProjectName" type="LineEdit" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectName"]
 margin_left = 10.0
 margin_right = 383.0
 margin_bottom = 21.0
 size_flags_horizontal = 3
+text = "New Game Project"
 
-[node name="CreateFolder" type="Button" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectName"]
+[node name="CreateFolder" type="Button" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectName"]
 margin_left = 393.0
 margin_right = 484.0
 margin_bottom = 21.0
 text = "Create Folder"
 
-[node name="Spacer2" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectName"]
+[node name="Spacer2" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectName"]
 margin_left = 494.0
 margin_right = 494.0
 margin_bottom = 21.0
 
-[node name="ProjectLocationHeader" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="ProjectLocationHeader" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 60.0
 margin_right = 494.0
 margin_bottom = 79.0
 custom_fonts/font = ExtResource( 6 )
 text = "Project Location:"
 
-[node name="ProjectLocation" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="ProjectLocation" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 89.0
 margin_right = 494.0
 margin_bottom = 113.0
 custom_constants/separation = 10
 
-[node name="Spacer1" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectLocation"]
+[node name="Spacer1" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectLocation"]
 margin_bottom = 24.0
 
-[node name="ProjectLocation" type="LineEdit" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectLocation"]
+[node name="ProjectLocation" type="LineEdit" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectLocation"]
 margin_left = 10.0
 margin_right = 389.0
 margin_bottom = 24.0
 size_flags_horizontal = 3
 
-[node name="ErrorIcon" type="TextureRect" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectLocation"]
+[node name="ErrorIcon" type="TextureRect" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectLocation"]
 margin_left = 399.0
 margin_right = 423.0
 margin_bottom = 24.0
@@ -183,18 +185,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Browse" type="Button" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectLocation"]
+[node name="Browse" type="Button" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectLocation"]
 margin_left = 433.0
 margin_right = 484.0
 margin_bottom = 24.0
 text = "Browse"
 
-[node name="Spacer2" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/ProjectLocation"]
+[node name="Spacer2" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectLocation"]
 margin_left = 494.0
 margin_right = 494.0
 margin_bottom = 24.0
 
-[node name="ErrorText" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="ErrorText" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 123.0
 margin_right = 494.0
 margin_bottom = 140.0
@@ -203,54 +205,54 @@ custom_fonts/font = ExtResource( 5 )
 align = 1
 valign = 1
 
-[node name="TemplateProjectHeader" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="TemplateProjectHeader" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 150.0
 margin_right = 494.0
 margin_bottom = 169.0
 custom_fonts/font = ExtResource( 6 )
 text = "Template Project:"
 
-[node name="TemplateProject" type="OptionButton" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="TemplateProject" type="OptionButton" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 179.0
 margin_right = 494.0
 margin_bottom = 200.0
 
-[node name="GodotVersionHeader" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="GodotVersionHeader" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 210.0
 margin_right = 494.0
 margin_bottom = 229.0
 custom_fonts/font = ExtResource( 6 )
-text = "Godot Version:"
+text = "Editor Version:"
 
-[node name="GodotVersion" type="OptionButton" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="GodotVersion" type="OptionButton" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 239.0
 margin_right = 494.0
 margin_bottom = 260.0
 
-[node name="Renderers" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="Renderers" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 270.0
 margin_right = 494.0
 margin_bottom = 397.0
 custom_constants/separation = 10
 
-[node name="Header" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers"]
+[node name="Header" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers"]
 margin_right = 494.0
 margin_bottom = 19.0
 custom_fonts/font = ExtResource( 6 )
 text = "Renderer:"
 
-[node name="Checkboxes" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers"]
+[node name="Checkboxes" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers"]
 margin_top = 29.0
 margin_right = 494.0
 margin_bottom = 127.0
 size_flags_horizontal = 3
 
-[node name="AdvRenderer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes"]
+[node name="AdvRenderer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes"]
 margin_right = 241.0
 margin_bottom = 98.0
 size_flags_horizontal = 3
 
-[node name="AdvRenderer" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes/AdvRenderer"]
+[node name="AdvRenderer" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/AdvRenderer"]
 margin_right = 241.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
@@ -258,7 +260,7 @@ pressed = true
 group = SubResource( 6 )
 text = "OpenGL ES 3.0"
 
-[node name="AdvRendererDesc" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes/AdvRenderer"]
+[node name="AdvRendererDesc" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/AdvRenderer"]
 margin_top = 21.0
 margin_right = 241.0
 margin_bottom = 98.0
@@ -271,24 +273,24 @@ Incompatible with older hardware.
 Not recommended for web games."
 max_lines_visible = 4
 
-[node name="VSeparator" type="VSeparator" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes"]
+[node name="VSeparator" type="VSeparator" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes"]
 margin_left = 245.0
 margin_right = 249.0
 margin_bottom = 98.0
 
-[node name="SimpleRenderer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes"]
+[node name="SimpleRenderer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes"]
 margin_left = 253.0
 margin_right = 494.0
 margin_bottom = 98.0
 size_flags_horizontal = 3
 
-[node name="SimpleRenderer" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes/SimpleRenderer"]
+[node name="SimpleRenderer" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/SimpleRenderer"]
 margin_right = 241.0
 margin_bottom = 17.0
 group = SubResource( 6 )
 text = "OpenGL ES 2.0"
 
-[node name="SimpleRendererDesc" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings/Renderers/Checkboxes/SimpleRenderer"]
+[node name="SimpleRendererDesc" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/SimpleRenderer"]
 margin_top = 21.0
 margin_right = 241.0
 margin_bottom = 98.0
@@ -301,7 +303,7 @@ Works on most hardware.
 Recommended for web games."
 max_lines_visible = 4
 
-[node name="Message" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectSettings"]
+[node name="Message" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 407.0
 margin_right = 494.0
 margin_bottom = 424.0
@@ -309,7 +311,7 @@ custom_fonts/font = ExtResource( 7 )
 text = "The renderer can be changed later, but scenes may need to be adjusted."
 align = 1
 
-[node name="ProjectPlugins" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer"]
+[node name="Addons" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -318,17 +320,28 @@ margin_top = 29.0
 margin_right = -10.0
 margin_bottom = -4.0
 
-[node name="ScrollContainer" type="ScrollContainer" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectPlugins"]
+[node name="ScrollContainer" type="ScrollContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Addons"]
 margin_right = 494.0
 margin_bottom = 431.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="List" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/ProjectPlugins/ScrollContainer"]
+[node name="List" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Addons/ScrollContainer"]
 margin_right = 494.0
 margin_bottom = 431.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+
+[node name="Warning" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Addons"]
+visible = false
+margin_right = 494.0
+margin_bottom = 431.0
+rect_min_size = Vector2( 0, 431 )
+custom_fonts/font = ExtResource( 9 )
+text = "Addons are only available in projects made
+with Godot v2.1+!"
+align = 1
+valign = 1
 
 [node name="MCButtons" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_top = 514.0

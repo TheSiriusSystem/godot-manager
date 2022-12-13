@@ -33,16 +33,10 @@ anchor_bottom = 1.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="VB" type="VBoxContainer" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="MC" type="MarginContainer" parent="VB"]
 margin_right = 1024.0
@@ -135,9 +129,9 @@ margin_right = 1014.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 140, 0 )
 hint_tooltip = "Select a Mirror to Download From."
-text = "Github"
+text = "TuxFamily.org"
 items = [ "Github", null, false, 0, null, "TuxFamily.org", null, false, 1, null ]
-selected = 0
+selected = 1
 
 [node name="SC" type="ScrollContainer" parent="VB"]
 margin_top = 44.0

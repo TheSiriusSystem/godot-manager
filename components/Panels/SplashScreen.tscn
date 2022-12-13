@@ -26,7 +26,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 2 )
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="Logo" type="TextureRect" parent="."]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -39,27 +39,25 @@ texture = ExtResource( 1 )
 expand = true
 stretch_mode = 6
 
-[node name="Label" type="Label" parent="."]
-margin_left = 283.0
-margin_top = 377.0
-margin_right = 747.0
-margin_bottom = 450.0
+[node name="Header" type="Label" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -323.0
+margin_bottom = -250.0
 custom_fonts/font = SubResource( 11 )
 text = "Godot Manager"
 align = 1
 valign = 1
 
 [node name="VersionInfo" type="Label" parent="."]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -122.0
-margin_top = 118.5
-margin_right = 122.0
-margin_bottom = 167.5
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -231.5
+margin_bottom = -182.5
 custom_fonts/font = SubResource( 12 )
-text = "Version 0.2.1"
+text = "Version x.x.x"
 align = 1
 valign = 1
 

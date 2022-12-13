@@ -9,9 +9,7 @@ margin_bottom = 50.0
 rect_min_size = Vector2( 50, 0 )
 color = Color( 0.137255, 0.14902, 0.180392, 1 )
 script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
+WindowMain = NodePath("")
 
 [node name="cc" type="CenterContainer" parent="."]
 anchor_right = 1.0
