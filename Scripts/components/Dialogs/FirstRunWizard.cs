@@ -143,7 +143,7 @@ StartupNotify=true
 	[SignalHandler("pressed", nameof(EngineBrowse))]
 	void OnPressed_EngineBrowse()
 	{
-		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Location for Godot Engines");
+		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Location for Godot Versions");
 		AppDialogs.BrowseFolderDialog.CurrentDir = EngineLoc.Text;
 		if (!AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, nameof(OnDirSelected_EngineBrowse)))
 		{
@@ -197,7 +197,6 @@ StartupNotify=true
 		CentralStore.Settings.EnginePath = EngineLoc.Text;
 		EnsureDirectoryExists(EngineLoc.Text);
 	}
-
 
 	void OnDirSelected_CacheBrowse(string dir)
 	{
@@ -280,8 +279,7 @@ StartupNotify=true
 	async void OnPressed_Cancel()
 	{
 		bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("First Run Wizard"),
-			Tr("Are you sure you want to cancel this first run wizard? " +
-				" Any settings you have changed, will be lost."));
+			Tr("Are you sure you want to exit the First Run Wizard?\nAny changes you have made to the settings will be lost."));
 		if (res)
 		{
 			// System.IO.Compression.FileSystem

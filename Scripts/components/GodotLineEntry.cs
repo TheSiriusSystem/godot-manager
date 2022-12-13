@@ -68,10 +68,10 @@ public class GodotLineEntry : HBoxContainer
 #endregion
 
 #region Private String Variables
-	private string sLabel = "Godot Version x.x.x (Stable)";
-	private string sSource = "Source: TuxFamily.org";
-	private string sFilesize = "Size: 32MB";
-	private string sLocation = @"E:\Apps\GodotManager\versions\TestLocation";
+	private string sLabel = "Godot x.x.x";
+	private string sSource = "Source: TuxFamily";
+	private string sFilesize = "Size: Unknown";
+	private string sLocation = @"E:\Apps\GodotManager\versions\x.x.x";
 	private bool bDownloaded = false;
 	private bool bSettingsShare = false;
 	private bool bSettingsLinked = false;
