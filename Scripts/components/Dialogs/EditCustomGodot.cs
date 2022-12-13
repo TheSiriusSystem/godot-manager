@@ -73,7 +73,7 @@ public class EditCustomGodot : ReferenceRect
 		}
 
         bool isProblematicName = true;
-		for (int indx = 1; indx < 4; indx++) {
+		for (int indx = 1; indx <= 4; indx++) {
 			string versNum = indx.ToString();
 			if (_Tag.Text.StartsWith(versNum) || _Tag.Text.StartsWith("v" + versNum)) {
 				isProblematicName = false;
