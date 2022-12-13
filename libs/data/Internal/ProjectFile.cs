@@ -27,6 +27,7 @@ public class ProjectFile : Godot.Object {
 			if (compatLevel <= 2) {
 				if (!project.HasSectionKey("application", "name")) {
 					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key 'name' does not exist in the project file.");
+					return projectFile;
 				}
 
 				projectFile = new ProjectFile();
@@ -49,15 +50,15 @@ public class ProjectFile : Godot.Object {
 					return projectFile;
 				}
 
-				int configVersion = project.GetValue("header", "config_version").ToInt();
-				if (configVersion >= 3) {
+				int cfgVer = project.GetValue("header", "config_version").ToInt();
+				if (cfgVer >= 3) {
 					projectFile = new ProjectFile();
 					projectFile.Name = project.GetValue("application", "config/name");
 					projectFile.Description = project.GetValue("application", "config/description", projectFile.Tr("No Description"));
 					projectFile.Location = filePath.NormalizePath();
 					projectFile.Icon = project.GetValue("application", "config/icon", "res://icon.png");
 				} else {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", $"{filePath}: Project Version does not match version 3+.");
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key 'config_version' does not match version 3.");
 				}
 			}
 		} else {
