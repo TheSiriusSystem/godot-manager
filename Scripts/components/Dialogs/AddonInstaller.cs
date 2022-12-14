@@ -85,8 +85,8 @@ public class AddonInstaller : ReferenceRect
 		IgnoreFiles = new Array<string>();
 		IgnoreFiles.Add("res://icon.png");
 		IgnoreFiles.Add("res://icon.png.import");
-		IgnoreFiles.Add("res://engine.cfg");
 		IgnoreFiles.Add("res://project.godot");
+		IgnoreFiles.Add("res://engine.cfg");
 		IgnoreFiles.Add("res://default_env.tres");
 		IgnoreFiles.Add("res://.gitignore");
 		IgnoreFiles.Add("res://.gitattributes");

@@ -128,11 +128,11 @@ public class AssetLibPanel : Panel
     {
         AppDialogs.ImportFileDialog.Connect("popup_hide", this, "OnImportClosed", null, (uint)ConnectFlags.Oneshot);
         var result = await AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Import Asset..."),
-            Tr("Do you wish to import a Template or an Addon?"),
-            Tr("Template"),Tr("Addon"),Tr("Cancel"));
+            Tr("What type of asset would you like to import?"),
+            Tr("Template"), Tr("Addon"));
         if (result == YesNoCancelDialog.ActionResult.FirstAction) {
             AppDialogs.ImportFileDialog.WindowTitle = Tr("Import Template...");
-            AppDialogs.ImportFileDialog.Filters = new string[] { "project.godot", "*.zip" };
+            AppDialogs.ImportFileDialog.Filters = new string[] {"project.godot", "engine.cfg", "*.zip"};
             AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnTemplateImport");
         } else if (result == YesNoCancelDialog.ActionResult.SecondAction) {
             AppDialogs.ImportFileDialog.WindowTitle = Tr("Import Plugin...");

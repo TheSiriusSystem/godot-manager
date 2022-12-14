@@ -91,7 +91,7 @@ public class ImportProject : ReferenceRect
 	[SignalHandler("pressed", nameof(_locationBrowse))]
 	void OnLocationBrowsePressed() {
 		AppDialogs.ImportFileDialog.WindowTitle = Tr("Open Godot Project...");
-		AppDialogs.ImportFileDialog.Filters = new string[] { "*.godot", "engine.cfg" };
+		AppDialogs.ImportFileDialog.Filters = new string[] {"project.godot", "engine.cfg"};
 		AppDialogs.ImportFileDialog.CurrentFile = "";
 		AppDialogs.ImportFileDialog.CurrentPath = _locationValue.Text == "" ? CentralStore.Settings.ProjectPath : _locationValue.Text;
 		AppDialogs.ImportFileDialog.PopupCentered(new Vector2(510, 390));

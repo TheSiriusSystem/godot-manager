@@ -113,7 +113,7 @@ public class AppDialogs : Control
         ImportFileDialog_.Mode = FileDialog.ModeEnum.OpenFile;
         ImportFileDialog_.Access = FileDialog.AccessEnum.Filesystem;
         ImportFileDialog_.WindowTitle = Tr("Open Godot Project...");
-        ImportFileDialog_.Filters = new string[] {"engine.cfg", "*.godot"};
+        ImportFileDialog_.Filters = new string[] {"project.godot", "engine.cfg"};
         ImportFileDialog_.RectMinSize = new Vector2(510, 390);
         ImportFileDialog_.Theme = GD.Load<Theme>("res://Resources/DefaultTheme.tres");
 
