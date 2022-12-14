@@ -85,18 +85,26 @@ public class AddonInstaller : ReferenceRect
 		IgnoreFiles = new Array<string>();
 		IgnoreFiles.Add("res://icon.png");
 		IgnoreFiles.Add("res://icon.png.import");
+		IgnoreFiles.Add("res://icon.png.flags");
 		IgnoreFiles.Add("res://project.godot");
 		IgnoreFiles.Add("res://engine.cfg");
 		IgnoreFiles.Add("res://default_env.tres");
 		IgnoreFiles.Add("res://.gitignore");
 		IgnoreFiles.Add("res://.gitattributes");
 		IgnoreFiles.Add("res://README");
+		IgnoreFiles.Add("res://README.txt");
 		IgnoreFiles.Add("res://README.md");
 		IgnoreFiles.Add("res://LICENSE");
+		IgnoreFiles.Add("res://LICENSE.txt");
 		IgnoreFiles.Add("res://LICENSE.md");
+		IgnoreFiles.Add("res://LICENCE");
+		IgnoreFiles.Add("res://LICENCE.txt");
+		IgnoreFiles.Add("res://LICENCE.md");
 		IgnoreFiles.Add("res://CREDITS");
+		IgnoreFiles.Add("res://CREDITS.txt");
 		IgnoreFiles.Add("res://CREDITS.md");
 		IgnoreFiles.Add("res://CHANGELOG");
+		IgnoreFiles.Add("res://CHANGELOG.txt");
 		IgnoreFiles.Add("res://CHANGELOG.md");
 	}
 
