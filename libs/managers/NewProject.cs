@@ -14,7 +14,7 @@ public class NewProject : Object {
 	public bool UseAdvRenderer;
 
 	public bool CreateProject() {
-		string cfgName = GodotVersion <= 2 ? "engine.cfg" : "project.godot";
+		string pfName = GodotVersion <= 2 ? "engine.cfg" : "project.godot";
 
 		if (Template == null)
 		{
@@ -29,14 +29,14 @@ public class NewProject : Object {
 			// Project file should be provided in the Template.
 			ExtractTemplate();
 			ProjectConfig pf = new ProjectConfig();
-			pf.Load(ProjectLocation.PlusFile(cfgName).NormalizePath());
+			pf.Load(ProjectLocation.PlusFile(pfName).NormalizePath());
 			pf.SetValue("application", GodotVersion <= 2 ? "name" : "config/name", $"\"{ProjectName}\"");
 
 			// Need way to compile Assets before Enabling Plugins
 			// if (Plugins.Count > 0)
 			// 	SetupPlugins(pf);
 
-			pf.Save(ProjectLocation.PlusFile(cfgName));
+			pf.Save(ProjectLocation.PlusFile(pfName));
 			ExtractPlugins();
 		}
 		
