@@ -1,6 +1,6 @@
 public static class VERSION {
 	public static string GodotManager = "0.2.2";
-	public static string Channel = "tss-fork";
+	public static string Channel = "unofficial";
 	public static string GodotSharpExtras = "0.3.4";
 	public static string NewtonsoftJSON = "13.0.1";
 	public static string SystemIOCompression = "4.3.0";
