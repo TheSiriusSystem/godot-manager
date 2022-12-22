@@ -127,10 +127,6 @@ public class ProjectsPanel : Panel
 			}
 		}
 
-		if (CentralStore.Settings.EnableAutoScan) {
-			ScanForProjects();
-		}
-
 		_topBorder = _scrollContainer.RectGlobalPosition.y + _borderSize;
 		_bottomBorder = _scrollContainer.RectSize.y - _borderSize;
 
@@ -313,7 +309,7 @@ public class ProjectsPanel : Panel
 		return added;
 	}
 
-	private async void ScanForProjects() {
+	public async void ScanForProjects(bool autoscan = false) {
 		Array<string> projects = new Array<string>();
 		Array<string> scanDirs = CentralStore.Settings.ScanDirs.Duplicate();
 		int i = 0;
@@ -357,7 +353,10 @@ public class ProjectsPanel : Panel
 
 		AppDialogs.BusyDialog.HideDialog();
 		if (addedTask.Result.Count == 0)
-			AppDialogs.MessageDialog.ShowMessage(Tr("Scan Projects"), Tr("No new projects found."));
+		{
+			if (!autoscan)
+				AppDialogs.MessageDialog.ShowMessage(Tr("Scan Projects"), Tr("No new projects found."));
+		}
 		else
 		{
 			AppDialogs.MessageDialog.ShowMessage(Tr("Scan Projects"),
@@ -840,45 +839,45 @@ public class ProjectsPanel : Panel
 		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
 		if (gv == null)
 		{
+			gv = CentralStore.Instance.FindVersion(CentralStore.Settings.DefaultEngine);
+			if (gv == null)
+			{
+				AppDialogs.MessageDialog.ShowMessage("Failed to Launch Project", "The default editor version cannot be found. Please select a default version of Godot to use.");
+				return;
+			}
+
 			bool res = await AppDialogs.YesNoDialog.ShowDialog("Missing Editor Version",
 				string.Format(
-					Tr("The associated editor version for this project was not found. Do you wish to use the default one '{0}'?"),
-					CentralStore.Instance.FindVersion(CentralStore.Settings.DefaultEngine).Tag
-					)
+					Tr("The associated editor version for this project was not found. Do you want to associate it with Godot {0}?"),
+					gv.Tag
+				)
 			);
 			if (res)
 			{
 				pf.GodotId = CentralStore.Settings.DefaultEngine;
-				gv = CentralStore.Instance.FindVersion(CentralStore.Settings.DefaultEngine);
 				CentralStore.Instance.SaveDatabase();
-				if (gv == null)
-				{
-					AppDialogs.MessageDialog.ShowMessage("Failed to Launch Project", "The default editor version cannot be found. Please select a default version of Godot to use.");
-					return;
-				}
 			}
 			else
 			{
-				AppDialogs.MessageDialog.ShowMessage("Failed to Launch Project", "The associated editor version for this project does not exist. Cannot open project in Editor!");
 				return;
 			}
 		}
 
 		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
 		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), string.Format(Tr("Executable path does not exist! Please check the Versions folder at: {0} for {1}."), gv.Location, gv.Tag));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), string.Format(Tr("The executable path for Godot {0} does not exist!"), gv.Tag));
 			return;
 		}
 
-		int gvn = gv.GetVersion();
-		if (gvn <= 2 && pf.Location.EndsWith("project.godot"))
+		int gdmv = gv.GetMajorVersion();
+		if (gdmv <= 2 && pf.Location.EndsWith("project.godot"))
 		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), Tr("Cannot open Godot v3.x+ projects in this editor version!"));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), Tr("You can't open Godot v3.x+ projects in this editor version."));
 			return;
 		}
-		else if (gvn >= 3 && pf.Location.EndsWith("engine.cfg"))
+		else if (gdmv >= 3 && pf.Location.EndsWith("engine.cfg"))
 		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), Tr("Cannot open Godot v1.x-v2.x projects in this editor version!"));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), Tr("You can't open Godot v1.x-v2.x projects in this editor version."));
 			return;
 		}
 
@@ -888,8 +887,7 @@ public class ProjectsPanel : Panel
 			if (ssgv is null)
 			{
 				gv.SharedSettings = string.Empty;
-				var md = AppDialogs.MessageDialog;
-				md.ShowMessage("Shared Settings Invalid", "Instance of Shared Settings that was setup for this editor version no longer exists and has been removed.");
+				AppDialogs.MessageDialog.ShowMessage("Shared Settings Invalid", "The instance of Shared Settings that was setup for this editor version no longer exists and has been removed.");
 				CentralStore.Instance.SaveDatabase();
 			}
 			else
@@ -901,7 +899,7 @@ public class ProjectsPanel : Panel
 					fromPath.Join("feature_profiles"),
 					fromPath.Join("script_templates"),
 					fromPath.Join("text_editor_themes"),
-					(gv.GetVersion() >= 4 && ssgv.GetVersion() >= 4) ? fromPath.Join("editor_settings-4.tres") :
+					(gv.GetMajorVersion() >= 4 && ssgv.GetMajorVersion() >= 4) ? fromPath.Join("editor_settings-4.tres") :
 						fromPath.Join("editor_settings-3.tres")
 				};
 				foreach(var path in copies)
@@ -1015,7 +1013,7 @@ public class ProjectsPanel : Panel
 	private async Task RemoveProject(ProjectFile pf)
 	{
 		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Remove Project"),
-				string.Format(Tr("You are about to remove project '{0}'.\nDo you wish to remove the files as well?"), pf.Name),
+				string.Format(Tr("You are about to remove project \"{0}\".\nDo you wish to remove the files as well?"), pf.Name),
 				Tr("Project and Files"), Tr("Just Project"));
 		while (!task.IsCompleted)
 			await this.IdleFrame();
