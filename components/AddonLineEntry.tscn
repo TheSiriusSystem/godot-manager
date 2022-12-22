@@ -56,12 +56,11 @@ clip_text = true
 margin_left = 888.0
 margin_right = 976.0
 margin_bottom = 32.0
-hint_tooltip = "Godot Engine Version"
 mouse_filter = 1
 mouse_default_cursor_shape = 2
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 2 )
-text = "Version: 0.0.0"
+text = "Version: x.x.x"
 align = 1
 valign = 1
 

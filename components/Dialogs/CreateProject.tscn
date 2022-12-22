@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Assets/Icons/icon_status_error.svg" type="Texture" id=2]
@@ -9,6 +9,7 @@
 [ext_resource path="res://Resources/Fonts/droid-regular-13.tres" type="DynamicFont" id=7]
 [ext_resource path="res://Resources/TabContainer.tres" type="Theme" id=8]
 [ext_resource path="res://Resources/Fonts/droid-bold-22.tres" type="DynamicFont" id=9]
+[ext_resource path="res://Scripts/components/RendererOption.cs" type="Script" id=10]
 
 [sub_resource type="StyleBoxFlat" id=4]
 bg_color = Color( 0, 0, 0, 0.509804 )
@@ -83,7 +84,7 @@ margin_right = 291.0
 margin_bottom = 21.0
 size_flags_horizontal = 6
 custom_fonts/font = ExtResource( 1 )
-text = "Create Project	"
+text = "Create Project"
 
 [node name="Close" parent="PC/CC/P/VB/MC/TitleBarBG/HB" instance=ExtResource( 4 )]
 margin_left = 476.0
@@ -216,6 +217,7 @@ text = "Template Project:"
 margin_top = 179.0
 margin_right = 494.0
 margin_bottom = 200.0
+text = "None"
 
 [node name="GodotVersionHeader" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 210.0
@@ -232,7 +234,7 @@ margin_bottom = 260.0
 [node name="Renderers" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
 margin_top = 270.0
 margin_right = 494.0
-margin_bottom = 397.0
+margin_bottom = 424.0
 custom_constants/separation = 10
 
 [node name="Header" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers"]
@@ -241,72 +243,146 @@ margin_bottom = 19.0
 custom_fonts/font = ExtResource( 6 )
 text = "Renderer:"
 
-[node name="Checkboxes" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers"]
+[node name="HB" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers"]
 margin_top = 29.0
-margin_right = 494.0
+margin_right = 340.0
 margin_bottom = 127.0
-size_flags_horizontal = 3
+size_flags_horizontal = 2
 
-[node name="AdvRenderer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes"]
-margin_right = 241.0
+[node name="Options" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB"]
+margin_right = 113.0
 margin_bottom = 98.0
+rect_min_size = Vector2( 113, 0 )
 size_flags_horizontal = 3
 
-[node name="AdvRenderer" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/AdvRenderer"]
-margin_right = 241.0
+[node name="1" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB/Options"]
+margin_right = 113.0
 margin_bottom = 17.0
 size_flags_horizontal = 3
 pressed = true
 group = SubResource( 6 )
 text = "OpenGL ES 3.0"
+script = ExtResource( 10 )
+metadata = [ {
+"description": "* Higher visual quality.
+* All features available.
+* Incompatible with older hardware.
+* Not recommended for web games.",
+"keys": {
+"rendering": {
+"quality/driver/driver_name": "\"GLES3\""
+}
+},
+"name": "OpenGL ES 3.0",
+"version": 3
+}, {
+"description": "* Supports desktop platforms only.
+* Advanced 3D graphics available.
+* Can scale to large complex scenes.
+* Uses Vulkan backend.
+* Slower rendering of simple scenes.",
+"keys": {
+"application": {
+"config/features": "PackedStringArray(\"4.0\", \"Forward Plus\")"
+},
+"rendering": {
+"renderer/rendering_method": "\"forward_plus\""
+}
+},
+"name": "Forward+",
+"version": 4
+} ]
 
-[node name="AdvRendererDesc" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/AdvRenderer"]
+[node name="2" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB/Options"]
 margin_top = 21.0
-margin_right = 241.0
-margin_bottom = 98.0
+margin_right = 113.0
+margin_bottom = 38.0
 size_flags_horizontal = 3
-size_flags_vertical = 3
-custom_fonts/font = ExtResource( 7 )
-text = "Higher visual quality.
-All features available.
-Incompatible with older hardware.
-Not recommended for web games."
-max_lines_visible = 4
-
-[node name="VSeparator" type="VSeparator" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes"]
-margin_left = 245.0
-margin_right = 249.0
-margin_bottom = 98.0
-
-[node name="SimpleRenderer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes"]
-margin_left = 253.0
-margin_right = 494.0
-margin_bottom = 98.0
-size_flags_horizontal = 3
-
-[node name="SimpleRenderer" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/SimpleRenderer"]
-margin_right = 241.0
-margin_bottom = 17.0
 group = SubResource( 6 )
 text = "OpenGL ES 2.0"
+script = ExtResource( 10 )
+metadata = [ {
+"description": "* Lower visual quality.
+* Some features not available.
+* Works on most hardware.
+* Recommended for web games.",
+"keys": {
+"rendering": {
+"quality/driver/driver_name": "\"GLES2\"",
+"vram_compression/import_etc": "true",
+"vram_compression/import_etc2": "false"
+}
+},
+"name": "OpenGL ES 2.0",
+"version": 3
+}, {
+"description": "* Supports desktop + mobile platforms.
+* Less advanced 3D graphics.
+* Less scalable for complex scenes.
+* Uses Vulkan backend.
+* Fast rendering of simple scenes.",
+"keys": {
+"application": {
+"config/features": "PackedStringArray(\"4.0\", \"Mobile\")"
+},
+"rendering": {
+"renderer/rendering_method": "\"mobile\""
+}
+},
+"name": "Mobile",
+"version": 4
+} ]
 
-[node name="SimpleRendererDesc" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/SimpleRenderer"]
-margin_top = 21.0
-margin_right = 241.0
+[node name="3" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB/Options"]
+visible = false
+margin_top = 42.0
+margin_right = 105.0
+margin_bottom = 59.0
+size_flags_horizontal = 3
+group = SubResource( 6 )
+text = "Compatibility"
+script = ExtResource( 10 )
+metadata = [ {
+"description": "* Supports desktop, mobile + web platforms.
+* Least advanced 3D graphics.
+* Intended for low-end/older devices.
+* Uses OpenGL backend (OpenGL 3.3/GLES 3.0/WebGL 2.0).
+* Fastest rendering of simple scenes.",
+"keys": {
+"application": {
+"config/features": "PackedStringArray(\"4.0\", \"GL Compatibility\")"
+},
+"rendering": {
+"renderer/rendering_method": "\"gl_compatibility\""
+}
+},
+"name": "Compatibility",
+"version": 4
+} ]
+
+[node name="VSeparator" type="VSeparator" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB"]
+margin_left = 117.0
+margin_right = 121.0
 margin_bottom = 98.0
+
+[node name="Description" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB"]
+margin_left = 125.0
+margin_right = 340.0
+margin_bottom = 98.0
+rect_min_size = Vector2( 0, 98 )
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 7 )
-text = "Lower visual quality.
-Some features not available.
-Works on most hardware.
-Recommended for web games."
-max_lines_visible = 4
+text = "* Higher visual quality.
+* All features available.
+* Incompatible with older hardware.
+* Not recommended for web games."
+max_lines_visible = 5
 
-[node name="Message" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
-margin_top = 407.0
+[node name="Message" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers"]
+margin_top = 137.0
 margin_right = 494.0
-margin_bottom = 424.0
+margin_bottom = 154.0
 custom_fonts/font = ExtResource( 7 )
 text = "The renderer can be changed later, but scenes may need to be adjusted."
 align = 1

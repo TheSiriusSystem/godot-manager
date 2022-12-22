@@ -153,10 +153,9 @@ text = "Browse"
 margin_top = 120.0
 margin_right = 304.0
 margin_bottom = 139.0
-hint_tooltip = "Tells Godot Manager that this version has C# support.
-Do not check this option for versions 1.0 to 2.1.6."
+hint_tooltip = "Check this option if the version has C# support."
 custom_fonts/font = ExtResource( 2 )
-text = "Is Mono Enabled"
+text = "Supports C#"
 
 [node name="MCButtons" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_top = 214.0
