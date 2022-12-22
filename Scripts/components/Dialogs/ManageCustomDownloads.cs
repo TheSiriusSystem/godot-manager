@@ -122,7 +122,7 @@ public class ManageCustomDownloads : ReferenceRect
 		else
 		{
 			bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Editor Donwload"),
-				string.Format(Tr("Are you sure you want to delete '{0}' from your list of downloads?"),delCed.Name));
+				string.Format(Tr("Are you sure you want to delete \"{0}\" from your list of downloads?"),delCed.Name));
 			if (res)
 			{
 				CentralStore.CustomEngines.Remove(delCed);

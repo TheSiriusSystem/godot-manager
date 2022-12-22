@@ -44,13 +44,13 @@ public class RemoveCategory : ReferenceRect
 
 		if (!CentralStore.Instance.HasCategory(selectedItem)) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Remove Category"),
-				string.Format(Tr("The selected Category '{0}' no longer exists! This shouldn't happen!"), selectedItem));
+				string.Format(Tr("The selected category \"{0}\" doesn't exist."), selectedItem));
 			return;
 		}
 		Category cat = CentralStore.Instance.GetCategoryByName(selectedItem);
 		var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Category"),
-				string.Format(Tr("You are about to remove category '{0}'." +
-					"  All projects listed under this will be moved to Uncategorized category, do you want to continue?"), selectedItem));
+				string.Format(Tr("You are about to remove category \"{0}\"." +
+					"  All projects in this category will be moved to the \"Uncategorized\" category."), selectedItem));
 		while (!res.IsCompleted) {
 			await this.IdleFrame();
 		}
