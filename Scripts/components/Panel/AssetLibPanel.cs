@@ -61,7 +61,7 @@ public class AssetLibPanel : Panel
     [NodePath("VC/SearchContainer/plTemplates")]
     PaginatedListing _plTemplates = null;
     #endregion
-    #endregion
+#endregion
 
     #region Manage Container
     [NodePath("VC/ManageContainer")]
@@ -107,20 +107,8 @@ public class AssetLibPanel : Panel
         foreach (Dictionary<string, string> mirror in CentralStore.Settings.AssetMirrors) {
             var indx = _mirrorSite.GetItemCount();
             _mirrorSite.AddItem(mirror["name"]);
-            _mirrorSite.SetItemMetadata(indx,mirror["url"]);
+            _mirrorSite.SetItemMetadata(indx, mirror["url"]);
         }
-
-        // Translations for Options/Menu Items
-        _sortBy.UpdateTr(0, Tr("Recently Updated"));
-        _sortBy.UpdateTr(1, Tr("Least Recently Updated"));
-        _sortBy.UpdateTr(2, Tr("Name (A-Z)"));
-        _sortBy.UpdateTr(3, Tr("Name (Z-A)"));
-        _sortBy.UpdateTr(4, Tr("License (A-Z)"));
-        _sortBy.UpdateTr(5, Tr("License (Z-A)"));
-
-        _supportPopup.UpdateTr(0, Tr("Official"));
-        _supportPopup.UpdateTr(1, Tr("Community"));
-        _supportPopup.UpdateTr(2, Tr("Testing"));
     }
 
     [SignalHandler("pressed", nameof(_import))]
