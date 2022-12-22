@@ -268,7 +268,7 @@ margin_right = 570.0
 margin_bottom = 21.0
 size_flags_vertical = 5
 custom_fonts/font = ExtResource( 2 )
-text = "Godot Version:"
+text = "Editor Version:"
 valign = 1
 
 [node name="GodotVersion" type="OptionButton" parent="VC/SearchContainer/HC2"]

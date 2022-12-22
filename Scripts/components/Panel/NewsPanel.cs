@@ -53,7 +53,7 @@ public class NewsPanel : Panel
 			}
 		}
 		AppDialogs.BusyDialog.UpdateHeader(Tr("Loading News..."));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching news from GodotEngine.org..."));
+		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching news from godotengine.org..."));
 		AppDialogs.BusyDialog.ShowDialog();
 		InitClient();
 		if (CentralStore.Settings.UseProxy)
@@ -179,19 +179,12 @@ public class NewsPanel : Panel
 		if (_client != null)
 			CleanupClient();
 		_client = new GDCSHTTPClient();
-		_client.Connect("chunk_received", this, "OnChunkReceived");
 	}
 
 	private void CleanupClient()
 	{
-		_client.Disconnect("chunk_received", this, "OnChunkReceived");
 		_client.QueueFree();
 		_client = null;
-	}
-
-	private void OnChunkReceived(int size)
-	{
-		GD.Print($"Downloaded {size} bytes");
 	}
 
 	private Array<Dictionary<string,string>> ParseNews(string buffer)
@@ -208,9 +201,8 @@ public class NewsPanel : Panel
 			{
 				if (err != Error.FileEof)
 				{
-					GD.Print($"Error {err} reading XML");
+					GD.PrintErr($"Error reading XML. Error Code: {error}");
 				}
-
 				break;
 			}
 
@@ -232,7 +224,7 @@ public class NewsPanel : Panel
 		var error = xml.OpenBuffer(buffer.ToUTF8());
 		if (error != Error.Ok)
 		{
-			GD.PrintErr($"Error parsing news item.  Error Code: {error}");
+			GD.PrintErr($"Error parsing news item. Error Code: {error}");
 			return null;
 		}
 

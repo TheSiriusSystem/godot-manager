@@ -55,6 +55,7 @@ margin_left = 974.0
 margin_right = 1014.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 40, 0 )
+hint_tooltip = "Refresh News"
 texture = ExtResource( 3 )
 expand = true
 stretch_mode = 6

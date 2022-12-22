@@ -48,9 +48,8 @@ public class RemoveCategory : ReferenceRect
 			return;
 		}
 		Category cat = CentralStore.Instance.GetCategoryByName(selectedItem);
-		var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Category"),
-				string.Format(Tr("You are about to remove category \"{0}\"." +
-					"  All projects in this category will be moved to the \"Uncategorized\" category."), selectedItem));
+		var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Please Confirm..."),
+				string.Format(Tr("You are about to remove category \"{0}\".\nAll projects in this category will be moved to the \"Uncategorized\" category."), selectedItem));
 		while (!res.IsCompleted) {
 			await this.IdleFrame();
 		}

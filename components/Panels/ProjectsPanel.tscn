@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Scripts/components/Panel/ProjectsPanel.cs" type="Script" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://Assets/Icons/rem_category.svg" type="Texture" id=10]
 [ext_resource path="res://Assets/Icons/remove_missing.svg" type="Texture" id=11]
 [ext_resource path="res://components/HeaderButton.tscn" type="PackedScene" id=12]
+[ext_resource path="res://Resources/Fonts/droid-regular-16.tres" type="DynamicFont" id=13]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.294118, 0.317647, 0.388235, 1 )
@@ -109,7 +110,7 @@ custom_constants/margin_left = 30
 margin_left = 30.0
 margin_right = 994.0
 margin_bottom = 44.0
-hint_tooltip = "Single Click to change order, Double Click to clear ordering."
+hint_tooltip = "Click to change order. Double Click to clear ordering."
 custom_styles/panel = SubResource( 2 )
 
 [node name="HeaderButtons" type="HBoxContainer" parent="VC/ProjectSort/PC"]
@@ -117,31 +118,32 @@ margin_left = 5.0
 margin_top = 5.0
 margin_right = 959.0
 margin_bottom = 39.0
-
-[node name="Spacer" type="Control" parent="VC/ProjectSort/PC/HeaderButtons"]
-margin_right = 35.0
-margin_bottom = 34.0
-rect_min_size = Vector2( 35, 0 )
+alignment = 1
 
 [node name="ProjectName" parent="VC/ProjectSort/PC/HeaderButtons" instance=ExtResource( 12 )]
-margin_left = 39.0
-margin_right = 289.0
+margin_left = 83.0
+margin_right = 333.0
 margin_bottom = 34.0
-hint_tooltip = "Single Click to change order, Double Click to clear ordering."
+hint_tooltip = "Click to change order. Double Click to clear ordering."
 Title = "Project Name"
 
-[node name="Spacer2" type="Control" parent="VC/ProjectSort/PC/HeaderButtons"]
-margin_left = 293.0
-margin_right = 573.0
-margin_bottom = 34.0
+[node name="Spacer" type="Label" parent="VC/ProjectSort/PC/HeaderButtons"]
+margin_left = 337.0
+margin_top = 7.0
+margin_right = 617.0
+margin_bottom = 26.0
 rect_min_size = Vector2( 280, 0 )
+custom_fonts/font = ExtResource( 13 )
+text = "Sort Projects By"
+align = 1
+valign = 1
 
 [node name="GodotVersion" parent="VC/ProjectSort/PC/HeaderButtons" instance=ExtResource( 12 )]
-margin_left = 577.0
-margin_right = 827.0
+margin_left = 621.0
+margin_right = 871.0
 margin_bottom = 34.0
-hint_tooltip = "Single Click to change order, Double Click to clear ordering."
-Title = "Godot Version"
+hint_tooltip = "Click to change order. Double Click to clear ordering."
+Title = "Editor Version"
 
 [node name="SC" type="ScrollContainer" parent="VC"]
 margin_top = 92.0

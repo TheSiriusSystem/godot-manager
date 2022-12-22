@@ -87,7 +87,7 @@ public class GodotPanel : Panel
 			var res = MirrorManager.Instance.GetMirrors();
 			while (!res.IsCompleted)
 				await this.IdleFrame();
-			
+
 			foreach(MirrorSite site in res.Result) {
 				var cres = from csite in CentralStore.Mirrors
 						where csite.Id == site.Id
@@ -107,17 +107,7 @@ public class GodotPanel : Panel
 
 		TagSelection.GetPopup().HideOnCheckableItemSelection = false;
 		TagSelection.GetPopup().Connect("id_pressed", this, "OnIdPressed_TagSelection");
-
-		// Translations for Menu Items
-		TagSelection.UpdateTr(0, Tr("Mono / C#"));
-		TagSelection.UpdateTr(1, Tr("Release Type"));
-		TagSelection.UpdateTr(2, Tr("Stable"));
-		TagSelection.UpdateTr(3, Tr("Alpha"));
-		TagSelection.UpdateTr(4, Tr("Beta"));
-		TagSelection.UpdateTr(5, Tr("Release Candidate"));
-
 		OnlyMono();
-
 		AppDialogs.ManageCustomDownloads.Connect("update_list", this, "OnUpdateList");
 	}
 
@@ -437,11 +427,11 @@ public class GodotPanel : Panel
 			installer = GodotInstaller.FromMirror(gle.MirrorVersion, IsMono());
 		else
 			installer = GodotInstaller.FromGithub(gle.GithubVersion, IsMono());
-		
+
 		installer.Connect("chunk_received", gle, "OnChunkReceived");
 		installer.Connect("download_completed", this, "OnDownloadCompleted", new Array { gle });
 		installer.Connect("download_failed", this, "OnDownloadFailed", new Array { gle });
-		
+
 		gle.ToggleDownloadProgress(true);
 
 		gle.StartDownloadStats(installer.DownloadSize);
@@ -450,7 +440,7 @@ public class GodotPanel : Panel
 	}
 
 	async void OnUninstallClicked(GodotLineEntry gle) {
-		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Remove Editor Version"),
+		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Please Confirm..."),
 				string.Format(Tr("You are about to remove {0}.\nDo you wish to remove the files as well?"), gle.GodotVersion.GetDisplayName()),
 				Tr("Editor and Files"), Tr("Just Editor"));
 		while (!task.IsCompleted)
@@ -500,7 +490,7 @@ public class GodotPanel : Panel
 	{
 		if (gle.SettingsLinked)
 		{
-			bool res = await AppDialogs.YesNoDialog.ShowDialog("Unlink Settings", "Do you want to unlink the settings for this version of Godot?");
+			bool res = await AppDialogs.YesNoDialog.ShowDialog("Unlink Settings", "Do you want to unlink the settings for this editor version?");
 			if (res)
 			{
 				gle.GodotVersion.SharedSettings = string.Empty;
@@ -510,28 +500,15 @@ public class GodotPanel : Panel
 			return;
 		}
 		var list = new Godot.Collections.Dictionary<string, string>();
-		if (gle.GodotVersion.GetMajorVersion() >= 4)
+		foreach (var id in CentralStore.Settings.SettingsShare)
 		{
-			foreach (var id in CentralStore.Settings.SettingsShare)
-			{
-				var gv = CentralStore.Instance.FindVersion(id);
-				if (gv.GetMajorVersion() <= 3) continue;
-				list[gv.Tag] = id;
-			}
-		}
-		else
-		{
-			foreach (var id in CentralStore.Settings.SettingsShare)
-			{
-				var gv = CentralStore.Instance.FindVersion(id);
-				if (gv.GetMajorVersion() >= 4) continue;
-				list[gv.Tag] = id;
-			}
+			var gv = CentralStore.Instance.FindVersion(id);
+			list[gv.Tag] = id;
 		}
 
 		AppDialogs.ListSelectDialog.Connect("option_selected", this, "OnOptionSelected_LinkSettings", new Array() { gle });
 		AppDialogs.ListSelectDialog.Connect("option_cancelled", this, "OnOptionCancelled_LinkSettings");
-		AppDialogs.ListSelectDialog.ShowDialog("Link Settings","Select a Version of Godot to Link the settings to for this version:", list);
+		AppDialogs.ListSelectDialog.ShowDialog("Link Settings", "Select a editor version to link the settings to:", list);
 	}
 
 	void OnOptionSelected_LinkSettings(string id, GodotLineEntry gle)
