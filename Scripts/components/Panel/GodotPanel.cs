@@ -510,12 +510,12 @@ public class GodotPanel : Panel
 			return;
 		}
 		var list = new Godot.Collections.Dictionary<string, string>();
-		if (gle.GodotVersion.GetVersion() >= 4)
+		if (gle.GodotVersion.GetMajorVersion() >= 4)
 		{
 			foreach (var id in CentralStore.Settings.SettingsShare)
 			{
 				var gv = CentralStore.Instance.FindVersion(id);
-				if (gv.GetVersion() <= 3) continue;
+				if (gv.GetMajorVersion() <= 3) continue;
 				list[gv.Tag] = id;
 			}
 		}
@@ -524,7 +524,7 @@ public class GodotPanel : Panel
 			foreach (var id in CentralStore.Settings.SettingsShare)
 			{
 				var gv = CentralStore.Instance.FindVersion(id);
-				if (gv.GetVersion() >= 4) continue;
+				if (gv.GetMajorVersion() >= 4) continue;
 				list[gv.Tag] = id;
 			}
 		}

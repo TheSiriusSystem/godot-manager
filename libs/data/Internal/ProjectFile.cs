@@ -15,18 +15,18 @@ public class ProjectFile : Godot.Object {
 	[JsonProperty] public DateTime LastAccessed;
 	[JsonProperty] public Array<string> Assets;
 
-	public static ProjectFile ReadFromFile(string filePath, int compatLevel = 3) {
+	public static ProjectFile ReadFromFile(string filePath, int gdMajorVers = 3) {
 		ProjectFile projectFile = null;
 		ProjectConfig project = new ProjectConfig();
 		var ret = project.Load(filePath);
 		if (ret == Error.Ok) {
 			if (!project.HasSection("application")) {
-				AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Section 'application' does not exist in the project file.");
+				AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Section \"application\" does not exist in the project file.");
 				return projectFile;
 			}
-			if (compatLevel <= 2) {
+			if (gdMajorVers <= 2) {
 				if (!project.HasSectionKey("application", "name")) {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key 'name' does not exist in the project file.");
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key \"name\" does not exist in the project file.");
 					return projectFile;
 				}
 
@@ -36,17 +36,17 @@ public class ProjectFile : Godot.Object {
 				projectFile.Location = filePath.NormalizePath();
 				projectFile.Icon = project.GetValue("application", "icon", "res://icon.png");
 				return projectFile;
-			} else if (compatLevel >= 3) {
+			} else if (gdMajorVers >= 3) {
 				if (!project.HasSection("header")) {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Section 'header' does not exist in the project file.");
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Section \"header\" does not exist in the project file.");
 					return projectFile;
 				}
 				if (!project.HasSectionKey("header", "config_version")) {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key 'config_version' does not exist in the project file.");
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key \"config_version\" does not exist in the project file.");
 					return projectFile;
 				}
 				if (!project.HasSectionKey("application", "config/name")) {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key 'config/name' does not exist in the project file.");
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key \"config/name\" does not exist in the project file.");
 					return projectFile;
 				}
 
@@ -58,7 +58,7 @@ public class ProjectFile : Godot.Object {
 					projectFile.Location = filePath.NormalizePath();
 					projectFile.Icon = project.GetValue("application", "config/icon", "res://icon.png");
 				} else {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key 'config_version' does not match version 3.");
+					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key \"config_version\" does not match version 3.");
 				}
 			}
 		} else {
@@ -99,10 +99,14 @@ public class ProjectFile : Godot.Object {
 		ProjectConfig pf = new ProjectConfig();
 		var ret = pf.Load(Location);
 		if (ret == Error.Ok) {
-			if (pf.GetValue("header","config_version") == "4" || pf.GetValue("header","config_version") == "5") {
+			if (!pf.HasSection("header")) {
+				this.Name = pf.GetValue("application", "name");
+				this.Description = Tr("No Description");
+				this.Icon = pf.GetValue("application", "icon");
+			} else if (pf.GetValue("header", "config_version").ToInt() >= 3) {
 				this.Name = pf.GetValue("application", "config/name");
 				this.Description = pf.GetValue("application", "config/description", Tr("No Description"));
-				this.Icon = pf.GetValue("application","config/icon", "res://icon.png");
+				this.Icon = pf.GetValue("application", "config/icon", "res://icon.png");
 			}
 		}
 	}
@@ -111,9 +115,14 @@ public class ProjectFile : Godot.Object {
 		ProjectConfig pf = new ProjectConfig();
 		var ret = pf.Load(Location);
 		if (ret == Error.Ok) {
-			pf.SetValue("application", "config/name", $"\"{this.Name}\"");
-			pf.SetValue("application", "config/description", $"\"{this.Description}\"");
-			pf.SetValue("application", "config/icon", $"\"{this.Icon}\"");
+			if (!pf.HasSection("header")) {
+				pf.SetValue("application", "name", $"\"{this.Name}\"");
+				pf.SetValue("application", "icon", $"\"{this.Icon}\"");
+			} else {
+				pf.SetValue("application", "config/name", $"\"{this.Name}\"");
+				pf.SetValue("application", "config/description", $"\"{this.Description}\"");
+				pf.SetValue("application", "config/icon", $"\"{this.Icon}\"");
+			}
 			pf.Save(Location);
 		}
 	}

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
@@ -40,23 +42,14 @@ public class CreateProject : ReferenceRect
 	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers")]
 	VBoxContainer _renderers = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Message")]
-	Label _message = null;
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB/Options")]
+	VBoxContainer _rendererOptions = null;
 
 	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/GodotVersion")]
 	OptionButton _godotVersion = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/AdvRenderer/AdvRenderer")]
-	CheckBox _advRenderer = null;
-	
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/AdvRenderer/AdvRendererDesc")]
-	Label _advRendererDesc = null;
-
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/SimpleRenderer/SimpleRenderer")]
-	CheckBox _simpleRenderer = null;
-	
-	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/Checkboxes/SimpleRenderer/SimpleRendererDesc")]
-	Label _simpleRendererDesc = null;
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB/Description")]
+	Label _rendererDesc = null;
 
 	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Addons/ScrollContainer")]
 	ScrollContainer _sc = null;
@@ -123,16 +116,28 @@ public class CreateProject : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_createBtn))]
 	void OnCreatePressed() {
-		GodotVersion gdVers = (GodotVersion)_godotVersion.GetSelectedMetadata();
-		int gdVersNum = gdVers.GetVersion();
+		GodotVersion gdVers = _godotVersion.GetSelectedMetadata() as GodotVersion;
+		int gdMajorVers = gdVers.GetMajorVersion();
+		Dictionary modifiedKeys = new Dictionary();
+
+		if (_renderers.Visible) {
+			IEnumerable<RendererOption> options = _rendererOptions.GetChildren().OfType<RendererOption>();
+			foreach (RendererOption option in options) {
+				if (option.Pressed) {
+					modifiedKeys = option.currentMeta["keys"] as Dictionary;
+					break;
+				}
+			}
+		}
 
 		NewProject prj = new NewProject {
 			ProjectName = _projectName.Text,
 			ProjectLocation = _projectLocation.Text,
 			GodotId = gdVers.Id,
-			GodotVersion = gdVersNum,
+			GodotMajorVersion = gdMajorVers,
+			GodotMinorVersion = gdVers.GetMinorVersion(),
 			Plugins = new Array<AssetPlugin>(),
-			UseAdvRenderer = _advRenderer.Pressed
+			ModifiedKeys = modifiedKeys.Duplicate()
 		};
 		if (_templateProject.Selected > 0)
 			prj.Template = _templateProject.GetSelectedMetadata() as AssetProject;
@@ -144,7 +149,7 @@ public class CreateProject : ReferenceRect
 		}
 
 		prj.CreateProject();
-		ProjectFile pf = ProjectFile.ReadFromFile(prj.ProjectLocation.PlusFile(gdVersNum <= 2 ? "engine.cfg" : "project.godot").NormalizePath(), gdVersNum);
+		ProjectFile pf = ProjectFile.ReadFromFile(prj.ProjectLocation.PlusFile(gdMajorVers <= 2 ? "engine.cfg" : "project.godot").NormalizePath(), gdMajorVers);
 		pf.GodotId = prj.GodotId;
 		pf.Assets = new Array<string>();
 
@@ -198,54 +203,30 @@ public class CreateProject : ReferenceRect
 
 	[SignalHandler("item_selected", nameof(_godotVersion))]
 	void OnVersionSelected(int index) {
-		GodotVersion gdVers = (GodotVersion)_godotVersion.GetSelectedMetadata();
-		int gdVersNum = gdVers.GetVersion();
-		string gdVersTag = gdVers.Tag.ToLower();
-
-		if (gdVersNum <= 2)
+		GodotVersion gdVers = _godotVersion.GetSelectedMetadata() as GodotVersion;
+		int gdMajorVers = gdVers.GetMajorVersion();
+		if (gdMajorVers <= 2 || (gdMajorVers == 3 && gdVers.GetMinorVersion() == 0))
 		{
 			_renderers.Visible = false;
-			_message.Text = Tr(@"The renderer cannot be changed in this editor version.");
 		}
 		else
 		{
-			if (gdVersTag.StartsWith("3.0") || gdVersTag.StartsWith("v3.0"))
+			_renderers.Visible = true;
+			IEnumerable<RendererOption> options = _rendererOptions.GetChildren().OfType<RendererOption>();
+			foreach (RendererOption option in options)
 			{
-				_renderers.Visible = false;
-				_message.Text = Tr(@"The renderer cannot be changed in this editor version.");
-			}
-			else
-			{
-				_renderers.Visible = true;
-				_advRenderer.Pressed = true;
-				_simpleRenderer.Pressed = false;
-				if (gdVersNum == 3)
-				{
-					_advRenderer.Text = Tr("OpenGL ES 3.0");
-					_simpleRenderer.Text = Tr("OpenGL ES 2.0");
-					_advRendererDesc.Text = Tr(@"Higher visual quality.
-											All features available.
-											Incompatible with older hardware.
-											Not recommended for web games.");
-					_simpleRendererDesc.Text = Tr(@"Lower visual quality.
-											Some features not available.
-											Works on most hardware.
-											Recommended for web games.");
+				if (option.Pressed)
+					option.EmitSignal("toggled", true);
+				option.Pressed = (option.Name == "1");
+				foreach (Dictionary meta in option.metadata) {
+					if (gdMajorVers == (int)meta["version"]) {
+						option.Visible = true;
+						option.Text = (string)meta["name"];
+						break;
+					} else {
+						option.Visible = false;
+					}
 				}
-				else if (gdVersNum >= 4)
-				{
-					_advRenderer.Text = Tr("Forward+");
-					_simpleRenderer.Text = Tr("Mobile");
-					_advRendererDesc.Text = Tr(@"Supports desktop platforms only.
-										Advanced 3D graphics available.
-										Can scale to large complex scenes.
-										Slower rendering of simple scenes.");
-					_simpleRendererDesc.Text = Tr(@"Supports desktop + mobile platforms.
-										Less advanced 3D graphics.
-										Less scalable for complex scenes.
-										Faster rendering of simple scenes.");
-				}
-				_message.Text = "The renderer can be changed later, but scenes may need to be adjusted.";
 			}
 		}
 		PopulatePlugins();
@@ -254,10 +235,9 @@ public class CreateProject : ReferenceRect
 	private void PopulatePlugins() {
 		foreach (AddonLineEntry node in _pluginList.GetChildren()) node.QueueFree();
 
-		GodotVersion gdVers = (GodotVersion)_godotVersion.GetSelectedMetadata();
-		int gdVersNum = gdVers.GetVersion();
-		string gdVersTag = gdVers.Tag.ToLower();
-		if (gdVersNum <= 1 || (gdVersNum == 2 && (gdVersTag.StartsWith("2.0") || gdVersTag.StartsWith("v2.0")))) {
+		GodotVersion gdVers = _godotVersion.GetSelectedMetadata() as GodotVersion;
+		int gdMajorVers = gdVers.GetMajorVersion();
+		if (gdMajorVers <= 1 || (gdMajorVers == 2 && gdVers.GetMinorVersion() == 0)) {
 			_sc.Visible = false;
 			_pluginErrorText.Visible = true;
 		} else {

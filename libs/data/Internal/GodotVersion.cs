@@ -29,12 +29,12 @@ public class GodotVersion : Object {
 		SharedSettings = string.Empty;
 	}
 
-	public int GetVersion() {
-		int position = 0;
-		if (Tag.ToLower().StartsWith("v")) {
-			position = 1;
-		}
-		return Tag[position].ToString().ToInt();
+	public int GetMajorVersion() {
+		return Tag[!Tag.ToLower().StartsWith("v") ? 0 : 1].ToString().ToInt();
+	}
+
+	public int GetMinorVersion() {
+		return Tag[!Tag.ToLower().StartsWith("v") ? 2 : 3].ToString().ToInt();
 	}
 
 	public string GetDisplayName() {

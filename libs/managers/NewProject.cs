@@ -9,19 +9,18 @@ public class NewProject : Object {
 	public string ProjectLocation;
 	public AssetProject Template;
 	public string GodotId;
-	public int GodotVersion;
+	public int GodotMajorVersion;
+	public int GodotMinorVersion;
 	public Array<AssetPlugin> Plugins;
-	public bool UseAdvRenderer;
+	public Dictionary ModifiedKeys;
 
 	public bool CreateProject() {
-		string pfName = GodotVersion <= 2 ? "engine.cfg" : "project.godot";
+		string pfName = GodotMajorVersion <= 2 ? "engine.cfg" : "project.godot";
 
 		if (Template == null)
 		{
 			// Need to create the Project File ourselves.
 			CreateProjectFile();
-			if (!Directory.Exists(ProjectLocation.PlusFile(".builds").NormalizePath()))
-				Directory.CreateDirectory(ProjectLocation.PlusFile(".builds"));
 			CreateDefaultEnvironment();
 			CopyIcon();
 			ExtractPlugins();
@@ -30,7 +29,7 @@ public class NewProject : Object {
 			ExtractTemplate();
 			ProjectConfig pf = new ProjectConfig();
 			pf.Load(ProjectLocation.PlusFile(pfName).NormalizePath());
-			pf.SetValue("application", GodotVersion <= 2 ? "name" : "config/name", $"\"{ProjectName}\"");
+			pf.SetValue("application", GodotMajorVersion <= 2 ? "name" : "config/name", $"\"{ProjectName}\"");
 
 			// Need way to compile Assets before Enabling Plugins
 			// if (Plugins.Count > 0)
@@ -61,8 +60,7 @@ public class NewProject : Object {
 
 	private void ExtractPlugins()
 	{
-		string gdVersTag = CentralStore.Instance.GetVersion(GodotId).Tag.ToLower();
-		if ((GodotVersion == 2 && !gdVersTag.StartsWith("2.0") && !gdVersTag.StartsWith("v2.0")) || GodotVersion >= 3) {
+		if ((GodotMajorVersion == 2 && GodotMinorVersion >= 1) || GodotMajorVersion >= 3) {
 			if (!Directory.Exists(ProjectLocation.PlusFile("addons").NormalizePath()))
 				Directory.CreateDirectory(ProjectLocation.PlusFile("addons"));
 
@@ -76,27 +74,29 @@ public class NewProject : Object {
 	private void CopyIcon()
 	{
 		Texture image = null;
-		if (GodotVersion <= 2) {
-			image = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v1.png");
-		} else if (GodotVersion == 3) {
-			image = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v3.png");
-		} else if (GodotVersion >= 4) {
-			image = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v4.png");
+		if (GodotMajorVersion <= 2) {
+			image = GD.Load<Texture>("res://assets/textures/icons/default_project_icon_v1.png");
+		} else if (GodotMajorVersion == 3) {
+			image = GD.Load<Texture>("res://assets/textures/icons/default_project_icon_v3.png");
+		} else {
+			image = GD.Load<Texture>("res://assets/textures/icons/default_project_icon_v4.png");
 		}
-		image.GetData().SavePng(ProjectLocation.PlusFile("icon.png").NormalizePath());
+		if (image != null)
+			image.GetData().SavePng(ProjectLocation.PlusFile("icon.png").NormalizePath());
 	}
 
 	private void CreateDefaultEnvironment()
 	{
-		if (GodotVersion >= 3) {
+		if (GodotMajorVersion == 3) {
 			using (StreamWriter writer = new StreamWriter(ProjectLocation.PlusFile("default_env.tres").NormalizePath())) {
 				writer.WriteLine("[gd_resource type=\"Environment\" load_steps=2 format=2]");
-				writer.WriteLine("");
+				if (GodotMinorVersion >= 5) writer.WriteLine("");
 				writer.WriteLine("[sub_resource type=\"ProceduralSky\" id=1]");
-				writer.WriteLine("");
+				if (GodotMinorVersion >= 5) writer.WriteLine("");
 				writer.WriteLine("[resource]");
 				writer.WriteLine("background_mode = 2");
-				writer.WriteLine("background_sky = SubResource(1)");
+				writer.WriteLine("background_sky = SubResource( 1 )");
+				writer.WriteLine("");
 			}
 		}
 	}
@@ -104,41 +104,40 @@ public class NewProject : Object {
 	private void CreateProjectFile()
 	{
 		ProjectConfig pf = new ProjectConfig();
-		if (GodotVersion <= 2) {
+		if (GodotMajorVersion <= 2) {
 			pf.SetValue("application", "name", $"\"{ProjectName}\"");
 			pf.SetValue("application", "icon", "\"res://icon.png\"");
 		} else {
-			GodotVersion gdVers = CentralStore.Instance.GetVersion(GodotId);
-			string gdVersTag = gdVers.Tag.ToLower();
-			int cfgVer = 4;
-			if (gdVersTag.StartsWith("3.0") || gdVersTag.StartsWith("v3.0")) {
-				cfgVer = 3;
-			} else if (GodotVersion >= 4)
-			{
-				cfgVer = 5;
+			string cfgVers = "3";
+			if (GodotMajorVersion == 3 && GodotMinorVersion >= 1) {
+				cfgVers = "4";
+			} else if (GodotMajorVersion >= 4) {
+				cfgVers = "5";
 			}
 
-			pf.SetValue("header", "config_version", cfgVer.ToString());
+			pf.SetValue("header", "config_version", cfgVers);
 			pf.SetValue("application", "config/name", $"\"{ProjectName}\"");
 			pf.SetValue("application", "config/icon", "\"res://icon.png\"");
-			if (cfgVer == 4) {
-				if (!UseAdvRenderer)
-				{
-					pf.SetValue("rendering", "quality/driver/driver_name", "\"GLES2\"");
+			if (GodotMajorVersion == 3) {
+				pf.SetValue("rendering", "environment/default_environment", "\"res://default_env.tres\"");
+				if (GodotMinorVersion >= 3) {
+					pf.SetValue("physics", "common/enable_pause_aware_picking", "true");
 				}
-				if (gdVers.IsMono)
-				{
-					pf.SetValue("mono", "debugger_agent/wait_timeout", "7000");
-				}
-			} else if (cfgVer >= 5) {
-				pf.SetValue("application", "config/features", "PackedStringArray(\"4.0\", \"Vulkan Clustered\")");
-				if (!UseAdvRenderer)
-				{
-					pf.SetValue("rendering", "renderer/rendering_method", "\"mobile\"");
+				if (GodotMinorVersion >= 5) {
+					pf.SetValue("gui", "common/drop_mouse_on_gui_input_disabled", "true");
 				}
 			}
-			pf.SetValue("rendering", "environment/default_environment", "\"res://default_env.tres\"");
+			foreach (string section in ModifiedKeys.Keys) {
+				Dictionary sectionDict = ModifiedKeys[section] as Dictionary;
+				foreach (string key in sectionDict.Keys) {
+					pf.SetValue(section, key, sectionDict[key] as string);
+				}
+			}
 		}
-		pf.Save(ProjectLocation.PlusFile(GodotVersion <= 2 ? "engine.cfg" : "project.godot").NormalizePath());
+		pf.Save(ProjectLocation.PlusFile(GodotMajorVersion <= 2 ? "engine.cfg" : "project.godot").NormalizePath());
+
+		if (!Directory.Exists(ProjectLocation.PlusFile(".builds").NormalizePath())) {
+			Directory.CreateDirectory(ProjectLocation.PlusFile(".builds"));
+		}
 	}
 }

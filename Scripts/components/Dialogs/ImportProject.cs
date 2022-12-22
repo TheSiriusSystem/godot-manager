@@ -74,7 +74,7 @@ public class ImportProject : ReferenceRect
 			return;
 		}
 		GodotVersion gdVers = CentralStore.Instance.FindVersion(_godotVersions.GetSelectedMetadata() as string);
-		ProjectFile pf = ProjectFile.ReadFromFile(_locationValue.Text, gdVers.GetVersion());
+		ProjectFile pf = ProjectFile.ReadFromFile(_locationValue.Text, gdVers.GetMajorVersion());
 		if (gdVers != null && gdVers.Id != null)
 			pf.GodotId = gdVers.Id;
 		CentralStore.Projects.Add(pf);
