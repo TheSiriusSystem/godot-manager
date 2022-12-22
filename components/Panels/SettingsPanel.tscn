@@ -692,9 +692,9 @@ size_flags_vertical = 3
 custom_fonts/normal_font = ExtResource( 13 )
 bbcode_enabled = true
 bbcode_text = "Created By: Mario Steele <[url=mailto:mario@ruby-im.net]mario@ruby-im.net[/url]>
-Website: [url=http://github.com/eumario/godot-manager]http://github.com/eumario/godot-manager[/url]"
+Forked By: TheSiriusSystem <[url=https://github.com/TheSiriusSystem/godot-manager]https://github.com/TheSiriusSystem/godot-manager[/url]>"
 text = "Created By: Mario Steele <mario@ruby-im.net>
-Website: http://github.com/eumario/godot-manager"
+Forked By: TheSiriusSystem <https://github.com/TheSiriusSystem/godot-manager>"
 
 [node name="VB2" type="VBoxContainer" parent="VB/MC/TC/About/MC/VB/HBHeader"]
 margin_left = 864.0
