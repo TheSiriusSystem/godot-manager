@@ -16,7 +16,7 @@ _global_script_class_icons={
 
 config/name="Godot Manager"
 config/description="A complete solution for Godot, allowing you to manage projects and versions on the fly."
-run/main_scene="res://components/Panels/SplashScreen.tscn"
+run/main_scene="res://Scenes/SplashScreen.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Godot-Manager"
 run/low_processor_mode=true
@@ -50,7 +50,7 @@ remove_project={
 
 [locale]
 
-translations=PoolStringArray( "res://locale/en_US.po" )
+translations=PoolStringArray(  )
 
 [mono]
 

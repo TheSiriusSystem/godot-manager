@@ -26,7 +26,7 @@ public class SplashScreen : Control
 		var loader = ResourceLoader.LoadInteractive("res://Scenes/SceneManager.tscn");
 		if (loader == null)
 		{
-			LoadingLabel.Text = "Failed to load 'Scenes/SceneManager.tscn'!";
+			LoadingLabel.Text = "Failed to load \"Scenes/SceneManager.tscn\"!";
 			return;
 		}
 
