@@ -93,14 +93,6 @@ public class ProjectsPanel : Panel
 		_views.Add(_categoryView);
 
 		_popupMenu = GD.Load<PackedScene>("res://components/ProjectPopup.tscn").Instance<ProjectPopup>();
-
-		// Translations for Menu Items
-		_popupMenu.UpdateTr(0, Tr("Open"));
-		_popupMenu.UpdateTr(1, Tr("Run"));
-		_popupMenu.UpdateTr(2, Tr("Show Project Files"));
-		_popupMenu.UpdateTr(3, Tr("Show Data Folder"));
-		_popupMenu.UpdateTr(4, Tr("Edit"));
-		_popupMenu.UpdateTr(5, Tr("Remove"));
 		AddChild(_popupMenu);
 		_popupMenu.SetAsToplevel(true);
 
@@ -277,11 +269,9 @@ public class ProjectsPanel : Panel
 		await this.IdleFrame();
 
 		foreach(string dir in scanDirs) {
-			var projsV1 = Dir.EnumerateFiles(dir, "engine.cfg", SearchOption.AllDirectories);
-			var projsV3 = Dir.EnumerateFiles(dir, "project.godot", SearchOption.AllDirectories);
-			foreach(string proj in projsV1)
+			foreach(string proj in Dir.EnumerateFiles(dir, "engine.cfg", SearchOption.AllDirectories))
 				projects.Add(proj);
-			foreach(string proj in projsV3)
+			foreach(string proj in Dir.EnumerateFiles(dir, "project.godot", SearchOption.AllDirectories))
 				projects.Add(proj);
 		}
 		return projects;
@@ -294,12 +284,12 @@ public class ProjectsPanel : Panel
 		foreach(string proj in projs) {
 			AppDialogs.BusyDialog.UpdateByline($"Processing {projs.IndexOf(proj)}/{projs.Count}...");
 			await this.IdleFrame();
-			if (CentralStore.Instance.HasProject(proj.NormalizePath()))
+			string pfPath = proj.NormalizePath();
+			if (CentralStore.Instance.HasProject(pfPath))
 			{
 				await this.IdleFrame();
 			} else {
-				ProjectFile pf = ProjectFile.ReadFromFile(proj.NormalizePath(), 1);
-				if (pf == null) pf = ProjectFile.ReadFromFile(proj.NormalizePath(), 3);
+				ProjectFile pf = ProjectFile.ReadFromFile(pfPath, pfPath.EndsWith("engine.cfg") ? 1 : 3);
 				if (pf == null) continue;
 				pf.GodotId = CentralStore.Settings.DefaultEngine;
 				CentralStore.Projects.Add(pf);
@@ -322,7 +312,7 @@ public class ProjectsPanel : Panel
 		}
 
 		if (scanDirs.Count == 0) {
-			var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Scan Projects"), Tr("There are currently no valid directories to scan. Would you like to add one?"));
+			var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Scan Projects"), Tr("There are currently no valid folders to scan. Would you like to add one?"));
 			while (!res.IsCompleted)
 				await this.IdleFrame();
 			
@@ -337,8 +327,8 @@ public class ProjectsPanel : Panel
 				return;
 		}
 
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Scan Projects"));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Scanning for project files..."));
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Scanning Projects..."));
+		AppDialogs.BusyDialog.UpdateByline(Tr("Scanning for project folders..."));
 		AppDialogs.BusyDialog.ShowDialog();
 
 		var projsTask = ScanDirectories(scanDirs);
@@ -360,7 +350,7 @@ public class ProjectsPanel : Panel
 		else
 		{
 			AppDialogs.MessageDialog.ShowMessage(Tr("Scan Projects"),
-				string.Format(Tr("Found {0} new projects, and added to database."), addedTask.Result.Count));
+				string.Format(Tr("Imported {0} project(s)."), addedTask.Result.Count));
 			CentralStore.Instance.SaveDatabase();
 			PopulateListing();
 		}
@@ -437,7 +427,7 @@ public class ProjectsPanel : Panel
 
 		if (clUncategorized == null)
 		{
-			clUncategorized = NewCL("Un-Categorized");
+			clUncategorized = NewCL("Uncategorized");
 			clUncategorized.SetMeta("ID", -2);
 			clUncategorized.Toggled = CentralStore.Settings.UncategorizedToggled;
 			_categoryView.AddChild(clUncategorized);
@@ -737,24 +727,24 @@ public class ProjectsPanel : Panel
 			case 1:     // Run Project
 				ExecuteProject(pf);
 				break;
-			case 2:     // Show Project Files
-				OS.ShellOpen("file://" + pf.Location.GetBaseDir());
-				break;
-			case 3:     // Show Project Data Folder
-				string folder = GetProjectDataFolder(pf);
-				if (Dir.Exists(folder))
-					OS.ShellOpen("file://" + folder);
-				else
-					AppDialogs.MessageDialog.ShowMessage(Tr("Show Data Directory"), 
-						string.Format(Tr("The data directory {0} does not exist!"),folder));
-				break;
-			case 4:     // Edit Project File
+			case 3:     // Edit Project File
 				AppDialogs.EditProject.Connect("project_updated", this, "OnProjectUpdated", new Array { pf });
 				AppDialogs.EditProject.Connect("hide", this, "OnHide_EditProject");
 				AppDialogs.EditProject.ShowDialog(pf);
 				break;
-			case 5:     // Remove Project
+			case 4:     // Remove Project
 				await RemoveProject(pf);
+				break;
+			case 6:     // Show Project Files
+				OS.ShellOpen("file://" + pf.Location.GetBaseDir());
+				break;
+			case 7:     // Show Project Data Folder
+				string folder = GetProjectDataFolder(pf);
+				if (Dir.Exists(folder))
+					OS.ShellOpen("file://" + folder);
+				else
+					AppDialogs.MessageDialog.ShowMessage(Tr("Show Data Folder"), 
+						string.Format(Tr("The data folder \"{0}\" doesn't exist."), folder));
 				break;
 		}
 	}
@@ -1012,7 +1002,7 @@ public class ProjectsPanel : Panel
 
 	private async Task RemoveProject(ProjectFile pf)
 	{
-		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Remove Project"),
+		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Please Confirm..."),
 				string.Format(Tr("You are about to remove project \"{0}\".\nDo you wish to remove the files as well?"), pf.Name),
 				Tr("Project and Files"), Tr("Just Project"));
 		while (!task.IsCompleted)
