@@ -58,7 +58,6 @@ Button _CancelBtn = null;
 
 #region Private Variables
 	ProjectFile _pf = null;
-	bool _isDirty = false;
 	EPData _data;
 	Regex _gitTag = new Regex("-[A-Za-z0-9]{40,}");
 #endregion
@@ -173,8 +172,6 @@ Button _CancelBtn = null;
 			}
 		}
 
-		_isDirty = false;
-		_SaveBtn.Disabled = true;
 		Visible = true;
 		_PluginList.GetParent().GetParent<ScrollContainer>().ScrollVertical = 0;
 		_TabContainer.CurrentTab = 0;
@@ -224,11 +221,6 @@ Button _CancelBtn = null;
 #endregion
 
 #region Event Handlers
-	void OnToggledPlugin(bool toggle) {
-		_isDirty = true;
-		_SaveBtn.Disabled = false;
-	}
-
 	[SignalHandler("pressed", nameof(_SaveBtn))]
 	void OnSaveBtnPressed() {
 		ProjectFile.Name = ProjectName;
@@ -244,14 +236,7 @@ Button _CancelBtn = null;
 
 	[SignalHandler("pressed", nameof(_CancelBtn))]
 	async void OnCancelBtnPressed() {
-		if (_isDirty) {
-			bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Edit Project"), Tr("You have unsaved changes. Do you wish to stop editing?"));
-			if (res) {
-				Visible = false;
-			}
-		} else {
-			Visible = false;
-		}
+		Visible = false;
 	}
 
 	[SignalHandler("gui_input", nameof(_Icon))]
@@ -292,8 +277,6 @@ Button _CancelBtn = null;
 			_Icon.Texture = Util.LoadImage(copyPath);
 		}
 		AppDialogs.ImageFileDialog.Visible = false;
-		_isDirty = true;
-		_SaveBtn.Disabled = false;
 	}
 
 	void OnFilePopupHide() {
@@ -303,22 +286,16 @@ Button _CancelBtn = null;
 	[SignalHandler("text_changed", nameof(_ProjectName))]
 	void OnProjectNameTextChanged(string text) {
 		ProjectName = text;
-		_isDirty = true;
-		_SaveBtn.Disabled = false;
 	}
 
 	[SignalHandler("item_selected", nameof(_GodotVersion))]
 	void OnGodotVersionItemSelected(int index) {
 		GodotId = _GodotVersion.GetItemMetadata(index) as string;
-		_isDirty = true;
-		_SaveBtn.Disabled = false;
 	}
 
 	[SignalHandler("text_changed", nameof(_ProjectDescription))]
 	void OnProjectDescriptionTextChanged() {
 		Description = _ProjectDescription.Text;
-		_isDirty = true;
-		_SaveBtn.Disabled = false;
 	}
 #endregion
 
