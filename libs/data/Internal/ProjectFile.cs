@@ -21,48 +21,44 @@ public class ProjectFile : Godot.Object {
 		var ret = project.Load(filePath);
 		if (ret == Error.Ok) {
 			if (!project.HasSection("application")) {
-				AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Section \"application\" does not exist in the project file.");
+				GD.PrintErr($"Section \"application\" does not exist in \"{filePath}\".");
 				return projectFile;
 			}
+
+			filePath = filePath.NormalizePath();
 			if (gdMajorVers <= 2) {
 				if (!project.HasSectionKey("application", "name")) {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key \"name\" does not exist in the project file.");
+					GD.PrintErr($"Key \"name\" does not exist in \"{filePath}\".");
 					return projectFile;
 				}
 
 				projectFile = new ProjectFile();
 				projectFile.Name = project.GetValue("application", "name");
 				projectFile.Description = projectFile.Tr("No Description");
-				projectFile.Location = filePath.NormalizePath();
+				projectFile.Location = filePath;
 				projectFile.Icon = project.GetValue("application", "icon", "res://icon.png");
-				return projectFile;
 			} else if (gdMajorVers >= 3) {
 				if (!project.HasSection("header")) {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Section \"header\" does not exist in the project file.");
+					GD.PrintErr($"Section \"header\" does not exist in \"{filePath}\".");
 					return projectFile;
 				}
 				if (!project.HasSectionKey("header", "config_version")) {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key \"config_version\" does not exist in the project file.");
+					GD.PrintErr($"Key \"config_version\" does not exist in \"{filePath}\".");
 					return projectFile;
 				}
 				if (!project.HasSectionKey("application", "config/name")) {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key \"config/name\" does not exist in the project file.");
+					GD.PrintErr($"Key \"config/name\" does not exist in \"{filePath}\".");
 					return projectFile;
 				}
 
-				int cfgVer = project.GetValue("header", "config_version").ToInt();
-				if (cfgVer >= 3) {
-					projectFile = new ProjectFile();
-					projectFile.Name = project.GetValue("application", "config/name");
-					projectFile.Description = project.GetValue("application", "config/description", projectFile.Tr("No Description"));
-					projectFile.Location = filePath.NormalizePath();
-					projectFile.Icon = project.GetValue("application", "config/icon", "res://icon.png");
-				} else {
-					AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", "Key \"config_version\" does not match version 3.");
-				}
+				projectFile = new ProjectFile();
+				projectFile.Name = project.GetValue("application", "config/name");
+				projectFile.Description = project.GetValue("application", "config/description", projectFile.Tr("No Description"));
+				projectFile.Location = filePath;
+				projectFile.Icon = project.GetValue("application", "config/icon", "res://icon.png");
 			}
 		} else {
-			AppDialogs.MessageDialog.ShowMessage("Failed to Load Project", $"{filePath}: {ret}");
+			GD.PrintErr($"Failed to load \"{filePath}\". Error Code: {ret}");
 		}
 		return projectFile;
 	}
