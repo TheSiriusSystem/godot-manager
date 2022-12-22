@@ -328,33 +328,13 @@ public class AssetLibPanel : Panel
         await UpdatePaginatedListing(_addonsBtn.Pressed ? _plAddons : _plTemplates);
     }
 
-    AssetLib.Asset CreateAssetDirectory(string filepath, bool is_plugin) {
-        AssetLib.Asset asset = new AssetLib.Asset();
-        if (is_plugin) {
-            ConfigFile cfg = new ConfigFile();
-            cfg.Load(filepath);
-            asset.Type = "addon";
-            asset.Title = cfg.GetValue("plugin","name") as string;
-            asset.Author = cfg.GetValue("plugin","author") as string;
-            asset.VersionString = cfg.GetValue("plugin","version") as string;
-            asset.Description = cfg.GetValue("plugin","description") as string;
-            asset.IconUrl = "res://Assets/Icons/default_project_icon_v3.png";
-        } else {
-            ProjectConfig pc = new ProjectConfig(filepath);
-            pc.Load();
-            asset.Type = "project";
-            asset.Title = pc.GetValue("application","config/name");
-            asset.Author = "Local User";
-            asset.VersionString = "0.0.0";
-            asset.Description = pc.GetValue("application","config/description");
-            asset.IconUrl = "zip+res://icon.png";
-        }
-        asset.AssetId = $"local-{CentralStore.Settings.LocalAddonCount}";
+    AssetLib.Asset FinalizeVariables(AssetLib.Asset asset, string filepath) {
+		asset.AssetId = $"local-{CentralStore.Settings.LocalAddonCount}";
         asset.AuthorId = "-1";
         asset.Version = "-1";
         asset.Category = "Local";
         asset.CategoryId = "-3";
-        asset.GodotVersion = "3.5";
+        asset.GodotVersion = "x.x.x";
         asset.Rating = "";
         asset.Cost = "";
         asset.SupportLevel = "";
@@ -364,9 +344,35 @@ public class AssetLibPanel : Panel
         asset.IssuesUrl = "";
         asset.Searchable = "";
         asset.ModifyDate = DateTime.UtcNow.ToString();
-        asset.DownloadUrl = $"file://{filepath.GetBaseDir()}";
+        asset.DownloadUrl = $"file://{filepath}";
         asset.Previews = new Array<AssetLib.Preview>();
         asset.DownloadHash = "";
+		return asset;
+	}
+
+    AssetLib.Asset CreateAssetDirectory(string filepath, bool is_plugin) {
+        AssetLib.Asset asset = new AssetLib.Asset();
+        if (is_plugin) {
+            ConfigFile cfg = new ConfigFile();
+            cfg.Load(filepath);
+            asset.Type = "addon";
+            asset.Title = cfg.GetValue("plugin", "name") as string;
+            asset.Author = cfg.GetValue("plugin", "author") as string;
+            asset.VersionString = cfg.GetValue("plugin", "version") as string;
+            asset.Description = cfg.GetValue("plugin", "description") as string;
+            asset.IconUrl = "res://Assets/Icons/default_project_icon_v3.png";
+        } else {
+            ProjectConfig pc = new ProjectConfig(filepath);
+			bool isOldGD = filepath.EndsWith("engine.cfg");
+            pc.Load();
+            asset.Type = "project";
+            asset.Title = pc.GetValue("application", isOldGD ? "name" : "config/name");
+            asset.Author = "Template Importer";
+            asset.VersionString = "x.x.x";
+            asset.Description = pc.GetValue("application", isOldGD ? "No Description" : "config/description");
+            asset.IconUrl = "zip+" + pc.GetValue("application", isOldGD ? "icon" : "config/icon");
+        }
+        asset = FinalizeVariables(asset, filepath);
         return asset;
     }
 
@@ -388,22 +394,23 @@ public class AssetLibPanel : Panel
 
             if (!found)
                 return null;
-            
-            
+
             asset.Type = "addon";
-            asset.Title = cfg.GetValue("plugin","name") as string;
-            asset.Author = cfg.GetValue("plugin","author") as string;
-            asset.VersionString = cfg.GetValue("plugin","version") as string;
-            asset.Description = cfg.GetValue("plugin","description") as string;
+            asset.Title = cfg.GetValue("plugin", "name") as string;
+            asset.Author = cfg.GetValue("plugin", "author") as string;
+            asset.VersionString = cfg.GetValue("plugin", "version") as string;
+            asset.Description = cfg.GetValue("plugin", "description") as string;
             asset.IconUrl = "res://Assets/Icons/default_project_icon_v3.png";
         } else {
             ProjectConfig pc = new ProjectConfig();
             bool found = false;
+			bool isOldGD = false;
 
             using (var za = ZipFile.OpenRead(filepath)) {
                 foreach(var zae in za.Entries) {
-                    if (zae.FullName.EndsWith("project.godot")) {
+                    if (zae.FullName.EndsWith("project.godot") || zae.FullName.EndsWith("engine.cfg")) {
                         found = true;
+						isOldGD = zae.FullName.EndsWith("engine.cfg");
                         pc.LoadBuffer(zae.ReadFile());
                         break;
                     }
@@ -412,34 +419,15 @@ public class AssetLibPanel : Panel
 
             if (!found)
                 return null;
-            
 
-            asset.Type = "project";
-            asset.Title = pc.GetValue("application","config/name");
-            asset.Author = "Local User";
-            asset.VersionString = "0.0.0";
-            asset.Description = pc.GetValue("application","config/description");
-            asset.IconUrl = "zip+" + pc.GetValue("application","config/icon");
-            
+			asset.Type = "project";
+            asset.Title = pc.GetValue("application", isOldGD ? "name" : "config/name");
+            asset.Author = "Asset Importer";
+            asset.VersionString = "x.x.x";
+            asset.Description = pc.GetValue("application", isOldGD ? "No Description" : "config/description");
+            asset.IconUrl = "zip+" + pc.GetValue("application", isOldGD ? "icon" : "config/icon");
         }
-        asset.AssetId = $"local-{CentralStore.Settings.LocalAddonCount}";
-        asset.AuthorId = "-1";
-        asset.Version = "-1";
-        asset.Category = "Local";
-        asset.CategoryId = "-3";
-        asset.GodotVersion = "3.5";
-        asset.Rating = "";
-        asset.Cost = "";
-        asset.SupportLevel = "";
-        asset.DownloadProvider = "local";
-        asset.DownloadCommit = "";
-        asset.BrowseUrl = $"file://{filepath.GetBaseDir()}";
-        asset.IssuesUrl = "";
-        asset.Searchable = "";
-        asset.ModifyDate = DateTime.UtcNow.ToString();
-        asset.DownloadUrl = $"file://{filepath}";
-        asset.Previews = new Array<AssetLib.Preview>();
-        asset.DownloadHash = "";
+        asset = FinalizeVariables(asset, filepath);
         return asset;
     }
 
