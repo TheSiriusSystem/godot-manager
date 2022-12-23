@@ -38,7 +38,6 @@ public class ProjectLineEntry : ColorRect
 
 #region Preload Resources
 	private Texture _missingIcon = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
-	private Texture _defaultIcon = GD.Load<Texture>("res://Assets/Icons/default_project_icon_v3.png");
 #endregion
 
 #region Private Variables
@@ -88,11 +87,11 @@ public class ProjectLineEntry : ColorRect
 					if (System.IO.File.Exists(value)) {
 						var texture = Util.LoadImage(value);
 						if (texture == null)
-							_icon.Texture = _defaultIcon;
+							_icon.Texture = _missingIcon;
 						else
 							_icon.Texture = texture;
 					} else {
-						_icon.Texture = _defaultIcon;
+						_icon.Texture = _missingIcon;
 					}
 				}
 			}

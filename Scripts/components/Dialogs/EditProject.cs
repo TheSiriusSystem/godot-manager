@@ -54,6 +54,7 @@ Button _CancelBtn = null;
 #region Resources
 [Resource("res://components/AddonLineEntry.tscn")] private PackedScene ALineEntry = null;
 [Resource("res://Assets/Icons/default_project_icon_v3.png")] private Texture DefaultIcon = null;
+[Resource("res://Assets/Icons/missing_icon.svg")] private Texture MissingIcon = null;
 #endregion
 
 #region Private Variables
@@ -143,7 +144,11 @@ Button _CancelBtn = null;
 		}
 
 		ProjectFile = pf;
-		_Icon.Texture = Util.LoadImage(ProjectFile.Location.GetResourceBase(IconPath));
+		var texture = Util.LoadImage(ProjectFile.Location.GetResourceBase(IconPath));
+		if (texture == null)
+			_Icon.Texture = MissingIcon;
+		else
+			_Icon.Texture = texture;
 		_ProjectName.Text = ProjectName;
 		_ProjectDescription.Text = Description;
 		_GodotVersion.Clear();
