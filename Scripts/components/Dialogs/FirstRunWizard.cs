@@ -92,9 +92,9 @@ StartupNotify=true
 			CentralStore.Settings.CachePath.GetOSDir().NormalizePath(),
 			CentralStore.Settings.ProjectPath.GetOSDir().NormalizePath()
 		};
-		EngineLoc.Text = CentralStore.Settings.EnginePath.GetOSDir().NormalizePath();
-		CacheLoc.Text = CentralStore.Settings.CachePath.GetOSDir().NormalizePath();
-		ProjectLoc.Text = CentralStore.Settings.ProjectPath.GetOSDir().NormalizePath();
+		EngineLoc.Text = OriginalSettings[0];
+		CacheLoc.Text = OriginalSettings[1];
+		ProjectLoc.Text = OriginalSettings[2];
 
 		Wizard.CurrentTab = 0;
 		PrevStep.Disabled = true;
