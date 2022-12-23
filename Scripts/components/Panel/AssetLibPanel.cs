@@ -115,17 +115,15 @@ public class AssetLibPanel : Panel
     async void OnImportPressed()
     {
         AppDialogs.ImportFileDialog.Connect("popup_hide", this, "OnImportClosed", null, (uint)ConnectFlags.Oneshot);
-        var result = await AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Import Asset..."),
+        var result = await AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Import Asset"),
             Tr("What type of asset would you like to import?"),
             Tr("Template"), Tr("Addon"));
         if (result == YesNoCancelDialog.ActionResult.FirstAction) {
-            AppDialogs.ImportFileDialog.WindowTitle = Tr("Import Template...");
             AppDialogs.ImportFileDialog.Filters = new string[] {"project.godot", "engine.cfg", "*.zip"};
-            AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnTemplateImport");
+            AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnTemplateImport", null, (uint)ConnectFlags.Oneshot);
         } else if (result == YesNoCancelDialog.ActionResult.SecondAction) {
-            AppDialogs.ImportFileDialog.WindowTitle = Tr("Import Plugin...");
-            AppDialogs.ImportFileDialog.Filters = new string[] { "plugin.cfg", "*.zip" };
-            AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnPluginImport");
+            AppDialogs.ImportFileDialog.Filters = new string[] {"plugin.cfg", "*.zip"};
+            AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnPluginImport", null, (uint)ConnectFlags.Oneshot);
         } else {
             return;
         }
@@ -155,7 +153,7 @@ public class AssetLibPanel : Panel
 
     void OnTemplateImport(string filepath)
     {
-        if (filepath.EndsWith("godot.project"))
+        if (filepath.EndsWith(".godot"))
         {
             TemplateDirectoryImport(filepath);
         }

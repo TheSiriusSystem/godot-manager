@@ -145,14 +145,8 @@ StartupNotify=true
 	{
 		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Location for Godot Versions");
 		AppDialogs.BrowseFolderDialog.CurrentDir = EngineLoc.Text;
-		if (!AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, nameof(OnDirSelected_EngineBrowse)))
-		{
-			AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, nameof(OnDirSelected_EngineBrowse), null,
-				(int)ConnectFlags.Oneshot);
-			AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, nameof(OnPopupHide_EngineBrowse), null,
-				(int)ConnectFlags.Oneshot);
-		}
-
+		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected_EngineBrowse", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.PopupExclusive = true;
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 	}
@@ -162,14 +156,8 @@ StartupNotify=true
 	{
 		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Location for Cache Store");
 		AppDialogs.BrowseFolderDialog.CurrentDir = CacheLoc.Text;
-		if (!AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, nameof(OnDirSelected_CacheBrowse)))
-		{
-			AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, nameof(OnDirSelected_CacheBrowse), null,
-					(int)ConnectFlags.Oneshot);
-			AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, nameof(OnPopupHide_CacheBrowse), null,
-					(int)ConnectFlags.Oneshot);
-		}
-
+		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected_CacheBrowse", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.PopupExclusive = true;
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 	}
@@ -179,11 +167,8 @@ StartupNotify=true
 	{
 		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Location for Projects");
 		AppDialogs.BrowseFolderDialog.CurrentDir = ProjectLoc.Text;
-		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, nameof(OnDirSelected_ProjectBrowse), null,
-			(int)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, nameof(OnPopupHide_ProjectBrowse), null,
-			(int)ConnectFlags.Oneshot);
-
+		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected_ProjectBrowse", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.PopupExclusive = true;
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 	}
@@ -214,22 +199,16 @@ StartupNotify=true
 		EnsureDirectoryExists(EngineLoc.Text);
 	}
 
-	void OnPopupHide_EngineBrowse()
+	void OnPopupHide()
 	{
-		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, nameof(OnDirSelected_EngineBrowse)))
-			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, nameof(OnDirSelected_EngineBrowse));
-	}
-	
-	void OnPopupHide_CacheBrowse()
-	{
-		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, nameof(OnDirSelected_CacheBrowse)))
-			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, nameof(OnDirSelected_CacheBrowse));
-	}
-	
-	void OnPopupHide_ProjectBrowse()
-	{
-		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, nameof(OnDirSelected_ProjectBrowse)))
-			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, nameof(OnDirSelected_ProjectBrowse));
+		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnDirSelected_EngineBrowse"))
+			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnDirSelected_EngineBrowse");
+
+		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnDirSelected_CacheBrowse"))
+			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnDirSelected_CacheBrowse");
+
+		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnDirSelected_ProjectBrowse"))
+			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnDirSelected_ProjectBrowse");
 	}
 
 	// Navigation buttons Handlers

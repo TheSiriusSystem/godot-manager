@@ -492,9 +492,8 @@ public class SettingsPanel : Panel
 
 	[SignalHandler("pressed", nameof(_godotBrowseButton))]
 	void OnGodotBrowse() {
-		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseGodot_DirSelected", null, (int)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnBrowseGodot_HidePopup", null, (int)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Browse for Godot Install Folder...");
+		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseGodot_DirSelected", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 	}
 
@@ -503,10 +502,22 @@ public class SettingsPanel : Panel
 		OnGodotInstallLocation();
 	}
 
-	void OnBrowseGodot_HidePopup()
+	void OnPopupHide()
 	{
 		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnBrowseGodot_DirSelected"))
 			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnBrowseGodot_DirSelected");
+
+		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnBrowseCache_DirSelected"))
+			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnBrowseCache_DirSelected");
+
+		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnBrowseProjectLocation_DirSelected"))
+			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnBrowseProjectLocation_DirSelected");
+
+		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnDirScan_DirSelected"))
+			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnDirScan_DirSelected");
+
+		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnEditDirScan_DirSelected"))
+			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnEditDirScan_DirSelected");
 	}
 
 	[SignalHandler("text_changed", nameof(_cacheInstallLocation))]
@@ -523,21 +534,14 @@ public class SettingsPanel : Panel
 
 	[SignalHandler("pressed", nameof(_cacheBrowseButton))]
 	void OnBrowseCacheLocation() {
-		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseCache_DirSelected", null, (int)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnBrowseCache_PopupHide", null, (int)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Browse for Cache Folder...");
+		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseCache_DirSelected", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 	}
 
 	void OnBrowseCache_DirSelected(string dir_name) {
 		_cacheInstallLocation.Text = dir_name.GetOSDir().NormalizePath();
 		OnCacheInstallLocation();
-	}
-
-	void OnBrowseCache_PopupHide()
-	{
-		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnBrowseCache_DirSelected"))
-			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnBrowseCache_DirSelected");
 	}
 
 	[SignalHandler("item_selected", nameof(_defaultProjectView))]
@@ -919,20 +923,14 @@ public class SettingsPanel : Panel
 		AppDialogs.BrowseFolderDialog.CurrentFile = "";
 		AppDialogs.BrowseFolderDialog.CurrentPath = _defaultProjectLocation.Text.NormalizePath();
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
-		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseProjectLocation_DirSelected", null, (int)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnBrowseProjectLocation_PopupHide", null, (int)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseProjectLocation_DirSelected", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 	}
 
 	void OnBrowseProjectLocation_DirSelected(string path) {
 		_defaultProjectLocation.Text = path.NormalizePath();
 		AppDialogs.BrowseFolderDialog.Visible = false;
 		OnDefaultProjectLocation();
-	}
-
-	void OnBrowseProjectLocation_PopupHide()
-	{
-		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnBrowseProjectLocation_DirSelected"))
-			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnBrowseProjectLocation_DirSelected");
 	}
 
 	[SignalHandler("toggled", nameof(_exitGodotManager))]
@@ -998,8 +996,8 @@ public class SettingsPanel : Panel
 		AppDialogs.BrowseFolderDialog.CurrentFile = "";
 		AppDialogs.BrowseFolderDialog.CurrentPath = _defaultProjectLocation.Text.NormalizePath();
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
-		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirScan_DirSelected", null, (int)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnDirScan_PopupHide", null, (int)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirScan_DirSelected", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 	}
 
 	void OnDirScan_DirSelected(string path) {
@@ -1012,22 +1010,15 @@ public class SettingsPanel : Panel
 		AppDialogs.BrowseFolderDialog.Visible = false;
 	}
 
-	void OnDirScan_PopupHide()
-	{
-		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnDirScan_DirSelected"))
-			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnDirScan_DirSelected");
-	}
-
 	[SignalHandler("edit_requested", nameof(_directoryScan))]
 	void OnDirScan_EditRequest() {
 		int index = _directoryScan.GetSelected();
 		if (index == -1)
 			return;
-		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Folder to Add to Scan");
 		AppDialogs.BrowseFolderDialog.CurrentFile = "";
 		AppDialogs.BrowseFolderDialog.CurrentPath = _directoryScan.GetItemText(index).NormalizePath();
-		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnEditDirScan_DirSelected", new Array() { index }, (int)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnEditDirScan_PopupHide", null, (int)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnEditDirScan_DirSelected", new Array() {index}, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 	}
 
@@ -1036,13 +1027,6 @@ public class SettingsPanel : Panel
 		_undoActions.Push(() => _directoryScan.SetItemText(index, oldVal));
 		updateActionButtons();
 		_directoryScan.SetItemText(index, path);
-		AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnEditDirScan_DirSelected");
-	}
-
-	void OnEditDirScan_PopupHide()
-	{
-		if (AppDialogs.BrowseFolderDialog.IsConnected("dir_selected", this, "OnEditDirScan_DirSelected"))
-			AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnEditDirScan_DirSelected");
 	}
 
 	[SignalHandler("remove_requested", nameof(_directoryScan))]
@@ -1116,7 +1100,7 @@ public class SettingsPanel : Panel
 		#if GODOT_WINDOWS || GODOT_UWP || GODOT_LINUXBSD || GODOT_X11
 		string updater = Util.GetUpdateFolder().Join(OS.GetExecutablePath().GetFile()).NormalizePath();
 		#else
-		string updater = Util.GetUpdateFolder().Join("Godot Manager.app","Contents","MacOS",OS.GetExecutablePath().GetFile()).NormalizePath();
+		string updater = Util.GetUpdateFolder().Join("Godot Manager.app", "Contents", "MacOS", OS.GetExecutablePath().GetFile()).NormalizePath();
 		#endif
 		ZipFile.ExtractToDirectory(updatePath, updatePath.GetBaseDir());
 

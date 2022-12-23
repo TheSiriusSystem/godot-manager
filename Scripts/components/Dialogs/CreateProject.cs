@@ -176,15 +176,14 @@ public class CreateProject : ReferenceRect
 		AppDialogs.BrowseFolderDialog.CurrentFile = "";
 		AppDialogs.BrowseFolderDialog.CurrentPath = (CentralStore.Settings.ProjectPath + "/").NormalizePath();
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
-		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected", null, (int)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnDirSelected_PopupHidden", null, (int)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnDirSelected_PopupHidden", null, (uint)ConnectFlags.Oneshot);
 	}
 
 	void OnDirSelected(string bfdir) {
 		bfdir = bfdir.NormalizePath();
 		_projectLocation.Text = bfdir;
 		AppDialogs.BrowseFolderDialog.Visible = false;
-		AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnDirSelected");
 		TestPath(bfdir);
 		if (bfdir.IsDirEmpty() && _projectName.Text == "New Game Project")
 			_projectName.Text = bfdir.GetFile().Capitalize();

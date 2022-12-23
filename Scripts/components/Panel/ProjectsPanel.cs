@@ -320,11 +320,10 @@ public class ProjectsPanel : Panel
 				AppDialogs.BrowseFolderDialog.CurrentFile = "";
 				AppDialogs.BrowseFolderDialog.CurrentPath = CentralStore.Settings.ProjectPath;
 				AppDialogs.BrowseFolderDialog.PopupCentered();
-				AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnScanProjects_DirSelected", null, (int)ConnectFlags.Oneshot);
-				AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnScanProjects_PopupHide", null, (int)ConnectFlags.Oneshot);
-				return;
-			} else
-				return;
+				AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnScanProjects_DirSelected", null, (uint)ConnectFlags.Oneshot);
+				AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnScanProjects_PopupHide", null, (uint)ConnectFlags.Oneshot);
+			}
+			return;
 		}
 
 		AppDialogs.BusyDialog.UpdateHeader(Tr("Scanning Projects..."));
@@ -360,7 +359,6 @@ public class ProjectsPanel : Panel
 		CentralStore.Settings.ScanDirs.Clear();
 		CentralStore.Settings.ScanDirs.Add(path);
 		CentralStore.Instance.SaveDatabase();
-		AppDialogs.BrowseFolderDialog.Disconnect("dir_selected", this, "OnScanProjects_DirSelected");
 		ScanForProjects();
 		PopulateListing();
 	}
@@ -728,7 +726,7 @@ public class ProjectsPanel : Panel
 				ExecuteProject(pf);
 				break;
 			case 3:     // Edit Project File
-				AppDialogs.EditProject.Connect("project_updated", this, "OnProjectUpdated", new Array { pf });
+				AppDialogs.EditProject.Connect("project_updated", this, "OnProjectUpdated", new Array {pf});
 				AppDialogs.EditProject.Connect("hide", this, "OnHide_EditProject");
 				AppDialogs.EditProject.ShowDialog(pf);
 				break;
