@@ -58,7 +58,7 @@ public class AddCustomGodot : ReferenceRect
 	}
 
 	void OnBrowseDialogHidden() {
-		if (AppDialogs.BrowseFolderDialog.IsConnected("file_selected", this, "OnFileSelected"))
+		if (AppDialogs.BrowseGodotDialog.IsConnected("file_selected", this, "OnFileSelected"))
 			AppDialogs.BrowseGodotDialog.Disconnect("file_selected", this, "OnFileSelected");
 	}
 
