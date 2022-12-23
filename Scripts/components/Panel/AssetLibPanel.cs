@@ -422,7 +422,7 @@ public class AssetLibPanel : Panel
         string addonPath = filepath.GetBaseDir().NormalizePath();
         string addonName = addonPath.GetFile();
         // "E:\Projects\Godot\EditorPlugins\addons\data_editor"
-        string zipFile = $"{CentralStore.Settings.CachePath}/AssetLib/local-{CentralStore.Settings.LocalAddonCount}-{addonName}.zip";
+        string zipFile = $"{CentralStore.Settings.CachePath}/downloads/assets/local-{CentralStore.Settings.LocalAddonCount}-{addonName}.zip";
         using(var fh = new FileStream(zipFile, FileMode.Create)) {
             using (var afh = new ZipArchive(fh, ZipArchiveMode.Create)) {
 
@@ -453,7 +453,7 @@ public class AssetLibPanel : Panel
     void TemplateDirectoryImport(string filepath) {
         string templatePath = filepath.GetBaseDir().NormalizePath();
         string templateName = templatePath.GetFile();
-        string zipFile = $"{CentralStore.Settings.CachePath}/AssetLib/local-{CentralStore.Settings.LocalAddonCount}-{templateName}.zip";
+        string zipFile = $"{CentralStore.Settings.CachePath}/downloads/assets/local-{CentralStore.Settings.LocalAddonCount}-{templateName}.zip";
         using(var fh = new FileStream(zipFile, FileMode.Create)) {
             using(var afh = new ZipArchive(fh, ZipArchiveMode.Create)) {
                 foreach (string entry in Directory.EnumerateFileSystemEntries(templatePath, "", System.IO.SearchOption.AllDirectories)) {
@@ -480,7 +480,7 @@ public class AssetLibPanel : Panel
     async void AssetZipImport(string filepath, bool is_plugin) {
         string zipFile = filepath.NormalizePath();
         string zipName = zipFile.GetFile().BaseName();
-        string newZipFile = $"{CentralStore.Settings.CachePath}/AssetLib/local-{CentralStore.Settings.LocalAddonCount}-{zipName}.zip";
+        string newZipFile = $"{CentralStore.Settings.CachePath}/downloads/assets/local-{CentralStore.Settings.LocalAddonCount}-{zipName}.zip";
         SFile.Copy(zipFile, newZipFile);
         AssetLib.Asset asset = CreateAssetZip(filepath, is_plugin);
         if (is_plugin) {

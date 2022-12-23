@@ -74,7 +74,7 @@ public class PaginatedListing : ScrollContainer
                     ale.Icon = Util.LoadImage(plgn.Asset.IconUrl);
                 } else {
                     Uri uri = new Uri(plgn.Asset.IconUrl);
-                    string iconPath = $"{CentralStore.Settings.CachePath}/images/{plgn.Asset.AssetId}{uri.AbsolutePath.GetExtension()}";
+                    string iconPath = $"{CentralStore.Settings.CachePath}/images/assets/{plgn.Asset.AssetId}{uri.AbsolutePath.GetExtension()}";
                     ale.SetMeta("iconPath", iconPath);
                     if (!File.Exists(iconPath.GetOSDir().NormalizePath())) {
                         // Implement Image Downloader through Download Queue
@@ -125,7 +125,7 @@ public class PaginatedListing : ScrollContainer
             } else {
                 string iconPath;
                 if (prj.Asset.IconUrl.StartsWith("zip+")) {
-                    iconPath = $"{CentralStore.Settings.CachePath}/images/{prj.Asset.AssetId}{prj.Asset.IconUrl.GetExtension()}";
+                    iconPath = $"{CentralStore.Settings.CachePath}/images/assets/{prj.Asset.AssetId}{prj.Asset.IconUrl.GetExtension()}";
                     string zipPath = prj.Asset.IconUrl.Substring("zip+res://".Length);
                     if (!File.Exists(iconPath)) {
                         using (ZipArchive za = ZipFile.Open(prj.Location,ZipArchiveMode.Read)) {
@@ -142,7 +142,7 @@ public class PaginatedListing : ScrollContainer
                     }
                 } else {
                     Uri uri = new Uri(prj.Asset.IconUrl);
-                    iconPath = $"{CentralStore.Settings.CachePath}/images/{prj.Asset.AssetId}{uri.AbsolutePath.GetExtension()}";
+                    iconPath = $"{CentralStore.Settings.CachePath}/images/assets/{prj.Asset.AssetId}{uri.AbsolutePath.GetExtension()}";
                     ale.SetMeta("iconPath", iconPath);
                     if (!File.Exists(iconPath.GetOSDir().NormalizePath())) {
                         // Implement Image Downloader through Download Queue
@@ -210,7 +210,7 @@ public class PaginatedListing : ScrollContainer
             }
             _listing.AddChild(ale);
             Uri uri = new Uri(asset.IconUrl);
-            string iconPath = $"{CentralStore.Settings.CachePath}/images/{asset.AssetId}{uri.AbsolutePath.GetExtension()}";
+            string iconPath = $"{CentralStore.Settings.CachePath}/images/assets/{asset.AssetId}{uri.AbsolutePath.GetExtension()}";
             ale.SetMeta("iconPath", iconPath);
             if (!File.Exists(iconPath.GetOSDir().NormalizePath())) {
                 // Implement Image Downloader through Download Queue

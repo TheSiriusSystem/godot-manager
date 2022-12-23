@@ -297,18 +297,8 @@ public class SettingsPanel : Panel
 	}
 
 	void UpdateSettings() {
+		GetTree().Root.GetNode<MainWindow>("SceneManager/MainWindow").EnsureDirStructure();
 		CentralStore.Settings.EnginePath = _godotInstallLocation.Text.GetOSDir().NormalizePath();
-		Error result;
-		if (CentralStore.Settings.CachePath != _cacheInstallLocation.Text.GetOSDir().NormalizePath()) {
-			Directory dir = new Directory();
-			dir.Open(_cacheInstallLocation.Text.GetOSDir().NormalizePath());
-			if (!dir.DirExists("AssetLib"))
-				result = dir.MakeDir("AssetLib");
-			if (!dir.DirExists("Godot"))
-				result = dir.MakeDir("Godot");
-			if (!dir.DirExists("images"))
-				result = dir.MakeDir("images");
-		}
 		CentralStore.Settings.CachePath = _cacheInstallLocation.Text.GetOSDir().NormalizePath();
 		CentralStore.Settings.DefaultView = _defaultProjectView.GetItemText(_defaultProjectView.Selected);
 		CentralStore.Settings.DefaultEngine = (string)_defaultEngine.GetItemMetadata(_defaultEngine.Selected);
@@ -321,15 +311,9 @@ public class SettingsPanel : Panel
 		CentralStore.Settings.ProxyPort = _proxyPort.Text.ToInt();
 		CentralStore.Settings.SelfContainedEditors = _editorProfiles.Pressed;
 
-		if (CentralStore.Settings.UseSystemTitlebar) {
-			OS.WindowBorderless = false;
-			GetTree().Root.GetNode<Titlebar>("SceneManager/MainWindow/bg/Shell/VC/TitleBar").Visible = false;
-			GetTree().Root.GetNode<Control>("SceneManager/MainWindow/bg/Shell/VC/VisibleSpacer").Visible = true;
-		} else {
-			OS.WindowBorderless = true;
-			GetTree().Root.GetNode<Titlebar>("SceneManager/MainWindow/bg/Shell/VC/TitleBar").Visible = true;
-			GetTree().Root.GetNode<Control>("SceneManager/MainWindow/bg/Shell/VC/VisibleSpacer").Visible = false;
-		}
+		OS.WindowBorderless = !CentralStore.Settings.UseSystemTitlebar;
+		GetTree().Root.GetNode<Titlebar>("SceneManager/MainWindow/bg/Shell/VC/TitleBar").Visible = !CentralStore.Settings.UseSystemTitlebar;
+		GetTree().Root.GetNode<Control>("SceneManager/MainWindow/bg/Shell/VC/VisibleSpacer").Visible = CentralStore.Settings.UseSystemTitlebar;
 
 		foreach (GodotVersion version in CentralStore.Versions) {
 			if (_editorProfiles.Pressed) {

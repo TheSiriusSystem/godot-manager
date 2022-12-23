@@ -245,7 +245,7 @@ public class CreateProject : ReferenceRect
 			foreach (AssetPlugin plgn in CentralStore.Plugins)
 			{
 				string imgLoc =
-					$"{CentralStore.Settings.CachePath}/images/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
+					$"{CentralStore.Settings.CachePath}/images/assets/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
 						.NormalizePath();
 				AddonLineEntry ale = ALineEntry.Instance<AddonLineEntry>();
 

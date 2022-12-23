@@ -57,7 +57,7 @@ public class GodotInstaller : Object {
 #else
 			Location = $"{CentralStore.Settings.EnginePath}/{(is_mono ? gdFile.ReplaceN(".zip","") : gh.Name)}",
 #endif
-			CacheLocation = $"{CentralStore.Settings.CachePath}/Godot/{gdFile}".GetOSDir().NormalizePath(),
+			CacheLocation = $"{CentralStore.Settings.CachePath}/downloads/editors/{gdFile}".GetOSDir().NormalizePath(),
 			DownloadedDate = DateTime.UtcNow,
 			GithubVersion = gh,
 			IsMono = is_mono
@@ -77,7 +77,7 @@ public class GodotInstaller : Object {
 #else
 			Location = $"{CentralStore.Settings.EnginePath}/{(is_mono ? mv.PlatformZipFile.ReplaceN(".zip","") : mv.Version)}",
 #endif
-			CacheLocation = $"{CentralStore.Settings.CachePath}/Godot/{mv.PlatformZipFile}".GetOSDir().NormalizePath(),
+			CacheLocation = $"{CentralStore.Settings.CachePath}/downloads/editors/{mv.PlatformZipFile}".GetOSDir().NormalizePath(),
 			DownloadedDate = DateTime.UtcNow,
 			MirrorVersion = mv,
 			IsMono = is_mono
@@ -99,7 +99,7 @@ public class GodotInstaller : Object {
 #else
 			Location = $"{CentralStore.Settings.EnginePath}/{ced.TagName}",
 #endif
-			CacheLocation = $"{CentralStore.Settings.CachePath}/Godot/{ced.Url.GetFile()}",
+			CacheLocation = $"{CentralStore.Settings.CachePath}/downloads/editors/{ced.Url.GetFile()}",
 			DownloadedDate = DateTime.Now,
 			CustomEngine = ced
 		};
