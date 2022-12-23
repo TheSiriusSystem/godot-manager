@@ -103,22 +103,22 @@ public class MainWindow : Control
 		return count;
 	}
 
-	void EnsureDirStructure() {
-		
-		if (!Directory.Exists(CentralStore.Settings.CachePath.GetOSDir()))
-			Directory.CreateDirectory(CentralStore.Settings.CachePath.GetOSDir());
-		if (!Directory.Exists(CentralStore.Settings.CachePath.Join("Godot").GetOSDir()))
-			Directory.CreateDirectory(CentralStore.Settings.CachePath.Join("Godot").GetOSDir());
-		if (!Directory.Exists(CentralStore.Settings.CachePath.Join("AssetLib").GetOSDir()))
-			Directory.CreateDirectory(CentralStore.Settings.CachePath.Join("AssetLib").GetOSDir());
-		if (!Directory.Exists(CentralStore.Settings.CachePath.Join("images").GetOSDir()))
-			Directory.CreateDirectory(CentralStore.Settings.CachePath.Join("images").GetOSDir());
-		if (!Directory.Exists(CentralStore.Settings.CachePath.Join("images","news").GetOSDir()))
-			Directory.CreateDirectory(CentralStore.Settings.CachePath.Join("images","news").GetOSDir());
-		if (!Directory.Exists(CentralStore.Settings.EnginePath.GetOSDir()))
-			Directory.CreateDirectory(CentralStore.Settings.EnginePath.GetOSDir());
+	public void EnsureDirStructure() {
+		string[] paths = new string[] {
+			CentralStore.Settings.CachePath.GetOSDir(),
+			CentralStore.Settings.CachePath.Join("downloads", "editors").GetOSDir(),
+			CentralStore.Settings.CachePath.Join("downloads", "assets").GetOSDir(),
+			CentralStore.Settings.CachePath.Join("images", "assets").GetOSDir(),
+			CentralStore.Settings.CachePath.Join("images", "news").GetOSDir(),
+			CentralStore.Settings.EnginePath.GetOSDir()
+		};
+
+		foreach (string path in paths) {
+			if (!Directory.Exists(path))
+				Directory.CreateDirectory(path);
+		}
 	}
-	
+
 	void OnPageButton_Clicked(PageButton pb) {
 		_notebook.CurrentTab = _buttons.IndexOf(pb);
 	}
