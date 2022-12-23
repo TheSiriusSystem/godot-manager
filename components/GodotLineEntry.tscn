@@ -59,7 +59,6 @@ size_flags_vertical = 3
 [node name="VersionTag" type="Label" parent="vc"]
 margin_right = 892.0
 margin_bottom = 19.0
-hint_tooltip = "Engine Version"
 mouse_filter = 1
 custom_fonts/font = SubResource( 11 )
 text = "Godot x.x.x"
@@ -75,7 +74,6 @@ visible = false
 margin_right = 320.0
 margin_bottom = 17.0
 rect_min_size = Vector2( 320, 0 )
-hint_tooltip = "Download Mirror"
 mouse_filter = 1
 size_flags_horizontal = 0
 custom_fonts/font = SubResource( 13 )
@@ -91,7 +89,6 @@ rect_min_size = Vector2( 20, 0 )
 [node name="Filesize" type="Label" parent="vc/hc"]
 margin_right = 92.0
 margin_bottom = 17.0
-hint_tooltip = "Engine Archive Filesize"
 mouse_filter = 1
 custom_fonts/font = SubResource( 15 )
 text = "Size: Unknown"
