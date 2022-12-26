@@ -132,15 +132,15 @@ public class AppDialogs : Control
         BrowseGodotDialog_.Mode = FileDialog.ModeEnum.OpenFile;
         BrowseGodotDialog_.Access = FileDialog.AccessEnum.Filesystem;
         BrowseGodotDialog_.WindowTitle = Tr("Open a File");
-        #if GODOT_WINDOWS || GODOT_UWP
-            BrowseGodotDialog_.Filters = new string[] {"*.exe"};
-        #elif GODOT_LINUXBSD || GODOT_X11
-            BrowseGodotDialog_.Filters = new string[] {"*.x86_64", "*.x86", "*.64", "*.32"};
-        #elif GODOT_MACOS || GODOT_OSX
-            BrowseGodotDialog_.Filters = new string[] {"*.app"};
-        #else
-            BrowseGodotDialog_.Filters = new string[] {"*.exe", "*.app", "*.x86_64", "*.x86", "*.64", "*.32"};
-        #endif
+#if GODOT_WINDOWS || GODOT_UWP
+        BrowseGodotDialog_.Filters = new string[] {"*.exe"};
+#elif GODOT_LINUXBSD || GODOT_X11
+        BrowseGodotDialog_.Filters = new string[] {"*.x86", "*.x86_64", "*.32", "*.64"};
+#elif GODOT_MACOS || GODOT_OSX
+        BrowseGodotDialog_.Filters = new string[] {"*.app"};
+#else
+        BrowseGodotDialog_.Filters = new string[] {"*.exe", "*.x86", "*.x86_64", "*.32", "*.64", "*.app"};
+#endif
         BrowseGodotDialog_.RectMinSize = new Vector2(510, 390);
         BrowseGodotDialog_.Theme = GD.Load<Theme>("res://Resources/DefaultTheme.tres");
 
