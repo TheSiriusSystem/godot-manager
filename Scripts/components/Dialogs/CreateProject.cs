@@ -173,8 +173,7 @@ public class CreateProject : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_browseLocation))]
 	void OnBrowseLocationPressed() {
-		AppDialogs.BrowseFolderDialog.CurrentFile = "";
-		AppDialogs.BrowseFolderDialog.CurrentPath = (CentralStore.Settings.ProjectPath + "/").NormalizePath();
+		AppDialogs.BrowseFolderDialog.CurrentDir = CentralStore.Settings.ProjectPath.NormalizePath();
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnDirSelected_PopupHidden", null, (uint)ConnectFlags.Oneshot);

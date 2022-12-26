@@ -1,7 +1,6 @@
 using Godot;
 using Godot.Sharp.Extras;
 
-
 public class ImportProject : ReferenceRect
 {
 	[Signal]
@@ -92,7 +91,7 @@ public class ImportProject : ReferenceRect
 	void OnLocationBrowsePressed() {
 		AppDialogs.ImportFileDialog.Filters = new string[] {"project.godot", "engine.cfg"};
 		AppDialogs.ImportFileDialog.CurrentFile = "";
-		AppDialogs.ImportFileDialog.CurrentPath = _locationValue.Text == "" ? CentralStore.Settings.ProjectPath : _locationValue.Text;
+		AppDialogs.ImportFileDialog.CurrentPath = CentralStore.Settings.ProjectPath.NormalizePath();
 		AppDialogs.ImportFileDialog.PopupCentered(new Vector2(510, 390));
 		AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnFileSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.ImportFileDialog.Connect("popup_hide", this, "OnLocationImportHidden", null, (uint)ConnectFlags.Oneshot);

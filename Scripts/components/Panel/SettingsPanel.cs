@@ -478,6 +478,7 @@ public class SettingsPanel : Panel
 	void OnGodotBrowse() {
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseGodot_DirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.CurrentDir = "";
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 	}
 
@@ -520,6 +521,7 @@ public class SettingsPanel : Panel
 	void OnBrowseCacheLocation() {
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseCache_DirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseFolderDialog.CurrentDir = "";
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 	}
 
@@ -904,8 +906,7 @@ public class SettingsPanel : Panel
 
 	[SignalHandler("pressed", nameof(_browseProjectLocation))]
 	void OnBrowseProjectLocation_Pressed() {
-		AppDialogs.BrowseFolderDialog.CurrentFile = "";
-		AppDialogs.BrowseFolderDialog.CurrentPath = _defaultProjectLocation.Text.NormalizePath();
+		AppDialogs.BrowseFolderDialog.CurrentDir = _defaultProjectLocation.Text.NormalizePath();
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseProjectLocation_DirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
@@ -977,8 +978,7 @@ public class SettingsPanel : Panel
 	#region Directory Scan List Actions
 	[SignalHandler("add_requested", nameof(_directoryScan))]
 	void OnDirScan_AddRequest() {
-		AppDialogs.BrowseFolderDialog.CurrentFile = "";
-		AppDialogs.BrowseFolderDialog.CurrentPath = _defaultProjectLocation.Text.NormalizePath();
+		AppDialogs.BrowseFolderDialog.CurrentDir = _defaultProjectLocation.Text.NormalizePath();
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirScan_DirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
@@ -999,8 +999,7 @@ public class SettingsPanel : Panel
 		int index = _directoryScan.GetSelected();
 		if (index == -1)
 			return;
-		AppDialogs.BrowseFolderDialog.CurrentFile = "";
-		AppDialogs.BrowseFolderDialog.CurrentPath = _directoryScan.GetItemText(index).NormalizePath();
+		AppDialogs.BrowseFolderDialog.CurrentDir = _directoryScan.GetItemText(index).NormalizePath();
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnEditDirScan_DirSelected", new Array() {index}, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));

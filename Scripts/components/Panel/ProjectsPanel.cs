@@ -317,8 +317,7 @@ public class ProjectsPanel : Panel
 				await this.IdleFrame();
 			
 			if (res.Result) {
-				AppDialogs.BrowseFolderDialog.CurrentFile = "";
-				AppDialogs.BrowseFolderDialog.CurrentPath = CentralStore.Settings.ProjectPath;
+				AppDialogs.BrowseFolderDialog.CurrentDir = CentralStore.Settings.ProjectPath.NormalizePath();
 				AppDialogs.BrowseFolderDialog.PopupCentered();
 				AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnScanProjects_DirSelected", null, (uint)ConnectFlags.Oneshot);
 				AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnScanProjects_PopupHide", null, (uint)ConnectFlags.Oneshot);
