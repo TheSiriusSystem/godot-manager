@@ -23,7 +23,7 @@ public class SplashScreen : Control
 
 	void GDThread_Loader()
 	{
-		var loader = ResourceLoader.LoadInteractive("res://Scenes/SceneManager.tscn");
+		ResourceInteractiveLoader loader = ResourceLoader.LoadInteractive("res://Scenes/SceneManager.tscn");
 		if (loader == null)
 		{
 			LoadingLabel.Text = "Failed to load \"Scenes/SceneManager.tscn\"!";
@@ -32,11 +32,10 @@ public class SplashScreen : Control
 
 		do
 		{
-			var err = loader.Poll();
+			Error err = loader.Poll();
 			if (err == Error.FileEof)
 			{
-				var res = (PackedScene)loader.GetResource();
-				CallDeferred("ThreadDone", res);
+				CallDeferred("ThreadDone", (PackedScene)loader.GetResource());
 				break;
 			} else if (err != Error.Ok)
 			{
@@ -50,7 +49,7 @@ public class SplashScreen : Control
 	{
 		_thread.WaitToFinish();
 
-		var inst = res.Instance<SceneManager>();
+		SceneManager inst = res.Instance<SceneManager>();
 		GetTree().CurrentScene.QueueFree();
 		GetTree().CurrentScene = null;
 		GetTree().Root.AddChild(inst);
