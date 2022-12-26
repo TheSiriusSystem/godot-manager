@@ -52,7 +52,7 @@ public class NewsPanel : Panel
 				item.QueueFree();
 			}
 		}
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Loading News..."));
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Loading News"));
 		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching news from godotengine.org..."));
 		AppDialogs.BusyDialog.ShowDialog();
 		InitClient();
