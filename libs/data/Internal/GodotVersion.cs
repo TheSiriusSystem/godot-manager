@@ -38,16 +38,16 @@ public class GodotVersion : Object {
 	}
 
 	public string GetDisplayName() {
-		return $"Godot {Tag + (IsMono ? " - Mono" : "")}";
+		return $"Godot {Tag}";
 	}
 
 	public string GetExecutablePath() {
 		string exe_path = "";
 #if GODOT_MACOS || GODOT_OSX
-		exe_path = Location.Join((IsMono ? "Godot_mono.app" : "Godot.app"), "Contents", "MacOS", ExecutableName).NormalizePath();
+		exe_path = Location.Join(!IsMono ? "Godot.app" : "Godot_mono.app", "Contents", "MacOS", ExecutableName);
 #else
-		exe_path = Location.Join(ExecutableName).NormalizePath();
+		exe_path = Location.Join(ExecutableName);
 #endif
-		return exe_path;
+		return exe_path.NormalizePath();
 	}
 }
