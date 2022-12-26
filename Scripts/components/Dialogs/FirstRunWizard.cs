@@ -143,7 +143,6 @@ StartupNotify=true
 	[SignalHandler("pressed", nameof(EngineBrowse))]
 	void OnPressed_EngineBrowse()
 	{
-		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Location for Godot Versions");
 		AppDialogs.BrowseFolderDialog.CurrentDir = EngineLoc.Text;
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected_EngineBrowse", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
@@ -154,7 +153,6 @@ StartupNotify=true
 	[SignalHandler("pressed", nameof(CacheBrowse))]
 	void OnPressed_CacheBrowse()
 	{
-		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Location for Cache Store");
 		AppDialogs.BrowseFolderDialog.CurrentDir = CacheLoc.Text;
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected_CacheBrowse", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
@@ -165,7 +163,6 @@ StartupNotify=true
 	[SignalHandler("pressed", nameof(ProjectBrowse))]
 	void OnPressed_ProjectBrowse()
 	{
-		AppDialogs.BrowseFolderDialog.WindowTitle = Tr("Location for Projects");
 		AppDialogs.BrowseFolderDialog.CurrentDir = ProjectLoc.Text;
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected_ProjectBrowse", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
