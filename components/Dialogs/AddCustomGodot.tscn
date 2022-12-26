@@ -38,18 +38,15 @@ margin_bottom = 700.0
 
 [node name="P" type="Panel" parent="PC/CC"]
 margin_left = 352.0
-margin_top = 225.0
+margin_top = 250.0
 margin_right = 672.0
-margin_bottom = 475.0
-rect_min_size = Vector2( 320, 250 )
+margin_bottom = 450.0
+rect_min_size = Vector2( 320, 200 )
 custom_styles/panel = SubResource( 5 )
 
 [node name="VB" type="VBoxContainer" parent="PC/CC/P"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="MC" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_right = 320.0
@@ -97,7 +94,7 @@ WindowMain = NodePath("../../../../../../../..")
 [node name="MCContent" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_top = 30.0
 margin_right = 320.0
-margin_bottom = 210.0
+margin_bottom = 160.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/margin_right = 8
@@ -109,7 +106,7 @@ custom_constants/margin_bottom = 8
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 312.0
-margin_bottom = 172.0
+margin_bottom = 122.0
 custom_constants/separation = 10
 
 [node name="TagHeader" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
@@ -149,18 +146,10 @@ margin_right = 304.0
 margin_bottom = 21.0
 text = "Browse"
 
-[node name="MonoEnabled" type="CheckBox" parent="PC/CC/P/VB/MCContent/VB"]
-margin_top = 120.0
-margin_right = 304.0
-margin_bottom = 139.0
-hint_tooltip = "Check this option if the version has C# support."
-custom_fonts/font = ExtResource( 2 )
-text = "Supports C#"
-
 [node name="MCButtons" type="MarginContainer" parent="PC/CC/P/VB"]
-margin_top = 214.0
+margin_top = 164.0
 margin_right = 320.0
-margin_bottom = 250.0
+margin_bottom = 200.0
 custom_constants/margin_bottom = 15
 
 [node name="HB" type="HBoxContainer" parent="PC/CC/P/VB/MCButtons"]

@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Godot;
 using Godot.Sharp.Extras;
+using SFile = System.IO.File;
 
 public class EditCustomGodot : ReferenceRect
 {
@@ -20,9 +21,6 @@ public class EditCustomGodot : ReferenceRect
 	[NodePath("PC/CC/P/VB/MCContent/VB/FilePath/Browse")]
 	Button _Browse = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/VB/MonoEnabled")]
-	CheckBox _MonoEnabled = null;
-
 	[NodePath("PC/CC/P/VB/MCButtons/HB/EditBtn")]
 	Button _EditBtn = null;
 
@@ -30,7 +28,7 @@ public class EditCustomGodot : ReferenceRect
 	Button _CancelBtn = null;
 #endregion
 
-    private GodotLineEntry _currentGLE = null;
+    GodotLineEntry _currentGLE = null;
 
 	public override void _Ready()
 	{
@@ -42,7 +40,6 @@ public class EditCustomGodot : ReferenceRect
         _currentGLE = gle;
 		_Tag.Text = _currentGLE.GodotVersion.Tag;
 		_Location.Text = _currentGLE.GodotVersion.GetExecutablePath();
-		_MonoEnabled.Pressed = _currentGLE.GodotVersion.IsMono;
 		Visible = true;
 	}
 #endregion
@@ -52,6 +49,8 @@ public class EditCustomGodot : ReferenceRect
 	void OnBrowsePressed() {
 		AppDialogs.BrowseGodotDialog.Connect("file_selected", this, "OnFileSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseGodotDialog.Connect("popup_hide", this, "OnBrowseDialogHidden", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.BrowseGodotDialog.CurrentFile = "";
+		AppDialogs.BrowseGodotDialog.CurrentPath = CentralStore.Settings.EnginePath.NormalizePath();
 		AppDialogs.BrowseGodotDialog.PopupCentered();
 	}
 
@@ -67,8 +66,27 @@ public class EditCustomGodot : ReferenceRect
 	[SignalHandler("pressed", nameof(_EditBtn))]
 	async Task OnEditPressed() {
 		if (_Tag.Text == "" || _Location.Text == "") {
-			AppDialogs.MessageDialog.ShowMessage(Tr("Edit Editor Version"),
-			Tr("You need to provide a name and a location for this editor version."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
+			Tr("You need to provide a tag and a location for this editor version."));
+			return;
+		}
+
+		if (!SFile.Exists(_Location.Text.NormalizePath())) {
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
+			Tr("The file doesn't exist."));
+			return;
+		}
+
+		bool isExtensionValid = false;
+		foreach (string extension in MainWindow._godotExtensions) {
+			if (_Location.Text.GetExtension() == extension) {
+				isExtensionValid = true;
+				break;
+			}
+		}
+		if (!isExtensionValid) {
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
+			Tr("The file's extension is invalid."));
 			return;
 		}
 
@@ -81,7 +99,7 @@ public class EditCustomGodot : ReferenceRect
 			}
 		}
 		if (isProblematicName) {
-			bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Add Editor Version"), Tr("This tag may cause problems with version detection when creating a project. Are you sure you want to continue?"));
+			bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Please Confirm..."), Tr("This tag may cause problems with version detection when creating a project."), Tr("Edit"), Tr("Cancel"));
 			if (!res) return;
 		}
 
@@ -89,8 +107,11 @@ public class EditCustomGodot : ReferenceRect
             if (version.Id == _currentGLE.GodotVersion.Id) {
                 version.Tag = _Tag.Text;
                 version.Location = _Location.Text.GetBaseDir();
-                version.ExecutableName = _Location.Text.GetFile();
-                version.IsMono = _MonoEnabled.Pressed;
+#if GODOT_MACOS || GODOT_OSX
+		version.ExecutableName = !version.Tag.ToLower().Contains("mono") ? "Godot" : "Godot_mono";
+#else
+		version.ExecutableName = _Location.Text.GetFile();
+#endif
             }
         }
 		CentralStore.Instance.SaveDatabase();

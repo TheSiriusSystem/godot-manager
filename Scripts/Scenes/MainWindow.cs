@@ -5,9 +5,9 @@ using Directory = System.IO.Directory;
 
 public class MainWindow : Control
 {
-	[NodePath("bg/Shell/Sidebar")]
-	ColorRect _sidebar = null;
+	[NodePath("bg/Shell/Sidebar")] ColorRect _sidebar = null;
 	Array<PageButton> _buttons;
+	public static string[] _godotExtensions;
 	[NodePath("bg/Shell/VC/TabContainer")] TabContainer _notebook = null;
 	[NodePath("bg/Shell/VC/TabContainer/Projects")] ProjectsPanel _projectsPanel = null;
 
@@ -46,6 +46,16 @@ public class MainWindow : Control
 		dlgs.SetAnchorsAndMarginsPreset(LayoutPreset.Wide);
 		dlgs.Name = "AppDialogs";
 		AddChild(dlgs);
+
+#if GODOT_WINDOWS || GODOT_UWP
+        _godotExtensions = new string[] {".exe"};
+#elif GODOT_LINUXBSD || GODOT_X11
+		_godotExtensions = new string[] {".x86", ".x86_64", ".32", ".64"};
+#elif GODOT_MACOS || GODOT_OSX
+		_godotExtensions = new string[] {".app"};
+#else
+		_godotExtensions = new string[] {".exe", ".x86", ".x86_64", ".32", ".64", ".app"};
+#endif
 
 		var res = CleanupCarriageReturns();
 
