@@ -98,12 +98,18 @@ public class GodotLineEntry : HBoxContainer
 				Label = value.Tag;
 				Source = value.Url;
 				Location = value.GetExecutablePath();
-				if (value.GithubVersion != null)
-					Filesize = Util.FormatSize(value.GithubVersion.PlatformDownloadSize);
-				if (value.MirrorVersion != null)
-					Filesize = Util.FormatSize(value.MirrorVersion.PlatformDownloadSize);
-				if (value.CustomEngine != null)
-					Filesize = Util.FormatSize(value.CustomEngine.DownloadSize);
+				File file = new File();
+				if (file.Open(Location, File.ModeFlags.Read) == Error.Ok) {
+					Filesize = Util.FormatSize(file.GetLen());
+				} else {
+					if (value.GithubVersion != null)
+						Filesize = Util.FormatSize(value.GithubVersion.PlatformDownloadSize);
+					else if (value.MirrorVersion != null)
+						Filesize = Util.FormatSize(value.MirrorVersion.PlatformDownloadSize);
+					else if (value.CustomEngine != null)
+						Filesize = Util.FormatSize(value.CustomEngine.DownloadSize);
+				}
+				file.Close();
 				if (_loc != null)
 					_loc.Visible = true;
 			}
@@ -240,9 +246,9 @@ public class GodotLineEntry : HBoxContainer
 	public string Label {
 		get => sLabel;
 		set {
-			sLabel = value + (Mono ? " - Mono" : "");
+			sLabel = value;
 			if (_label != null)
-				_label.Text = $"Godot {value + (Mono ? " - Mono" : "")}";
+				_label.Text = $"Godot {value}";
 		}
 	}
 
