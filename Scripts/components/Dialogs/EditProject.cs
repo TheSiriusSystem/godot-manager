@@ -3,6 +3,7 @@ using Godot;
 using Godot.Sharp.Extras;
 using Godot.Collections;
 using System.Linq;
+using Guid = System.Guid;
 using SFile = System.IO.File;
 using SDirectory = System.IO.Directory;
 using System.Text.RegularExpressions;
@@ -240,45 +241,39 @@ Button _CancelBtn = null;
 	}
 
 	[SignalHandler("pressed", nameof(_CancelBtn))]
-	async void OnCancelBtnPressed() {
+	void OnCancelBtnPressed() {
 		Visible = false;
 	}
 
 	[SignalHandler("gui_input", nameof(_Icon))]
 	void OnIconGuiInput(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseButton iemb) {
-			if (iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left)
-			{
-				AppDialogs.ImageFileDialog.Connect("file_selected", this, "OnFileSelected", null, (uint)ConnectFlags.Oneshot);
-				AppDialogs.ImageFileDialog.Connect("popup_hide", this, "OnFilePopupHide", null, (uint)ConnectFlags.Oneshot);
-				AppDialogs.ImageFileDialog.CurrentDir = ProjectFile.Location.GetBaseDir();
-				AppDialogs.ImageFileDialog.PopupCentered();
-			}
+		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left) {
+			AppDialogs.ImageFileDialog.Connect("file_selected", this, "OnFileSelected", null, (uint)ConnectFlags.Oneshot);
+			AppDialogs.ImageFileDialog.Connect("popup_hide", this, "OnFilePopupHide", null, (uint)ConnectFlags.Oneshot);
+			AppDialogs.ImageFileDialog.CurrentFile = "";
+			AppDialogs.ImageFileDialog.CurrentPath = (ProjectFile.Location.GetBaseDir() + "/").NormalizePath();
+			AppDialogs.ImageFileDialog.PopupCentered();
 		}
 	}
 
-	async Task OnFileSelected(string path) {
+	void OnFileSelected(string path) {
 		if (path == "")
 			return;
-		var pfPath = ProjectFile.Location.GetBaseDir().Replace(@"\", "/");
-		var copyPath = pfPath.PlusFile(path.GetFile());
+		string pfPath = ProjectFile.Location.GetBaseDir().Replace(@"\", "/");
+		string fPath;
 		if (path.StartsWith(pfPath)) {
-			IconPath = pfPath.GetProjectRoot(path);
-			_Icon.Texture = Util.LoadImage(path);
+			fPath = path;
 		} else {
-			if (SFile.Exists(copyPath)) {
-				bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Edit Project"), Tr("A icon of the same name already exists in your project's root. Do you want to overwrite it?"));
-				if (res) {
-					SFile.Delete(copyPath);
-				} else {
-					AppDialogs.ImageFileDialog.Visible = false;
-					return;
-				}
+			fPath = pfPath.PlusFile(path.GetFile());
+			if (SFile.Exists(fPath)) {
+				string backupPath = fPath.BaseName() + "_" + Guid.NewGuid().ToString() + fPath.GetExtension();
+				SFile.Move(fPath, backupPath);
+				AppDialogs.MessageDialog.ShowMessage(Tr("Previous Icon Renamed"), Tr($"A icon of the same name was found in your project's root. It has been renamed to \"{backupPath.GetFile().RStrip(".png")}\"."));
 			}
-			SFile.Copy(path, copyPath);
-			IconPath = pfPath.GetProjectRoot(copyPath);
-			_Icon.Texture = Util.LoadImage(copyPath);
+			SFile.Copy(path, fPath);
 		}
+		IconPath = pfPath.GetProjectRoot(fPath);
+		_Icon.Texture = Util.LoadImage(fPath);
 		AppDialogs.ImageFileDialog.Visible = false;
 	}
 
