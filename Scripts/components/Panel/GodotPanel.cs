@@ -255,16 +255,15 @@ public class GodotPanel : Panel
 	public async Task CheckForUpdates()
 	{
 		MirrorSite site = null;
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Loading Editor Downloads"));
 		if (DownloadSource.Selected == 0)
 		{
-			AppDialogs.BusyDialog.UpdateHeader(Tr("Grabbing information from Github"));
-			AppDialogs.BusyDialog.UpdateByline(Tr("Getting the latest version information from Github for Godot Engine..."));
+			AppDialogs.BusyDialog.UpdateByline(Tr("Connecting to GitHub..."));
 		}
 		else
 		{
 			site = CentralStore.Mirrors[DownloadSource.Selected - 1];
-			AppDialogs.BusyDialog.UpdateHeader(string.Format(Tr("Grabbing information for mirror {0}"), site.Name));
-			AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Grabbing the latest version information for mirror {0} for Godot Engine..."), site.Name));
+			AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Connecting to {0}..."), site.Name));
 		}
 		AppDialogs.BusyDialog.ShowDialog();
 		if (DownloadSource.Selected == 0)
@@ -486,17 +485,12 @@ public class GodotPanel : Panel
 		CentralStore.Instance.SaveDatabase();
 	}
 
-	async void OnLinkSettingsClicked(GodotLineEntry gle)
+	void OnLinkSettingsClicked(GodotLineEntry gle)
 	{
 		if (gle.SettingsLinked)
 		{
-			bool res = await AppDialogs.YesNoDialog.ShowDialog("Unlink Settings", "Do you want to unlink the settings for this editor version?");
-			if (res)
-			{
-				gle.GodotVersion.SharedSettings = string.Empty;
-				gle.SettingsLinked = false;
-			}
-
+			gle.GodotVersion.SharedSettings = string.Empty;
+			gle.SettingsLinked = false;
 			return;
 		}
 		var list = new Godot.Collections.Dictionary<string, string>();
@@ -681,8 +675,8 @@ public class GodotPanel : Panel
 	}
 
 	public async Task GatherGithubReleases() {
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Releases from Github..."));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Connecting..."));
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Loading Editor Downloads"));
+		AppDialogs.BusyDialog.UpdateByline(Tr("Connecting to GitHub..."));
 		AppDialogs.BusyDialog.ShowDialog();
 		downloadedBytes = 0;
 		Github.Github.Instance.Connect("chunk_received", this, "OnChunkReceived");
@@ -692,13 +686,11 @@ public class GodotPanel : Panel
 		}
 
 		Github.Github.Instance.Disconnect("chunk_received", this, "OnChunkReceived");
-		
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Processing Release Information from Github..."));
-		AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Processing {0}/{1}"),0,task.Result.Count));
+
 		int i = 0;
 		foreach(Github.Release release in task.Result) {
 			i++;
-			AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Processing {0}/{1}"),i,task.Result.Count));
+			AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Releases Processed: {0}/{1}"), i, task.Result.Count));
 			GithubVersion gv = GithubVersion.FromAPI(release);
 			CentralStore.GHVersions.Add(gv);
 			await this.IdleFrame();
@@ -713,25 +705,23 @@ public class GodotPanel : Panel
 		MirrorSite mirror = CentralStore.Mirrors.Where(x => x.Id == id).FirstOrDefault<MirrorSite>();
 		if (mirror == null)
 			return;
-		
-		AppDialogs.BusyDialog.UpdateHeader(string.Format(Tr("Fetching Releases from {0}..."), mirror.Name));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Connecting..."));
+
+		AppDialogs.BusyDialog.UpdateHeader("Loading Editor Downloads");
+		AppDialogs.BusyDialog.UpdateByline(Tr(string.Format(Tr("Connecting to {0}..."), mirror.Name)));
 		AppDialogs.BusyDialog.ShowDialog();
 		downloadedBytes = 0;
 		Mirrors.MirrorManager.Instance.Connect("chunk_received", this, "OnChunkReceived");
 		var task = Mirrors.MirrorManager.Instance.GetEngineLinks(id);
-		
+
 		while(!task.IsCompleted)
 			await this.IdleFrame();
-		
+
 		Mirrors.MirrorManager.Instance.Disconnect("chunk_received", this, "OnChunkReceived");
 
-		AppDialogs.BusyDialog.UpdateHeader(string.Format(Tr("Processing Release Information from {0}..."), mirror.Name));
-		AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Processing {0}/{1}"), 0, task.Result.Count));
 		int i = 0;
 		foreach (MirrorVersion version in task.Result) {
 			i++;
-			AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Processing {0}/{1}"), i, task.Result.Count));
+			AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Releases Processed: {0}/{1}"), i, task.Result.Count));
 			CentralStore.MRVersions[id].Add(version);
 			await this.IdleFrame();
 		}
