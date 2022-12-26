@@ -2,8 +2,8 @@ using Godot;
 
 public class SceneManager : Control
 {
-	static Vector2 DEFAULT_RESOLUTION = new Vector2(1024,700);
-	static Vector2 UPDATE_RESOLUTION = new Vector2(600,50);
+	static Vector2 DEFAULT_RESOLUTION = new Vector2(1024, 700);
+	static Vector2 UPDATE_RESOLUTION = new Vector2(600, 50);
 
 	PackedScene mainWindow = GD.Load<PackedScene>("res://Scenes/MainWindow.tscn");
 	PackedScene updateWindow = GD.Load<PackedScene>("res://Scenes/UpdateWindow.tscn");
