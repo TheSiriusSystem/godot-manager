@@ -61,13 +61,12 @@ text = "Version x.x.x"
 align = 1
 valign = 1
 
-[node name="LoadingLabel" type="Label" parent="."]
+[node name="ErrorText" type="Label" parent="."]
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = -107.0
 margin_bottom = -80.0
 custom_fonts/font = ExtResource( 1 )
-text = "Loading..."
 align = 1
 valign = 1

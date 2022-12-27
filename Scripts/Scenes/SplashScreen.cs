@@ -4,7 +4,7 @@ using Godot.Sharp.Extras;
 public class SplashScreen : Control
 {
 	[NodePath] private Label VersionInfo = null;
-	[NodePath] private Label LoadingLabel = null;
+	[NodePath] private Label ErrorText = null;
 	private Thread _thread;
 
 	// Called when the node enters the scene tree for the first time.
@@ -26,7 +26,7 @@ public class SplashScreen : Control
 		ResourceInteractiveLoader loader = ResourceLoader.LoadInteractive("res://Scenes/SceneManager.tscn");
 		if (loader == null)
 		{
-			LoadingLabel.Text = "Failed to load \"Scenes/SceneManager.tscn\"!";
+			ErrorText.Text = "An error occurred while loading the scene manager.";
 			return;
 		}
 
@@ -39,7 +39,7 @@ public class SplashScreen : Control
 				break;
 			} else if (err != Error.Ok)
 			{
-				LoadingLabel.Text = "An error occurred.\nError Code: " + err.ToString();
+				ErrorText.Text = "An error occurred.\nError Code: " + err.ToString();
 				break;
 			}
 		} while (true);
