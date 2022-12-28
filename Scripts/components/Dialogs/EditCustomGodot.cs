@@ -50,7 +50,7 @@ public class EditCustomGodot : ReferenceRect
 		AppDialogs.BrowseGodotDialog.Connect("file_selected", this, "OnFileSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseGodotDialog.Connect("popup_hide", this, "OnBrowseDialogHidden", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseGodotDialog.CurrentFile = "";
-		AppDialogs.BrowseGodotDialog.CurrentPath = CentralStore.Settings.EnginePath.NormalizePath();
+		AppDialogs.BrowseGodotDialog.CurrentPath = (CentralStore.Settings.EnginePath + "/").NormalizePath();
 		AppDialogs.BrowseGodotDialog.PopupCentered();
 	}
 

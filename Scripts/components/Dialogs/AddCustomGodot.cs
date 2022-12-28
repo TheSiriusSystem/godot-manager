@@ -48,11 +48,15 @@ public class AddCustomGodot : ReferenceRect
 		AppDialogs.BrowseGodotDialog.Connect("file_selected", this, "OnFileSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseGodotDialog.Connect("popup_hide", this, "OnBrowseDialogHidden", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseGodotDialog.CurrentFile = "";
-		AppDialogs.BrowseGodotDialog.CurrentPath = CentralStore.Settings.EnginePath.NormalizePath();
+		AppDialogs.BrowseGodotDialog.CurrentPath = (CentralStore.Settings.EnginePath + "/").NormalizePath();
 		AppDialogs.BrowseGodotDialog.PopupCentered();
 	}
 
 	void OnFileSelected(string file) {
+		_Tag.Text = file.GetFile();
+		foreach (string str in new string[] {"godot_", "_console", "_win32", "_win64", "_stable", "-stable", file.GetExtension()}) {
+			_Tag.Text = _Tag.Text.ReplaceN(str, "");
+		}
 		_Location.Text = file;
 	}
 
