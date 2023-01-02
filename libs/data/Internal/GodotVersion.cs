@@ -42,12 +42,12 @@ public class GodotVersion : Object {
 	}
 
 	public string GetExecutablePath() {
-		string exe_path = "";
+		string exePath = "";
 #if GODOT_MACOS || GODOT_OSX
-		exe_path = Location.Join(!IsMono ? "Godot.app" : "Godot_mono.app", "Contents", "MacOS", ExecutableName);
+		exePath = Location.Join(!IsMono ? "Godot.app" : "Godot_mono.app", "Contents", "MacOS", ExecutableName);
 #else
-		exe_path = Location.Join(ExecutableName);
+		exePath = Location.Join(ExecutableName);
 #endif
-		return exe_path.NormalizePath();
+		return exePath.NormalizePath();
 	}
 }
