@@ -56,50 +56,20 @@ public class SettingsPanel : Panel
 	[NodePath("VB/MC/TC/General/GC/GodotDefault")]
 	OptionButton _defaultEngine = null;
 
-	[NodePath("VB/MC/TC/General/GC/CheckForUpdates")]
-	CheckBox _checkForUpdates = null;
-
-	[NodePath("VB/MC/TC/General/GC/HBCI/UpdateCheckInterval")]
-	OptionButton _updateCheckInterval = null;
-
-	[NodePath("VB/MC/TC/General/GC/SIContainer/TitleBar")]
+	[NodePath("VB/MC/TC/General/GC/TitleBar")]
 	private CheckBox _useSystemTitlebar = null;
-
-	[NodePath("VB/MC/TC/General/GC/SIContainer/CDELabel")]
-	private Label _cdeLabel = null;
-	
-	[NodePath("VB/MC/TC/General/GC/SIContainer/CreateDesktopEntry")]
-	private Button _createDesktopEntry = null;
-
-	[NodePath("VB/MC/TC/General/GC/SIContainer/RemoveDesktopEntry")]
-	private Button _removeDesktopEntry = null;
 
 	[NodePath("VB/MC/TC/General/GC/UseLastMirror")]
 	CheckBox _useLastMirror = null;
 
-	[NodePath("VB/MC/TC/General/GC/HBCI/CheckBox")]
-	CheckBox _useProxy = null;
-
-	[NodePath("VB/MC/TC/General/GC/HBCI/ProxyContainer")]
-	HBoxContainer _proxyContainer = null;
-
-	[NodePath("VB/MC/TC/General/GC/HBCI/ProxyContainer/ProxyHost")]
-	LineEdit _proxyHost = null;
-
-	[NodePath("VB/MC/TC/General/GC/HBCI/ProxyContainer/ProxyPort")]
-	LineEdit _proxyPort = null;
-
-	[NodePath("VB/MC/TC/General/GC/VBLO/NoConsole")]
+	[NodePath("VB/MC/TC/General/GC/HBLO/NoConsole")]
 	CheckBox _noConsole = null;
 
-	[NodePath("VB/MC/TC/General/GC/VBLO/EditorProfiles")]
+	[NodePath("VB/MC/TC/General/GC/HBLO/EditorProfiles")]
 	CheckBox _editorProfiles = null;
 
 	[NodePath("VB/MC/TC/General/GC/MirrorTabs/Asset Library")]
 	ItemListWithButtons _assetMirror = null;
-
-	// [NodePath("VB/MC/TC/General/GC/MirrorTabs/Godot Engine")]
-	// ItemListWithButtons _godotMirror = null;
 	#endregion
 
 	#region Projects Page
@@ -124,9 +94,6 @@ public class SettingsPanel : Panel
 	Label _versionInfo = null;
 	[NodePath("VB/MC/TC/About/MC/VB/HBHeader/VB/EmailWebsite")]
 	RichTextLabel _emailWebsite = null;
-
-	[NodePath("VB/MC/TC/About/MC/VB/HBHeader/VB2/CheckUpdatesGM")]
-	Button _checkForUpdatesGM = null;
 
 	[NodePath("VB/MC/TC/About/MC/VB/MC/BuiltWith")]
 	RichTextLabel _builtWith = null;
@@ -186,7 +153,6 @@ public class SettingsPanel : Panel
 	public override void _Ready()
 	{
 		this.OnReady();
-		UpdateShortcutButtons();
 
 		_builtWith.BbcodeText = BuildVersionInfo(); //VERSION_INFORMATION;
 		_undoActions = new ActionStack();
@@ -202,17 +168,6 @@ public class SettingsPanel : Panel
 
 		GetParent<TabContainer>().Connect("tab_changed", this, "OnPageChanged");
 		_versionInfo.Text = $"Version {VERSION.GodotManager}-{VERSION.Channel}";
-		_updateCheckInterval.Disabled = !_checkForUpdates.Pressed;
-	}
-	
-	void UpdateShortcutButtons() {
-		_cdeLabel.Visible = Platform.OperatingSystem == "Linux (or BSD)";
-		_createDesktopEntry.Visible = Platform.OperatingSystem == "Linux (or BSD)";
-		_removeDesktopEntry.Visible = Platform.OperatingSystem == "Linux (or BSD)";
-#if GODOT_X11 || GODOT_LINUXBSD
-		_createDesktopEntry.Disabled = CentralStore.Settings.ShortcutMade;
-		_removeDesktopEntry.Disabled = !CentralStore.Settings.ShortcutMade;
-#endif
 	}
 
 	void updateActionButtons() {
@@ -257,14 +212,8 @@ public class SettingsPanel : Panel
 		_cacheInstallLocation.Text = CentralStore.Settings.CachePath.GetOSDir().NormalizePath();
 		_defaultProjectView.Select(_views.IndexOf(CentralStore.Settings.DefaultView));
 		PopulateGodotEngine();
-		_checkForUpdates.Pressed = CentralStore.Settings.CheckForUpdates;
 		_useSystemTitlebar.Pressed = CentralStore.Settings.UseSystemTitlebar;
 		_useLastMirror.Pressed = CentralStore.Settings.UseLastMirror;
-		_useProxy.Pressed = CentralStore.Settings.UseProxy;
-		_proxyContainer.Visible = CentralStore.Settings.UseProxy;
-		_proxyHost.Text = CentralStore.Settings.ProxyHost;
-		_proxyPort.Text = $"{CentralStore.Settings.ProxyPort}";
-		_updateCheckInterval.Select(GetIntervalIndex());
 		_editorProfiles.Pressed = CentralStore.Settings.SelfContainedEditors;
 		_noConsole.Pressed = CentralStore.Settings.NoConsole;
 
@@ -302,13 +251,8 @@ public class SettingsPanel : Panel
 		CentralStore.Settings.CachePath = _cacheInstallLocation.Text.GetOSDir().NormalizePath();
 		CentralStore.Settings.DefaultView = _defaultProjectView.GetItemText(_defaultProjectView.Selected);
 		CentralStore.Settings.DefaultEngine = (string)_defaultEngine.GetItemMetadata(_defaultEngine.Selected);
-		CentralStore.Settings.CheckForUpdates = _checkForUpdates.Pressed;
-		CentralStore.Settings.CheckInterval = System.TimeSpan.FromHours(_dCheckInterval[_updateCheckInterval.Selected]);
 		CentralStore.Settings.UseSystemTitlebar = _useSystemTitlebar.Pressed;
 		CentralStore.Settings.UseLastMirror = _useLastMirror.Pressed;
-		CentralStore.Settings.UseProxy = _useProxy.Pressed;
-		CentralStore.Settings.ProxyHost = _proxyHost.Text;
-		CentralStore.Settings.ProxyPort = _proxyPort.Text.ToInt();
 		CentralStore.Settings.SelfContainedEditors = _editorProfiles.Pressed;
 
 		OS.WindowBorderless = !CentralStore.Settings.UseSystemTitlebar;
@@ -566,202 +510,6 @@ public class SettingsPanel : Panel
 		CentralStore.Settings.DefaultEngine = engine;
 		await GetNode<GodotPanel>("/root/MainWindow/bg/Shell/VC/TabContainer/Godot").PopulateList();
 	}
-
-	[SignalHandler("toggled", nameof(_checkForUpdates))]
-	void OnToggleCheckForUpdates(bool toggle) {
-		_updateCheckInterval.Disabled = !toggle;
-		bool oldVal = CentralStore.Settings.CheckForUpdates;
-		if (!bPInternal) {
-			_undoActions.Push(() => {
-				CentralStore.Settings.CheckForUpdates = oldVal; 
-				_checkForUpdates.Pressed = oldVal;
-			});
-			updateActionButtons();
-		}
-		CentralStore.Settings.CheckForUpdates = toggle;
-	}
-
-	[SignalHandler("item_selected", nameof(_updateCheckInterval))]
-	void OnUpdateCheckInterval(int index) {
-		TimeSpan oldVal = CentralStore.Settings.CheckInterval;
-		if (!bPInternal) {
-			_undoActions.Push(() => {
-				CentralStore.Settings.CheckInterval = oldVal;
-				_updateCheckInterval.Select(GetIntervalIndex());
-			});
-			updateActionButtons();
-		}
-		CentralStore.Settings.CheckInterval = System.TimeSpan.FromHours(_dCheckInterval[index]);
-	}
-
-	[SignalHandler("pressed", nameof(_useProxy))]
-	void OnPressed_UseProxy() {
-		bool oldVal = CentralStore.Settings.UseProxy;
-		if (!bPInternal) {
-			_undoActions.Push(() => {
-				CentralStore.Settings.UseProxy = oldVal;
-				_proxyContainer.Visible = oldVal;
-				_useProxy.Pressed = oldVal;
-			});
-			updateActionButtons();
-		}
-		_proxyContainer.Visible = _useProxy.Pressed;
-		CentralStore.Settings.UseProxy = _useProxy.Pressed;
-	}
-
-	[SignalHandler("text_changed", nameof(_proxyHost))]
-	void OnTextChanged_ProxyHost(string newText) {
-		string oldVal = CentralStore.Settings.ProxyHost;
-		if (!bPInternal) {
-			_undoActions.Push(() => {
-				CentralStore.Settings.ProxyHost = oldVal;
-				_proxyHost.Text = oldVal;
-			});
-			updateActionButtons();
-		}
-		CentralStore.Settings.ProxyHost = _proxyHost.Text;
-	}
-	
-	[SignalHandler("text_changed", nameof(_proxyPort))]
-	void OnTextChanged_ProxyPort(string newText) {
-		if (!bPInternal) {
-			if (newText != string.Empty && IsNumeric.IsMatch(newText)) {
-				int oldVal = CentralStore.Settings.ProxyPort;
-				_undoActions.Push(() => {
-					CentralStore.Settings.ProxyPort = oldVal;
-					_proxyPort.Text = $"{oldVal}";
-				});
-				CentralStore.Settings.ProxyPort = _proxyPort.Text.ToInt();
-			} else {
-				if (newText != string.Empty)
-					_proxyPort.Text = newText.Substr(0,newText.Length-1);
-			}
-			updateActionButtons();
-		}
-	}
-
-	#if GODOT_X11 || GODOT_LINUXBSD
-	[SignalHandler("pressed", nameof(_createDesktopEntry))]
-	async void OnPressed_CreateDesktopEntry()
-	{
-		string iconPath = OS.GetExecutablePath().GetBaseDir().Join("godot-manager.svg");
-		string executablePath = OS.GetExecutablePath();
-
-		var allUsers = await AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Create Desktop Entry"),
-			Tr("Do you wish to integrate for all users, or just your user?"), Tr("All Users"),
-			Tr("Just You"), Tr("Cancel"));
-		bool needRoot = false;
-		if (allUsers == YesNoCancelDialog.ActionResult.FirstAction)
-			needRoot = true;
-		else if (allUsers == YesNoCancelDialog.ActionResult.CancelAction)
-			return;
-
-		
-		using (var fh = new File())
-		{
-			var err = fh.Open("res://godot-manager.dat", File.ModeFlags.Read);
-			var size = fh.GetLen();
-			var svg = fh.GetBuffer((long)size);
-			fh.Close();
-			System.IO.File.WriteAllBytes(iconPath,svg);
-		}
-		
-		if (needRoot)
-		{
-			iconPath = "/opt/GodotManager/godot-manager.svg";
-		}
-		
-		System.IO.File.WriteAllText("/tmp/godot-manager.desktop", 
-			string.Format(FirstRunWizard.DESKTOP_ENTRY, iconPath, executablePath), Encoding.ASCII);
-		if (needRoot)
-		{
-			bool needToCopy = false;
-			if (!executablePath.StartsWith("/opt/GodotManager"))
-			{
-				executablePath = "/opt/GodotManager/GodotManager.x86_64";
-				System.IO.File.WriteAllText("/tmp/godot-manager.desktop",
-					string.Format(FirstRunWizard.DESKTOP_ENTRY, iconPath, executablePath), Encoding.ASCII);
-				needToCopy = true;
-			}
-
-			using (var fh = new File())
-			{
-				fh.Open("/tmp/godot-installer.sh", File.ModeFlags.Write);
-				fh.StoreString("#!/bin/bash\n\n");
-				if (needToCopy)
-				{
-					if (System.IO.Directory.Exists("/opt/GodotManager")) fh.StoreString("rm -rf /opt/GodotManager\n");
-					fh.StoreString("mkdir -p /opt/GodotManager\n");
-					fh.StoreString($"cp -r {OS.GetExecutablePath().GetBaseDir()}/* /opt/GodotManager/\n");
-				}
-				fh.StoreString("xdg-desktop-menu install --mode system /tmp/godot-manager.desktop\n");
-				fh.StoreString("xdg-desktop-menu forceupdate --mode system\n");
-
-				fh.Close();
-				Util.Chmod("/tmp/godot-installer.sh", 0755);
-				var execre = Util.PkExec("/tmp/godot-installer.sh", Tr("Install Shortcut"),
-					Tr("Godot Manager needs Administrative privileges to complete the requested actions."));
-				GD.Print($"Execre: {execre}");
-				if (execre > 0)
-				{
-					AppDialogs.MessageDialog.ShowMessage(Tr("Install Shortcut"), Tr("Failed to install shortcut."));
-					return;
-				}
-				System.IO.File.Delete("/tmp/godot-installer.sh");
-			}
-		}
-		else
-		{
-			Util.XdgDesktopInstall("/tmp/godot-manager.desktop");
-			Util.XdgDesktopUpdate();
-		}
-		System.IO.File.Delete("/tmp/godot-manager.desktop");
-		CentralStore.Settings.ShortcutMade = true;
-		CentralStore.Settings.ShortcutRoot = needRoot;
-		CentralStore.Instance.SaveDatabase();
-		UpdateShortcutButtons();
-	}
-
-	[SignalHandler("pressed", nameof(_removeDesktopEntry))]
-	async void OnPressed_RemoveDesktopEntry()
-	{
-		if (CentralStore.Settings.ShortcutMade)
-		{
-			if (CentralStore.Settings.ShortcutRoot)
-			{
-				using (var fh = new File())
-				{
-					var res = fh.Open("/tmp/godot-uninstaller.sh", File.ModeFlags.Write);
-					fh.StoreString("#!/bin/bash\n\n");
-					fh.StoreString("xdg-desktop-menu uninstall --mode system godot-manager.desktop\n");
-					fh.StoreString("xdg-desktop-menu forceupdate --mode system\n");
-
-					fh.Close();
-					Util.Chmod("/tmp/godot-uninstaller.sh", 0755);
-					var execre = Util.PkExec("/tmp/godot-uninstaller.sh", Tr("Remove Shortcut"),
-						Tr("Godot Manager needs Administrative privileges to complete the requested actions."));
-					GD.Print($"execre: {execre}");
-					if (execre > 0)
-					{
-						AppDialogs.MessageDialog.ShowMessage(Tr("Remove Shortcut"), Tr("Failed to remove shortcut.") );
-						return;
-					}
-					System.IO.File.Delete("/tmp/godot-uninstaller.sh");
-				}
-			}
-			else
-			{
-				Util.XdgDesktopUninstall("godot-manager.desktop");
-				Util.XdgDesktopUpdate();
-			}
-
-			CentralStore.Settings.ShortcutMade = false;
-			CentralStore.Settings.ShortcutRoot = false;
-			CentralStore.Instance.SaveDatabase();
-			UpdateShortcutButtons();
-		}
-	}
-	#endif
 
 	[SignalHandler("toggled", nameof(_noConsole))]
 	void OnNoConsole(bool toggle) {
@@ -1040,35 +788,6 @@ public class SettingsPanel : Panel
 	[SignalHandler("meta_clicked", nameof(_contributors))]
 	void OnMetaClicked(object meta) {
 		OS.ShellOpen((string)meta);
-	}
-
-	[SignalHandler("pressed", nameof(_checkForUpdatesGM))]
-	async void OnCheckForUpdatesGM_Pressed() {
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Check for Updates"));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Connecting to GitHub..."));
-		AppDialogs.BusyDialog.ShowDialog();
-		var res = Github.Github.Instance.GetLatestManagerRelease();
-		while (!res.IsCompleted) {
-			await this.IdleFrame();
-		}
-
-		if (res.Result == null) {
-			AppDialogs.BusyDialog.HideDialog();
-			AppDialogs.MessageDialog.ShowMessage(Tr("Check for Updates"), 
-				Tr("Failed to get release information from GitHub."));
-			return;
-		}
-
-		Github.Release rel = res.Result;
-		if (rel.TagName != $"v{VERSION.GodotManager}") {
-			AppDialogs.BusyDialog.HideDialog();
-			AppDialogs.NewVersion.ShowDialog(rel,true);
-			AppDialogs.NewVersion.Connect("download_manager_update", this, "OnDownloadManagerUpdate");
-		} else {
-			AppDialogs.BusyDialog.HideDialog();
-			AppDialogs.MessageDialog.ShowMessage(Tr("Check for Updates"),
-				Tr("Godot Manager is up-to-date."));
-		}
 	}
 
 	void OnDownloadManagerUpdate(Github.Release release) {
