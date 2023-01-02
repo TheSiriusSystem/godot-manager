@@ -144,7 +144,7 @@ margin_top = 60.0
 margin_right = 304.0
 margin_bottom = 79.0
 custom_fonts/font = ExtResource( 1 )
-text = "Godot Version:"
+text = "Editor Version:"
 
 [node name="GodotVersions" type="OptionButton" parent="PC/CC/P/VB/MCContent/VB"]
 margin_top = 89.0

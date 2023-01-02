@@ -254,7 +254,7 @@ margin_top = 105.0
 margin_right = 72.0
 margin_bottom = 122.0
 custom_fonts/font = ExtResource( 6 )
-text = "Godot Ver:"
+text = "Editor Version:"
 align = 2
 
 [node name="GodotVersion" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
