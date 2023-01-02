@@ -16,11 +16,11 @@ _global_script_class_icons={
 
 config/name="Godot Manager"
 config/description="A complete solution for Godot, allowing you to manage projects and versions on the fly."
-run/main_scene="res://Scenes/SplashScreen.tscn"
+run/main_scene="res://Scenes/MainWindow.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Godot-Manager"
 run/low_processor_mode=true
-boot_splash/show_image=false
+boot_splash/image="res://Assets/images/splash.png"
 boot_splash/fullsize=false
 boot_splash/use_filter=false
 boot_splash/bg_color=Color( 0.137255, 0.14902, 0.180392, 1 )

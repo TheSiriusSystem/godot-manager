@@ -297,7 +297,7 @@ public class SettingsPanel : Panel
 	}
 
 	void UpdateSettings() {
-		GetTree().Root.GetNode<MainWindow>("SceneManager/MainWindow").EnsureDirStructure();
+		GetTree().Root.GetNode<MainWindow>("MainWindow").EnsureDirStructure();
 		CentralStore.Settings.EnginePath = _godotInstallLocation.Text.GetOSDir().NormalizePath();
 		CentralStore.Settings.CachePath = _cacheInstallLocation.Text.GetOSDir().NormalizePath();
 		CentralStore.Settings.DefaultView = _defaultProjectView.GetItemText(_defaultProjectView.Selected);
@@ -312,8 +312,8 @@ public class SettingsPanel : Panel
 		CentralStore.Settings.SelfContainedEditors = _editorProfiles.Pressed;
 
 		OS.WindowBorderless = !CentralStore.Settings.UseSystemTitlebar;
-		GetTree().Root.GetNode<Titlebar>("SceneManager/MainWindow/bg/Shell/VC/TitleBar").Visible = !CentralStore.Settings.UseSystemTitlebar;
-		GetTree().Root.GetNode<Control>("SceneManager/MainWindow/bg/Shell/VC/VisibleSpacer").Visible = CentralStore.Settings.UseSystemTitlebar;
+		GetTree().Root.GetNode<Titlebar>("MainWindow/bg/Shell/VC/TitleBar").Visible = !CentralStore.Settings.UseSystemTitlebar;
+		GetTree().Root.GetNode<Control>("MainWindow/bg/Shell/VC/VisibleSpacer").Visible = CentralStore.Settings.UseSystemTitlebar;
 
 		foreach (GodotVersion version in CentralStore.Versions) {
 			if (_editorProfiles.Pressed) {
@@ -559,12 +559,12 @@ public class SettingsPanel : Panel
 			_undoActions.Push(async () => {
 				CentralStore.Settings.DefaultEngine = oldVal;
 				_defaultEngine.Select(oldIndex);
-				await GetNode<GodotPanel>("/root/SceneManager/MainWindow/bg/Shell/VC/TabContainer/Godot").PopulateList();
+				await GetNode<GodotPanel>("/root/MainWindow/bg/Shell/VC/TabContainer/Godot").PopulateList();
 			});
 			updateActionButtons();
 		}
 		CentralStore.Settings.DefaultEngine = engine;
-		await GetNode<GodotPanel>("/root/SceneManager/MainWindow/bg/Shell/VC/TabContainer/Godot").PopulateList();
+		await GetNode<GodotPanel>("/root/MainWindow/bg/Shell/VC/TabContainer/Godot").PopulateList();
 	}
 
 	[SignalHandler("toggled", nameof(_checkForUpdates))]
