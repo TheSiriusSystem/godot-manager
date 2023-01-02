@@ -1,11 +1,8 @@
-using System.Threading.Tasks;
 using Godot;
 using Godot.Sharp.Extras;
 using Godot.Collections;
-using System.Linq;
 using Guid = System.Guid;
 using SFile = System.IO.File;
-using SDirectory = System.IO.Directory;
 using System.Text.RegularExpressions;
 
 public class EditProject : ReferenceRect
@@ -16,31 +13,18 @@ public class EditProject : ReferenceRect
 #endregion
 
 #region Node Paths
-[NodePath("PC/CC/P/VB/MCContent/TC")] private TabContainer _TabContainer = null;
-
 #region General Tab
-[NodePath("PC/CC/P/VB/MCContent/TC/General/VC/HC/ProjectIcon")]
+[NodePath("PC/CC/P/VB/MCContent/VC/HC/ProjectIcon")]
 TextureRect _Icon = null;
 
-[NodePath("PC/CC/P/VB/MCContent/TC/General/VC/HC/MC/VC/ProjectName")]
+[NodePath("PC/CC/P/VB/MCContent/VC/HC/MC/VC/ProjectName")]
 LineEdit _ProjectName = null;
 
-[NodePath("PC/CC/P/VB/MCContent/TC/General/VC/GodotVersion")]
+[NodePath("PC/CC/P/VB/MCContent/VC/GodotVersion")]
 OptionButton _GodotVersion = null;
 
-[NodePath("PC/CC/P/VB/MCContent/TC/General/VC/ProjectDescription")]
+[NodePath("PC/CC/P/VB/MCContent/VC/ProjectDescription")]
 TextEdit _ProjectDescription = null;
-#endregion
-
-#region Plugins Tab
-[NodePath("PC/CC/P/VB/MCContent/TC/Addons/VBoxContainer")]
-VBoxContainer _VBC = null;
-
-[NodePath("PC/CC/P/VB/MCContent/TC/Addons/VBoxContainer/ScrollContainer/MC/List")]
-VBoxContainer _PluginList = null;
-
-[NodePath("PC/CC/P/VB/MCContent/TC/Addons/ErrorText")]
-Label _PluginErrorText = null;
 #endregion
 
 #region Dialog Controls
@@ -116,34 +100,6 @@ Button _CancelBtn = null;
 
 #region Public Functions
 	public void ShowDialog(ProjectFile pf) {
-		foreach (AddonLineEntry node in _PluginList.GetChildren()) node.QueueFree();
-
-		if (pf.Location.EndsWith("engine.cfg") && !SDirectory.Exists(pf.Location.GetBaseDir() + "/addons")) {
-			_VBC.Visible = false;
-			_PluginErrorText.Visible = true;
-		} else {
-			_VBC.Visible = true;
-
-			foreach (AssetPlugin plgn in CentralStore.Plugins)
-			{
-				string imgLoc =
-					$"{CentralStore.Settings.CachePath}/images/assets/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
-						.NormalizePath();
-				AddonLineEntry ale = ALineEntry.Instance<AddonLineEntry>();
-
-				ale.Icon = Util.LoadImage(imgLoc);
-				if (ale.Icon == null) ale.Icon = DefaultIcon;
-
-				ale.Title = plgn.Asset.Title;
-				ale.Version = plgn.Asset.VersionString;
-				ale.SetMeta("asset", plgn);
-				_PluginList.AddChild(ale);
-				ale.Connect("install_clicked", this, "OnToggledPlugin");
-			}
-
-			_PluginErrorText.Visible = false;
-		}
-
 		ProjectFile = pf;
 		var texture = Util.LoadImage(ProjectFile.Location.GetResourceBase(IconPath));
 		if (texture == null)
@@ -160,69 +116,10 @@ Button _CancelBtn = null;
 				_GodotVersion.Selected = _GodotVersion.GetItemCount()-1;
 		}
 
-		foreach(AddonLineEntry ale in _PluginList.GetChildren())
-		{
-			ale.Installed = false;
-		}
-
 		if (ProjectFile.Assets == null)
 			ProjectFile.Assets = new Array<string>();
 
-		foreach(string assetId in ProjectFile.Assets) {
-			foreach(AddonLineEntry ale in _PluginList.GetChildren()) {
-				AssetPlugin plugin = (AssetPlugin)ale.GetMeta("asset");
-				if (plugin.Asset.AssetId == assetId)
-				{
-					ale.Installed = true;
-				}
-			}
-		}
-
 		Visible = true;
-		_PluginList.GetParent().GetParent<ScrollContainer>().ScrollVertical = 0;
-		_TabContainer.CurrentTab = 0;
-	}
-#endregion
-
-#region Private Functions
-	void UpdatePlugins() {
-		Array<AssetPlugin> plugins = new Array<AssetPlugin>();
-		Array<AssetPlugin> install = new Array<AssetPlugin>();
-		Array<AssetPlugin> remove = new Array<AssetPlugin>();
-
-		foreach(AddonLineEntry ale in _PluginList.GetChildren()) {
-			if (ale.Installed)
-				plugins.Add((AssetPlugin)ale.GetMeta("asset"));
-		}
-
-		var res = from asset in plugins
-				where !ProjectFile.Assets.Contains(asset.Asset.AssetId)
-				select asset;
-
-		foreach(AssetPlugin asset in res.AsEnumerable<AssetPlugin>())
-			install.Add(asset);
-		
-		foreach(string assetId in ProjectFile.Assets) {
-			var ares = from asset in plugins
-						where asset.Asset.AssetId == assetId
-						select asset;
-			if (ares.FirstOrDefault() == null)
-				remove.Add(CentralStore.Instance.GetPluginId(assetId));
-		}
-
-		foreach(AssetPlugin plugin in remove) {
-			PluginInstaller installer = new PluginInstaller(plugin);
-			installer.Uninstall(ProjectFile.Location.GetBaseDir().NormalizePath());
-			ProjectFile.Assets.Remove(plugin.Asset.AssetId);
-		}
-
-		foreach(AssetPlugin plugin in install) {
-			PluginInstaller installer = new PluginInstaller(plugin);
-			installer.Install(ProjectFile.Location.GetBaseDir().NormalizePath());
-			ProjectFile.Assets.Add(plugin.Asset.AssetId);
-		}
-		
-		CentralStore.Instance.SaveDatabase();
 	}
 #endregion
 
@@ -234,7 +131,6 @@ Button _CancelBtn = null;
 		ProjectFile.Icon = IconPath;
 		ProjectFile.GodotId = GodotId;
 		ProjectFile.WriteUpdatedData();
-		UpdatePlugins();
 		CentralStore.Instance.SaveDatabase();
 		EmitSignal("project_updated");
 		Visible = false;
