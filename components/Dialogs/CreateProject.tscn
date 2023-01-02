@@ -414,8 +414,8 @@ margin_right = 494.0
 margin_bottom = 431.0
 rect_min_size = Vector2( 0, 431 )
 custom_fonts/font = ExtResource( 9 )
-text = "Addons are only available in projects made
-with Godot v2.1+!"
+text = "Addons are not available in projects that
+use this editor version."
 align = 1
 valign = 1
 
