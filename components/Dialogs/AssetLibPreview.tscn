@@ -86,18 +86,15 @@ color = Color( 0.219608, 0.239216, 0.290196, 1 )
 [node name="HB" type="HBoxContainer" parent="PC/CC/P/VB/MC/TitleBarBG"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Title" type="Label" parent="PC/CC/P/VB/MC/TitleBarBG/HB"]
-margin_left = 321.0
+margin_left = 293.0
 margin_top = 2.0
-margin_right = 420.0
+margin_right = 448.0
 margin_bottom = 21.0
 size_flags_horizontal = 6
 custom_fonts/font = ExtResource( 2 )
-text = "Plugin Name"
+text = "Godot Super Scaling"
 
 [node name="Close" parent="PC/CC/P/VB/MC/TitleBarBG/HB" instance=ExtResource( 4 )]
 margin_left = 746.0
@@ -158,7 +155,7 @@ margin_right = 196.0
 margin_bottom = 19.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 2 )
-text = "Plugin Name"
+text = "Godot Super Scaling"
 clip_text = true
 
 [node name="GC" type="GridContainer" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo"]
@@ -176,10 +173,10 @@ align = 2
 
 [node name="Category" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_left = 104.0
-margin_right = 166.0
+margin_right = 174.0
 margin_bottom = 17.0
 custom_fonts/font = ExtResource( 5 )
-text = "Materials"
+text = "Shaders"
 
 [node name="Label3" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 21.0
@@ -192,10 +189,10 @@ align = 2
 [node name="Author" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_left = 104.0
 margin_top = 21.0
-margin_right = 166.0
+margin_right = 174.0
 margin_bottom = 38.0
 custom_fonts/font = ExtResource( 5 )
-text = "KoBeWi"
+text = "cybereality"
 
 [node name="Label5" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 42.0
@@ -208,10 +205,10 @@ align = 2
 [node name="License" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_left = 104.0
 margin_top = 42.0
-margin_right = 166.0
+margin_right = 174.0
 margin_bottom = 59.0
 custom_fonts/font = ExtResource( 5 )
-text = "Unlicense"
+text = "MIT"
 
 [node name="Label7" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 63.0
@@ -224,10 +221,10 @@ align = 2
 [node name="Version" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_left = 104.0
 margin_top = 63.0
-margin_right = 166.0
+margin_right = 174.0
 margin_bottom = 80.0
 custom_fonts/font = ExtResource( 5 )
-text = "0.1.0"
+text = "1.2.0"
 
 [node name="Label8" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 84.0
@@ -240,13 +237,13 @@ align = 2
 [node name="AddonId" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_left = 104.0
 margin_top = 84.0
-margin_right = 166.0
+margin_right = 174.0
 margin_bottom = 101.0
 mouse_filter = 0
 mouse_default_cursor_shape = 2
 custom_colors/font_color = Color( 0, 0.972549, 1, 1 )
 custom_fonts/font = ExtResource( 5 )
-text = "12345"
+text = "1141"
 
 [node name="Label9" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 105.0
@@ -259,13 +256,13 @@ align = 2
 [node name="GodotVersion" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_left = 104.0
 margin_top = 105.0
-margin_right = 166.0
+margin_right = 174.0
 margin_bottom = 122.0
 mouse_filter = 0
 mouse_default_cursor_shape = 2
 custom_colors/font_color = Color( 0.266667, 1, 0, 1 )
 custom_fonts/font = ExtResource( 5 )
-text = "12345"
+text = "3.4"
 
 [node name="PC" type="PanelContainer" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel"]
 margin_top = 149.0

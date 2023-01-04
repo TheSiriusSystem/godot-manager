@@ -382,7 +382,7 @@ custom_colors/font_color_pressed = Color( 0.647059, 0.937255, 0.67451, 1 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
 pressed = true
-text = "Installed Addons"
+text = "Downloaded Addons"
 flat = true
 
 [node name="VSeparator" type="VSeparator" parent="VC/ManageContainer/HC/PC/HC"]
@@ -401,7 +401,7 @@ custom_colors/font_color_hover = Color( 0.0156863, 0.815686, 1, 1 )
 custom_colors/font_color_pressed = Color( 0.647059, 0.937255, 0.67451, 1 )
 custom_fonts/font = ExtResource( 3 )
 toggle_mode = true
-text = "Installed Templates"
+text = "Downloaded Templates"
 flat = true
 
 [node name="Spacer2" type="Control" parent="VC/ManageContainer/HC"]

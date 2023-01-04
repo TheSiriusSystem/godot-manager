@@ -22,9 +22,6 @@ corner_detail = 20
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PC" type="PanelContainer" parent="."]
 anchor_right = 1.0
@@ -79,13 +76,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="Title" type="Label" parent="PC/CC/P/VB/MC/TitleBarBG/HB"]
-margin_left = 132.0
+margin_left = 157.0
 margin_top = 2.0
-margin_right = 280.0
+margin_right = 255.0
 margin_bottom = 21.0
 size_flags_horizontal = 6
 custom_fonts/font = ExtResource( 1 )
-text = "Addon Downloader"
+text = "Addon Setup"
 
 [node name="Close" parent="PC/CC/P/VB/MC/TitleBarBG/HB" instance=ExtResource( 3 )]
 margin_left = 416.0
@@ -116,7 +113,7 @@ size_flags_vertical = 3
 margin_right = 454.0
 margin_bottom = 37.0
 text = "Contents of asset \"Addon\"
-Select the files to install for new projects:"
+Select the files to install during project creation:"
 align = 1
 clip_text = true
 max_lines_visible = 2
