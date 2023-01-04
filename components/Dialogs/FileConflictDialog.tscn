@@ -90,6 +90,7 @@ margin_bottom = 40.0
 size_flags_vertical = 1
 custom_fonts/font = ExtResource( 1 )
 text = "There was a conflict between the following files:"
+align = 1
 autowrap = true
 
 [node name="GridContainer" type="GridContainer" parent="PC/CC/P/VB/MCContent/VC"]
@@ -149,6 +150,7 @@ margin_bottom = 176.0
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 1 )
 text = "Do you wish to replace the file?"
+align = 1
 autowrap = true
 
 [node name="CC" type="CenterContainer" parent="PC/CC/P/VB/MCContent/VC"]

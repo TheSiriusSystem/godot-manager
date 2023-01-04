@@ -48,16 +48,6 @@ public class ProjectConfig : Object {
 	public bool HasSection(string section) => sections.Keys.Contains(section);
 	public bool HasSectionKey(string section, string key) => sections[section].Keys.Contains(key);
 
-	public void DebugPrint() {
-		GD.PrintErr("DEBUG>  <<< Sections >>>");
-		foreach(string section in sections.Keys) {
-			GD.PrintErr($"DEBUG> [{section}]");
-			foreach(string key in sections[section].Keys) {
-				GD.PrintErr($"DEBUG> >>{key}={sections[section][key]}");
-			}
-		}
-	}
-
 	public Error LoadBuffer(string buffer = "") {
 		sections = new Dictionary<string, Dictionary<string, string>>();
 
@@ -145,21 +135,21 @@ public class ProjectConfig : Object {
 			writer.WriteLine(HEADER);
 
 			if (sections.ContainsKey("header")) {
-				foreach(string key in sections["header"].Keys) {
+				foreach (string key in sections["header"].Keys) {
 					writer.WriteLine($"{key}={sections["header"][key]}");
 				}
 			}
 
 			writer.WriteLine("");
 
-			foreach(string section in sections.Keys) {
+			foreach (string section in sections.Keys) {
 				if (section == "header")
 					continue;
 				
 				writer.WriteLine($"[{section}]");
 				writer.WriteLine("");
 
-				foreach(string key in sections[section].Keys) {
+				foreach (string key in sections[section].Keys) {
 					writer.WriteLine($"{key}={sections[section][key]}");
 				}
 
@@ -185,7 +175,7 @@ public class ProjectConfig : Object {
 		sections["header"] = new Dictionary<string, string>();
 		string current_section = "header";
 		string last_key = "";
-		foreach(string line in buffer.Split("\n")) {
+		foreach (string line in buffer.Split("\n")) {
 			var nline = line.StripEdges();
 			if (nline.BeginsWith(";")) // Comment, ignore.
 				continue;
@@ -220,19 +210,19 @@ public class ProjectConfig : Object {
 			}
 			fh.StoreBuffer(HEADER.ToUTF8());
 
-			foreach(string key in sections["header"].Keys) {
+			foreach (string key in sections["header"].Keys) {
 				fh.StoreLine($"{key}={sections["header"][key]}");
 			}
 
 			fh.StoreLine(" ");
 
-			foreach(string section in sections.Keys) {
+			foreach (string section in sections.Keys) {
 				if (section == "header")
 					continue;
 				
 				fh.StoreLine($"[{section}]");
 				fh.StoreLine(" ");
-				foreach(string key in sections[section].Keys) {
+				foreach (string key in sections[section].Keys) {
 					fh.StoreLine($"{key}={sections[section][key]}");
 				}
 				fh.StoreLine(" ");

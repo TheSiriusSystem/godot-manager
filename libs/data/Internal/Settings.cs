@@ -2,40 +2,24 @@ using Godot;
 using Godot.Collections;
 using Newtonsoft.Json;
 using DateTime = System.DateTime;
-using TimeSpan = System.TimeSpan;
-using Guid = System.Guid;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class Settings : Object {
 	[JsonProperty] public string ProjectPath;
-	[JsonProperty] public string DefaultEngine;
 	[JsonProperty] public string EnginePath;
 	[JsonProperty] public string CachePath;
 	[JsonProperty] public string LastView;
 	[JsonProperty] public string DefaultView;
-	[JsonProperty] public DateTime LastCheck;
-	[JsonProperty] public DateTime LastMirrorCheck;
-	[JsonProperty] public Dictionary<int, UpdateCheck> LastUpdateMirrorCheck;
-	[JsonProperty] public bool CheckForUpdates;
-	[JsonProperty] public TimeSpan CheckInterval;
 	[JsonProperty] public bool UseSystemTitlebar;
 	[JsonProperty] public bool UseLastMirror;
-	[JsonProperty] public bool CloseManagerOnEdit;
 	[JsonProperty] public bool NoConsole;
 	[JsonProperty] public bool SelfContainedEditors;
 	[JsonProperty] public bool EnableAutoScan;
 	[JsonProperty] public bool FavoritesToggled;
 	[JsonProperty] public bool UncategorizedToggled;
-	[JsonProperty] public bool UseProxy;
-	[JsonProperty] public string ProxyHost;
-	[JsonProperty] public int ProxyPort;
 	[JsonProperty] public Array<string> ScanDirs;
 	[JsonProperty] public Array<Dictionary<string, string>> AssetMirrors;
 	[JsonProperty] public Array<string> SettingsShare;
-#if GODOT_X11 || GODOT_LINUXBSD
-	[JsonProperty] public bool ShortcutMade;
-	[JsonProperty] public bool ShortcutRoot;
-#endif
 
 	[JsonProperty] public Dictionary<string, string> CurrentAssetMirror;
 	[JsonProperty] public int LastEngineMirror;
@@ -45,34 +29,20 @@ public class Settings : Object {
 	public bool FirstTimeRun = false;
 
 	public Settings() {
-		ProjectPath = OS.GetSystemDir(OS.SystemDir.Documents).Join("Projects").NormalizePath();
-		DefaultEngine = Guid.Empty.ToString();
-		EnginePath = Util.GetUserFolder("versions"); //"user://versions";
-		CachePath = Util.GetUserFolder("cache"); //"user://cache");
+		ProjectPath = OS.GetSystemDir(OS.SystemDir.Documents).Join("Godot Projects").NormalizePath();
+		EnginePath = Util.GetUserFolder("versions");
+		CachePath = Util.GetUserFolder("cache");
 		LastView = Tr("List View");
 		DefaultView = Tr("List View");
-		CheckForUpdates = true;
-		CloseManagerOnEdit = true;
 		SelfContainedEditors = true;
 		EnableAutoScan = false;
 		FavoritesToggled = false;
 		UncategorizedToggled = false;
 		NoConsole = true;
-		LastCheck = DateTime.UtcNow.AddDays(-1);
-		LastMirrorCheck = DateTime.UtcNow.AddDays(-1);
-		LastUpdateMirrorCheck = new Dictionary<int, UpdateCheck>();
-		CheckInterval = TimeSpan.FromDays(1);
 		UseSystemTitlebar = false;
 		UseLastMirror = false;
 		ScanDirs = new Array<string>();
-		UseProxy = false;
-		ProxyHost = "localhost";
-		ProxyPort = 8000;
 		AssetMirrors = new Array<Dictionary<string, string>>();
-#if GODOT_X11 || GODOT_LINUXBSD
-		ShortcutMade = false;
-		ShortcutRoot = false;
-#endif
 		CurrentAssetMirror = new Dictionary<string, string>();
 		LastEngineMirror = 0;
 		LocalAddonCount = 0;

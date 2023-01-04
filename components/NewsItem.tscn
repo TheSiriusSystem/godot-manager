@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Scripts/components/NewsItem.cs" type="Script" id=2]
 [ext_resource path="res://Shaders/mask_texture.gdshader" type="Shader" id=3]
 [ext_resource path="res://Assets/images/circle_mask.png" type="Texture" id=4]
+[ext_resource path="res://Assets/Icons/icon_thumbnail_wait.svg" type="Texture" id=5]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.294118, 0.317647, 0.388235, 1 )
@@ -75,8 +76,9 @@ size_flags_vertical = 3
 margin_right = 146.0
 margin_bottom = 637.0
 rect_min_size = Vector2( 146, 0 )
+texture = ExtResource( 5 )
 expand = true
-stretch_mode = 5
+stretch_mode = 6
 
 [node name="Blerb" type="RichTextLabel" parent="vb/hb"]
 margin_left = 150.0

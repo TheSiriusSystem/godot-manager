@@ -57,7 +57,8 @@ public class NewsItem : Panel
             _sImage = value;
             if (_image == null || value == null || value.Empty()) return;
             var img = Util.LoadImage(_sImage);
-            _image.Texture = img;
+            if (img != null)
+                _image.Texture = img;
         }
     }
 

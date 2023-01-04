@@ -34,7 +34,7 @@ public class MirrorVersion : Object
 
 	public string PlatformDownloadURL {
 		get {
-			switch(Platform.OperatingSystem) {
+			switch (Platform.OperatingSystem) {
 				case "Windows":
 				case "UWP (Windows 10)":
 					return FPath.Combine(BaseLocation, (Platform.Bits == "32") ? Win32 : Win64);
@@ -50,7 +50,7 @@ public class MirrorVersion : Object
 
 	public string PlatformZipFile {
 		get {
-			switch(Platform.OperatingSystem) {
+			switch (Platform.OperatingSystem) {
 				case "Windows":
 				case "UWP (Windows 10)":
 					return (Platform.Bits == "32") ? Win32 : Win64;
@@ -67,7 +67,7 @@ public class MirrorVersion : Object
 	public int PlatformDownloadSize
 	{
 		get {
-			switch(Platform.OperatingSystem) {
+			switch (Platform.OperatingSystem) {
 				case "Windows":
 				case "UWP (Windows 10)":
 					return (Platform.Bits == "32") ? Win32_Size : Win64_Size;

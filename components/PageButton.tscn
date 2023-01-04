@@ -17,9 +17,6 @@ margin_bottom = 104.0
 rect_min_size = Vector2( 40, 50 )
 color = Color( 0.219608, 0.239216, 0.290196, 1 )
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Icon" type="TextureRect" parent="."]
 margin_left = 15.0

@@ -55,7 +55,7 @@ public class DownloadQueue : Node {
 	[SignalHandler("timeout", nameof(checkActive))]
 	async void OnCheckActive() {
 		Array<ImageDownloader> remove = new Array<ImageDownloader>();
-		foreach(ImageDownloader adld in active) {
+		foreach (ImageDownloader adld in active) {
 			await this.IdleFrame();
 			if (adld.ActiveTask.IsCompleted) {
 				EmitSignal("download_completed", adld);
@@ -63,7 +63,7 @@ public class DownloadQueue : Node {
 			}
 		}
 
-		foreach(ImageDownloader adld in remove) {
+		foreach (ImageDownloader adld in remove) {
 			active.Remove(adld);
 		}
 
@@ -78,7 +78,7 @@ public class DownloadQueue : Node {
 	}
 
 	public void PrintQueue() {
-		foreach(ImageDownloader dld in queued) {
+		foreach (ImageDownloader dld in queued) {
 			GD.Print($"Queued: {dld.Url}");
 		}
 	}

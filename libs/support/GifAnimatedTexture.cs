@@ -18,7 +18,7 @@ public class GifAnimatedTexture {
 		Texture.Frames = gif.Frames.Count >= 256 ? 256 : gif.Frames.Count;
 		Texture.Fps = 24.0f;
 
-		for(int i = 0; i < Texture.Frames; i++) {
+		for (int i = 0; i < Texture.Frames; i++) {
 			using(MemoryStream ms = new MemoryStream()) {
 				GifFrameMetadata gifMeta = gif.Frames[i].Metadata.GetGifMetadata();
 				Image iframe = gif.Frames.CloneFrame(i);

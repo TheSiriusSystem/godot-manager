@@ -80,7 +80,7 @@ margin_top = 108.0
 margin_right = 70.0
 margin_bottom = 158.0
 hint_tooltip = "Asset Library"
-Label = "AssetLib"
+Label = "Asset Lib."
 Icon = ExtResource( 5 )
 
 [node name="Godot" parent="bg/Shell/Sidebar/VC" groups=["page_buttons"] instance=ExtResource( 2 )]

@@ -14,11 +14,6 @@ public class AddonLineEntry : ColorRect
 	[NodePath("hc/InstallUninstall")] private TextureRect InstallUninstall = null;
 	#endregion
 	
-	#region Resources
-	[Resource("res://Assets/Icons/icon_add.svg")] private Texture IconAdd = null;
-	[Resource("res://Assets/Icons/x.svg")] private Texture IconCancel = null;
-	#endregion
-	
 	#region Private Variables
 	private Texture _icon = null;
 	private string _title = null;
@@ -65,12 +60,12 @@ public class AddonLineEntry : ColorRect
 			_installed = value;
 			if (_installed && InstallUninstall != null)
 			{
-				InstallUninstall.Texture = IconCancel;
+				InstallUninstall.Texture = MainWindow._plTextures["X"];
 				InstallUninstall.SelfModulate = Colors.Red;
 			}
 			else
 			{
-				InstallUninstall.Texture = IconAdd;
+				InstallUninstall.Texture = MainWindow._plTextures["AddIcon"];
 				InstallUninstall.SelfModulate = Colors.Green;
 			}
 		}

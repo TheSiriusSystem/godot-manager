@@ -1,13 +1,10 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-regular-16.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=2]
-[ext_resource path="res://components/SysButton.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Resources/Fonts/droid-bold-22.tres" type="DynamicFont" id=4]
-[ext_resource path="res://Resources/DefaultTheme.tres" type="Theme" id=5]
 [ext_resource path="res://components/Panels/GodotPanel.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Scripts/components/Dialogs/FirstRunWizard.cs" type="Script" id=7]
-[ext_resource path="res://Assets/images/GodotIntegration.png" type="Texture" id=8]
 
 [sub_resource type="StyleBoxFlat" id=4]
 bg_color = Color( 0, 0, 0, 0.509804 )
@@ -32,9 +29,6 @@ script = ExtResource( 7 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_styles/panel = SubResource( 4 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="CC" type="CenterContainer" parent="PC"]
 margin_right = 1024.0
@@ -42,10 +36,10 @@ margin_bottom = 700.0
 
 [node name="P" type="Panel" parent="PC/CC"]
 margin_left = 112.0
-margin_top = 50.0
+margin_top = 150.0
 margin_right = 912.0
-margin_bottom = 650.0
-rect_min_size = Vector2( 800, 600 )
+margin_bottom = 550.0
+rect_min_size = Vector2( 800, 400 )
 custom_styles/panel = SubResource( 5 )
 
 [node name="VB" type="VBoxContainer" parent="PC/CC/P"]
@@ -78,24 +72,18 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="Title" type="Label" parent="PC/CC/P/VB/MC/TitleBarBG/HB"]
-margin_left = 307.0
+margin_left = 334.0
 margin_top = 2.0
-margin_right = 434.0
+margin_right = 461.0
 margin_bottom = 21.0
 size_flags_horizontal = 6
 custom_fonts/font = ExtResource( 2 )
 text = "First Run Wizard"
 
-[node name="Close" parent="PC/CC/P/VB/MC/TitleBarBG/HB" instance=ExtResource( 3 )]
-margin_left = 746.0
-margin_right = 796.0
-margin_bottom = 24.0
-WindowMain = NodePath("../../../../../../../..")
-
 [node name="MCContent" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_top = 30.0
 margin_right = 800.0
-margin_bottom = 561.0
+margin_bottom = 361.0
 size_flags_vertical = 3
 custom_constants/margin_right = 8
 custom_constants/margin_top = 8
@@ -107,7 +95,7 @@ unique_name_in_owner = true
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 792.0
-margin_bottom = 523.0
+margin_bottom = 323.0
 tabs_visible = false
 
 [node name="Page1" type="Panel" parent="PC/CC/P/VB/MCContent/Wizard"]
@@ -115,16 +103,21 @@ unique_name_in_owner = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="RichTextLabel" type="RichTextLabel" parent="PC/CC/P/VB/MCContent/Wizard/Page1"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-bbcode_enabled = true
-bbcode_text = "[center][font=res://Resources/Fonts/droid-bold-22.tres]Welcome to Godot Manager[/font][/center]
+[node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page1"]
+margin_right = 784.0
+margin_bottom = 27.0
+custom_fonts/font = ExtResource( 4 )
+text = "Welcome to Godot Manager"
+align = 1
 
-Godot Manager has detected that this is the first time you have run the program.  This wizard has been developed to help setup a few settings to get you started right out of the box.  To begin the process, press the Next Button below.  You can cancel the Wizard, and setup the settings if you like Manually, by pressing the Cancel button."
-text = "Welcome to Godot Manager
-
-Godot Manager has detected that this is the first time you have run the program.  This wizard has been developed to help setup a few settings to get you started right out of the box.  To begin the process, press the Next Button below.  You can cancel the Wizard, and setup the settings if you like Manually, by pressing the Cancel button."
+[node name="Label2" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page1"]
+margin_top = 47.0
+margin_right = 784.0
+margin_bottom = 132.0
+custom_fonts/font = ExtResource( 1 )
+text = "Godot Manager has detected that this is the first time you have run the program.  This wizard has been developed to help set up a few settings to get you started right out of the box.  To begin the process, press the Next button. You can cancel the wizard and set up the settings manually if you want, by pressing the Cancel button."
+align = 1
+autowrap = true
 
 [node name="Page2" type="Panel" parent="PC/CC/P/VB/MCContent/Wizard"]
 unique_name_in_owner = true
@@ -140,62 +133,70 @@ anchor_bottom = 1.0
 margin_right = 784.0
 margin_bottom = 27.0
 custom_fonts/font = ExtResource( 4 )
-text = "Setup Directories"
+text = "Set Up Settings"
+align = 1
 
-[node name="Label2" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer"]
+[node name="Spacer" type="Control" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer"]
 margin_top = 31.0
 margin_right = 784.0
-margin_bottom = 94.0
+margin_bottom = 43.0
+rect_min_size = Vector2( 0, 12 )
+
+[node name="Label2" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer"]
+margin_top = 47.0
+margin_right = 784.0
+margin_bottom = 88.0
 custom_fonts/font = ExtResource( 1 )
-text = "In this step, you will setup the directories you will want to have as the default locations to store the Godot Engine, along with cached images and downloaded Addons / Plugins.  You can also select the default location of where your projects are, or want them to be."
+text = "In this step, you will specify the default locations for downloaded editor versions, cached downloads/images, and your projects. You can also choose what kind of titlebar Godot Manager will use."
+align = 1
 autowrap = true
 
-[node name="Control" type="Control" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer"]
-margin_top = 98.0
+[node name="Spacer2" type="Control" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer"]
+margin_top = 92.0
 margin_right = 784.0
-margin_bottom = 128.0
-rect_min_size = Vector2( 0, 30 )
+margin_bottom = 116.0
+rect_min_size = Vector2( 0, 24 )
 
 [node name="Grid" type="GridContainer" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer"]
-margin_top = 132.0
+margin_top = 120.0
 margin_right = 784.0
-margin_bottom = 235.0
+margin_bottom = 262.0
 custom_constants/vseparation = 20
 custom_constants/hseparation = 20
 columns = 4
 
 [node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 margin_top = 1.0
-margin_right = 183.0
+margin_right = 158.0
 margin_bottom = 20.0
 custom_fonts/font = ExtResource( 2 )
-text = "Engine Install Location:"
+text = "Editor Location:"
 align = 2
 
 [node name="EngineLoc" type="LineEdit" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 203.0
-margin_right = 503.0
+margin_left = 178.0
+margin_right = 478.0
 margin_bottom = 21.0
 rect_min_size = Vector2( 300, 0 )
 
 [node name="EngineBrowse" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 523.0
-margin_right = 574.0
+margin_left = 498.0
+margin_right = 549.0
 margin_bottom = 21.0
 text = "Browse"
 
 [node name="EngineDefault" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 594.0
-margin_right = 673.0
+margin_left = 569.0
+margin_right = 648.0
 margin_bottom = 21.0
 text = "Use Default"
 
 [node name="Label2" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 margin_top = 42.0
-margin_right = 183.0
+margin_right = 158.0
 margin_bottom = 61.0
 custom_fonts/font = ExtResource( 2 )
 text = "Cache Location:"
@@ -203,59 +204,75 @@ align = 2
 
 [node name="CacheLoc" type="LineEdit" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 203.0
+margin_left = 178.0
 margin_top = 41.0
-margin_right = 503.0
+margin_right = 478.0
 margin_bottom = 62.0
 rect_min_size = Vector2( 300, 0 )
 
 [node name="CacheBrowse" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 523.0
+margin_left = 498.0
 margin_top = 41.0
-margin_right = 574.0
+margin_right = 549.0
 margin_bottom = 62.0
 text = "Browse"
 
 [node name="CacheDefault" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 594.0
+margin_left = 569.0
 margin_top = 41.0
-margin_right = 673.0
+margin_right = 648.0
 margin_bottom = 62.0
 text = "Use Deafult"
 
 [node name="Label3" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 margin_top = 83.0
-margin_right = 183.0
+margin_right = 158.0
 margin_bottom = 102.0
 custom_fonts/font = ExtResource( 2 )
-text = "Projects Location:"
+text = "Project Location:"
 align = 2
 
 [node name="ProjectLoc" type="LineEdit" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 203.0
+margin_left = 178.0
 margin_top = 82.0
-margin_right = 503.0
+margin_right = 478.0
 margin_bottom = 103.0
 rect_min_size = Vector2( 300, 0 )
 
 [node name="ProjectBrowse" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 523.0
+margin_left = 498.0
 margin_top = 82.0
-margin_right = 574.0
+margin_right = 549.0
 margin_bottom = 103.0
 text = "Browse"
 
 [node name="ProjectDefault" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 594.0
+margin_left = 569.0
 margin_top = 82.0
-margin_right = 673.0
+margin_right = 648.0
 margin_bottom = 103.0
 text = "Use Default"
+
+[node name="Label4" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
+margin_top = 123.0
+margin_right = 158.0
+margin_bottom = 142.0
+custom_fonts/font = ExtResource( 2 )
+text = "System Integration:"
+align = 2
+
+[node name="TitleBar" type="CheckBox" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
+unique_name_in_owner = true
+margin_left = 178.0
+margin_top = 123.0
+margin_right = 478.0
+margin_bottom = 142.0
+text = "Use System Titlebar"
 
 [node name="Page3" type="Panel" parent="PC/CC/P/VB/MCContent/Wizard"]
 unique_name_in_owner = true
@@ -271,48 +288,16 @@ anchor_bottom = 1.0
 margin_right = 784.0
 margin_bottom = 27.0
 custom_fonts/font = ExtResource( 4 )
-text = "Create Desktop Entry"
+text = "Add Editor Versions"
 
-[node name="CreateShortcut" type="CheckBox" parent="PC/CC/P/VB/MCContent/Wizard/Page3/VBoxContainer"]
+[node name="GodotPanel" parent="PC/CC/P/VB/MCContent/Wizard/Page3/VBoxContainer" instance=ExtResource( 6 )]
 unique_name_in_owner = true
+anchor_right = 0.0
+anchor_bottom = 0.0
 margin_top = 31.0
 margin_right = 784.0
-margin_bottom = 50.0
-custom_fonts/font = ExtResource( 1 )
-text = "Create a desktop entry for integration with system application menu"
-
-[node name="HBoxContainer" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/Wizard/Page3/VBoxContainer"]
-margin_top = 54.0
-margin_right = 784.0
-margin_bottom = 73.0
-
-[node name="Control" type="Control" parent="PC/CC/P/VB/MCContent/Wizard/Page3/VBoxContainer/HBoxContainer"]
-margin_right = 5.0
-margin_bottom = 19.0
-rect_min_size = Vector2( 5, 0 )
-
-[node name="GlobalShortcut" type="CheckBox" parent="PC/CC/P/VB/MCContent/Wizard/Page3/VBoxContainer/HBoxContainer"]
-unique_name_in_owner = true
-margin_left = 9.0
-margin_right = 335.0
-margin_bottom = 19.0
-theme = ExtResource( 5 )
-custom_fonts/font = ExtResource( 1 )
-disabled = true
-text = "For all users (requires superuser privileges)"
-
-[node name="Control" type="Control" parent="PC/CC/P/VB/MCContent/Wizard/Page3/VBoxContainer"]
-margin_top = 77.0
-margin_right = 784.0
-margin_bottom = 97.0
-rect_min_size = Vector2( 0, 20 )
-
-[node name="TextureRect" type="TextureRect" parent="PC/CC/P/VB/MCContent/Wizard/Page3/VBoxContainer"]
-margin_top = 101.0
-margin_right = 784.0
-margin_bottom = 371.0
-texture = ExtResource( 8 )
-stretch_mode = 4
+margin_bottom = 315.0
+InWizard = true
 
 [node name="Page4" type="Panel" parent="PC/CC/P/VB/MCContent/Wizard"]
 unique_name_in_owner = true
@@ -320,59 +305,28 @@ visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/Wizard/Page4"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-
-[node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page4/VBoxContainer"]
-margin_right = 784.0
-margin_bottom = 27.0
-custom_fonts/font = ExtResource( 4 )
-text = "Setup Godot Engine"
-
-[node name="GodotPanel" parent="PC/CC/P/VB/MCContent/Wizard/Page4/VBoxContainer" instance=ExtResource( 6 )]
-unique_name_in_owner = true
-anchor_right = 0.0
-anchor_bottom = 0.0
-margin_top = 31.0
-margin_right = 784.0
-margin_bottom = 515.0
-InWizard = true
-
-[node name="Page5" type="Panel" parent="PC/CC/P/VB/MCContent/Wizard"]
-unique_name_in_owner = true
-visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-
-[node name="VBoxContainer" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/Wizard/Page5"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-
-[node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page5/VBoxContainer"]
+[node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page4"]
 margin_right = 784.0
 margin_bottom = 27.0
 custom_fonts/font = ExtResource( 4 )
 text = "Finished"
+align = 1
 
-[node name="RichTextLabel" type="RichTextLabel" parent="PC/CC/P/VB/MCContent/Wizard/Page5/VBoxContainer"]
-margin_top = 31.0
+[node name="Label2" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page4"]
+margin_top = 47.0
 margin_right = 784.0
-margin_bottom = 515.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-bbcode_enabled = true
-bbcode_text = "Everything has been setup, you can further modify your settings in the Settings tab at the bottom right corner.  If you have encounter any problems, please make sure to report them to the [url=https://github.com/eumario/godot-manager]Github Repository[/url].  If you need help, or want to talk about Godot, feel free to hit us up on [url=https://discord.gg/ESkwAMN2Tt]Discord[/url].
+margin_bottom = 132.0
+custom_fonts/font = ExtResource( 1 )
+text = "Godot Manager has been set up. If you want to change your settings further, you can do so through the Settings tab which is found in the bottom-left corner.
 
 Thank you for choosing Godot Manager, and have fun creating your games!"
-text = "Everything has been setup, you can further modify your settings in the Settings tab at the bottom right corner.  If you have encounter any problems, please make sure to report them to the Github Repository.  If you need help, or want to talk about Godot, feel free to hit us up on Discord.
-
-Thank you for choosing Godot Manager, and have fun creating your games!"
+align = 1
+autowrap = true
 
 [node name="MCButtons" type="MarginContainer" parent="PC/CC/P/VB"]
-margin_top = 565.0
+margin_top = 365.0
 margin_right = 800.0
-margin_bottom = 600.0
+margin_bottom = 400.0
 custom_constants/margin_bottom = 14
 __meta__ = {
 "_edit_use_anchors_": false
@@ -397,6 +351,7 @@ margin_left = 163.0
 margin_right = 222.0
 margin_bottom = 21.0
 size_flags_horizontal = 5
+disabled = true
 text = "Previous"
 
 [node name="Sep4" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]

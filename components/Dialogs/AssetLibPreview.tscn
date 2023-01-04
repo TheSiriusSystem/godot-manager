@@ -10,7 +10,6 @@
 [ext_resource path="res://Assets/Icons/icon_play_overlay.svg" type="Texture" id=8]
 [ext_resource path="res://Assets/Icons/missing_icon.svg" type="Texture" id=9]
 
-
 [sub_resource type="StyleBoxFlat" id=6]
 bg_color = Color( 0.180392, 0.192157, 0.231373, 1 )
 
@@ -169,79 +168,79 @@ margin_bottom = 145.0
 columns = 2
 
 [node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
-margin_right = 72.0
+margin_right = 100.0
 margin_bottom = 17.0
 custom_fonts/font = ExtResource( 6 )
 text = "Category:"
 align = 2
 
 [node name="Category" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
-margin_left = 76.0
-margin_right = 138.0
+margin_left = 104.0
+margin_right = 166.0
 margin_bottom = 17.0
 custom_fonts/font = ExtResource( 5 )
 text = "Materials"
 
 [node name="Label3" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 21.0
-margin_right = 72.0
+margin_right = 100.0
 margin_bottom = 38.0
 custom_fonts/font = ExtResource( 6 )
 text = "Author:"
 align = 2
 
 [node name="Author" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
-margin_left = 76.0
+margin_left = 104.0
 margin_top = 21.0
-margin_right = 138.0
+margin_right = 166.0
 margin_bottom = 38.0
 custom_fonts/font = ExtResource( 5 )
 text = "KoBeWi"
 
 [node name="Label5" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 42.0
-margin_right = 72.0
+margin_right = 100.0
 margin_bottom = 59.0
 custom_fonts/font = ExtResource( 6 )
 text = "License:"
 align = 2
 
 [node name="License" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
-margin_left = 76.0
+margin_left = 104.0
 margin_top = 42.0
-margin_right = 138.0
+margin_right = 166.0
 margin_bottom = 59.0
 custom_fonts/font = ExtResource( 5 )
 text = "Unlicense"
 
 [node name="Label7" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 63.0
-margin_right = 72.0
+margin_right = 100.0
 margin_bottom = 80.0
 custom_fonts/font = ExtResource( 6 )
 text = "Version:"
 align = 2
 
 [node name="Version" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
-margin_left = 76.0
+margin_left = 104.0
 margin_top = 63.0
-margin_right = 138.0
+margin_right = 166.0
 margin_bottom = 80.0
 custom_fonts/font = ExtResource( 5 )
 text = "0.1.0"
 
 [node name="Label8" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 84.0
-margin_right = 72.0
+margin_right = 100.0
 margin_bottom = 101.0
 custom_fonts/font = ExtResource( 6 )
 text = "ID:"
 align = 2
 
 [node name="AddonId" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
-margin_left = 76.0
+margin_left = 104.0
 margin_top = 84.0
-margin_right = 138.0
+margin_right = 166.0
 margin_bottom = 101.0
 mouse_filter = 0
 mouse_default_cursor_shape = 2
@@ -251,16 +250,16 @@ text = "12345"
 
 [node name="Label9" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
 margin_top = 105.0
-margin_right = 72.0
+margin_right = 100.0
 margin_bottom = 122.0
 custom_fonts/font = ExtResource( 6 )
 text = "Editor Version:"
 align = 2
 
 [node name="GodotVersion" type="Label" parent="PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC"]
-margin_left = 76.0
+margin_left = 104.0
 margin_top = 105.0
-margin_right = 138.0
+margin_right = 166.0
 margin_bottom = 122.0
 mouse_filter = 0
 mouse_default_cursor_shape = 2

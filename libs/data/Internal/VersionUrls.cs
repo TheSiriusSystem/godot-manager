@@ -53,7 +53,7 @@ public class VersionUrls : Object
 		}
 
 		set {
-			switch(key) {
+			switch (key) {
 				case "Win32": Win32 = value as string; break;
 				case "Win32_Size": Win32_Size = (int)value; break;
 				case "Win64": Win64 = value as string; break;

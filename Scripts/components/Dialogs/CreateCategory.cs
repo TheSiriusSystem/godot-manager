@@ -30,11 +30,11 @@ public class CreateCategory : ReferenceRect
 	[SignalHandler("pressed", nameof(_createBtn))]
 	void OnPressedCreateBtn() {
 		if (_categoryName.Text == "") {
-			AppDialogs.MessageDialog.ShowMessage(Tr("Create Category"), Tr("Category name cannot be blank."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to provide a name for this category."));
 			return;
 		}
 		if (CentralStore.Instance.HasCategory(_categoryName.Text)) {
-			AppDialogs.MessageDialog.ShowMessage(Tr("Create Category"), Tr("There is already a category by that name."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("There is already a category of the same name."));
 			return;
 		}
 		Category c = new Category();

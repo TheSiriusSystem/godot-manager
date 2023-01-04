@@ -33,12 +33,6 @@ public class ProjectsPanel : Panel
 	ViewToggleButtons _viewSelector = null;
 #endregion
 
-#region Template Scenes
-	PackedScene _ProjectLineEntry = GD.Load<PackedScene>("res://components/ProjectLineEntry.tscn");
-	PackedScene _ProjectIconEntry = GD.Load<PackedScene>("res://components/ProjectIconEntry.tscn");
-	PackedScene _CategoryList = GD.Load<PackedScene>("res://components/CategoryList.tscn");
-#endregion
-
 #region Enumerations
 	enum View {
 		ListView,
@@ -92,7 +86,7 @@ public class ProjectsPanel : Panel
 		_views.Add(_gridView);
 		_views.Add(_categoryView);
 
-		_popupMenu = GD.Load<PackedScene>("res://components/ProjectPopup.tscn").Instance<ProjectPopup>();
+		_popupMenu = MainWindow._plScenes["ProjectPopup"].Instance<ProjectPopup>();
 		AddChild(_popupMenu);
 		_popupMenu.SetAsToplevel(true);
 
@@ -132,7 +126,7 @@ public class ProjectsPanel : Panel
 		PopulateListing();
 	}
 
-	public override void _Input(InputEvent inputEvent) {
+	public override async void _Input(InputEvent inputEvent) {
 		if (!Visible) {
 			return;
 		}
@@ -157,7 +151,7 @@ public class ProjectsPanel : Panel
 			}
 			else if (Input.IsActionJustPressed("remove_project"))
 			{
-				OnRemoveKeyPressed();
+				await OnRemoveKeyPressed();
 			}
 		} else if (inputEvent is InputEventMouseMotion iemmEvent) {
 			if (!dragging)
@@ -216,7 +210,7 @@ public class ProjectsPanel : Panel
 
 
 	public ProjectLineEntry NewPLE(ProjectFile pf) {
-		ProjectLineEntry ple = _ProjectLineEntry.Instance<ProjectLineEntry>();
+		ProjectLineEntry ple = MainWindow._plScenes["ProjectLineEntry"].Instance<ProjectLineEntry>();
 		if (_missingProjects.Contains(pf))
 			ple.MissingProject = true;
 		else if (!ProjectFile.ProjectExists(pf.Location)) {
@@ -228,7 +222,7 @@ public class ProjectsPanel : Panel
 	}
 
 	public ProjectIconEntry NewPIE(ProjectFile pf) {
-		ProjectIconEntry pie = _ProjectIconEntry.Instance<ProjectIconEntry>();
+		ProjectIconEntry pie = MainWindow._plScenes["ProjectIconEntry"].Instance<ProjectIconEntry>();
 		if (_missingProjects.Contains(pf))
 			pie.MissingProject = true;
 		else if (!ProjectFile.ProjectExists(pf.Location)) {
@@ -240,7 +234,7 @@ public class ProjectsPanel : Panel
 	}
 	
 	public CategoryList NewCL(string name) {
-		CategoryList clt = _CategoryList.Instance<CategoryList>();
+		CategoryList clt = MainWindow._plScenes["CategoryList"].Instance<CategoryList>();
 		clt.Toggable = true;
 		clt.CategoryName = name;
 		return clt;
@@ -263,35 +257,29 @@ public class ProjectsPanel : Panel
 		}
 	}
 
-	async Task<Array<string>> ScanDirectories(Array<string> scanDirs) {
+	Array<string> ScanDirectories(Array<string> scanDirs) {
 		Array<string> projects = new Array<string>();
 
-		await this.IdleFrame();
-
-		foreach(string dir in scanDirs) {
-			foreach(string proj in Dir.EnumerateFiles(dir, "engine.cfg", SearchOption.AllDirectories))
-				projects.Add(proj);
-			foreach(string proj in Dir.EnumerateFiles(dir, "project.godot", SearchOption.AllDirectories))
-				projects.Add(proj);
+		foreach (string pfExt in new string[] {"project.godot", "engine.cfg"}) {
+			foreach (string dir in scanDirs) {
+				foreach (string proj in Dir.EnumerateFiles(dir, pfExt, SearchOption.AllDirectories)) {
+					projects.Add(proj);
+				}
+			}
 		}
 		return projects;
 	}
 
-	private async Task<Array<string>> UpdateProjects(Array<string> projs) {
+	private Array<string> UpdateProjects(Array<string> projs) {
 		Array<string> added = new Array<string>();
-		await this.IdleFrame();
 
-		foreach(string proj in projs) {
-			AppDialogs.BusyDialog.UpdateByline($"Processing {projs.IndexOf(proj)}/{projs.Count}...");
-			await this.IdleFrame();
+		foreach (string proj in projs) {
 			string pfPath = proj.NormalizePath();
-			if (CentralStore.Instance.HasProject(pfPath))
+			if (!CentralStore.Instance.HasProject(pfPath))
 			{
-				await this.IdleFrame();
-			} else {
 				ProjectFile pf = ProjectFile.ReadFromFile(pfPath, pfPath.EndsWith("engine.cfg") ? 1 : 3);
 				if (pf == null) continue;
-				pf.GodotId = CentralStore.Settings.DefaultEngine;
+				pf.GodotId = CentralStore.Versions[0].Id;
 				CentralStore.Projects.Add(pf);
 				added.Add(proj);
 			}
@@ -300,6 +288,12 @@ public class ProjectsPanel : Panel
 	}
 
 	public async void ScanForProjects(bool autoscan = false) {
+		if (CentralStore.Versions.Count <= 0)
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can scan projects."));
+			return;
+		}
+
 		Array<string> projects = new Array<string>();
 		Array<string> scanDirs = CentralStore.Settings.ScanDirs.Duplicate();
 		int i = 0;
@@ -325,22 +319,8 @@ public class ProjectsPanel : Panel
 			return;
 		}
 
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Scanning Projects..."));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Scanning for project folders..."));
-		AppDialogs.BusyDialog.ShowDialog();
-
-		var projsTask = ScanDirectories(scanDirs);
-		while (!projsTask.IsCompleted)
-			await this.IdleFrame();
-
-		AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Processing 0/{0}..."), projsTask.Result.Count));
-
-		var addedTask = UpdateProjects(projsTask.Result);
-		while (!addedTask.IsCompleted)
-			await this.IdleFrame();
-
-		AppDialogs.BusyDialog.HideDialog();
-		if (addedTask.Result.Count == 0)
+		Array<string> addedProjs = UpdateProjects(ScanDirectories(scanDirs));
+		if (addedProjs.Count == 0)
 		{
 			if (!autoscan)
 				AppDialogs.MessageDialog.ShowMessage(Tr("Scan Projects"), Tr("No new projects found."));
@@ -348,7 +328,7 @@ public class ProjectsPanel : Panel
 		else
 		{
 			AppDialogs.MessageDialog.ShowMessage(Tr("Scan Projects"),
-				string.Format(Tr("Imported {0} project(s)."), addedTask.Result.Count));
+				string.Format(Tr("Found {0} project(s)."), addedProjs.Count));
 			CentralStore.Instance.SaveDatabase();
 			PopulateListing();
 		}
@@ -375,7 +355,7 @@ public class ProjectsPanel : Panel
 	// executed at a faster pace, then previous method of Freeing all, and Re-creating. )
 	public void PopulateListing()
 	{
-
+		GD.Print("Test PopulateListing()");
 		// Initialize if not initialized
 		if (pleCache == null)
 			pleCache = new Dictionary<ProjectFile, ProjectLineEntry>();
@@ -494,12 +474,7 @@ public class ProjectsPanel : Panel
 		{
 			foreach (ProjectFile pf in cpleCache[cclt].Keys)
 			{
-				if (!CentralStore.Projects.Contains(pf))
-				{
-					cpleCache[cclt][pf].QueueFree();
-					cpleCache[cclt].Remove(pf);
-				}
-				else if (cclt == clFavorites && !pf.Favorite && cpleCache[cclt].Keys.Contains(pf))
+				if (!CentralStore.Projects.Contains(pf) || (cclt == clFavorites && !pf.Favorite && cpleCache[cclt].Keys.Contains(pf)))
 				{
 					cpleCache[cclt][pf].QueueFree();
 					cpleCache[cclt].Remove(pf);
@@ -544,34 +519,31 @@ public class ProjectsPanel : Panel
 
 		PopulateSort();
 
-		if (_missingProjects.Count == 0)
+		if (_missingProjects.Count <= 0)
 			_actionButtons.SetHidden(6);
 		else
 			_actionButtons.SetVisible(6);
 	}
 
-	public async void OnDragDropCompleted(CategoryList source, CategoryList destination, ProjectLineEntry ple) {
-		if (cpleCache.ContainsKey(source) && cpleCache.ContainsKey(destination)) {
-			if (cpleCache[source].ContainsKey(ple.ProjectFile) && !cpleCache[destination].ContainsKey(ple.ProjectFile)) {    
-				cpleCache[source].Remove(ple.ProjectFile);
-				cpleCache[destination][ple.ProjectFile] = ple;
+	public void OnDragDropCompleted(CategoryList source, CategoryList destination, ProjectLineEntry ple) {
+		if (cpleCache.ContainsKey(source) && cpleCache.ContainsKey(destination) && cpleCache[source].ContainsKey(ple.ProjectFile) && !cpleCache[destination].ContainsKey(ple.ProjectFile)) {    
+			cpleCache[source].Remove(ple.ProjectFile);
+			cpleCache[destination][ple.ProjectFile] = ple;
 
-				if (destination == clUncategorized && ple.ProjectFile.Favorite) {
-					await this.IdleFrame();
-					ple.EmitSignal("FavoriteUpdated", ple);
-				}
+			if (destination == clUncategorized && ple.ProjectFile.Favorite) {
+				ple.EmitSignal("FavoriteUpdated", ple);
 			}
 		}
 	}
 
 	public void PopulateSort() {
-		foreach(Node node in _listView.GetChildren())
+		foreach (Node node in _listView.GetChildren())
 			_listView.RemoveChild(node);
 
-		foreach(Node node in _gridView.GetChildren())
+		foreach (Node node in _gridView.GetChildren())
 			_gridView.RemoveChild(node);
 
-		foreach(Node node in _categoryView.GetChildren())
+		foreach (Node node in _categoryView.GetChildren())
 			_categoryView.RemoveChild(node);
 
 		foreach (Category cat in CentralStore.Instance.GetPinnedCategories())
@@ -585,13 +557,13 @@ public class ProjectsPanel : Panel
 		_categoryView.AddChild(clFavorites);
 		_categoryView.AddChild(clUncategorized);
 
-		foreach(IOrderedEnumerable<ProjectFile> apf in SortListing()) {
-			foreach(ProjectFile pf in apf)
+		foreach (IOrderedEnumerable<ProjectFile> apf in SortListing()) {
+			foreach (ProjectFile pf in apf)
 				_listView.AddChild(pleCache[pf]);
 		}
 
-		foreach(IOrderedEnumerable<ProjectFile> apf in SortListing(true)) {
-			foreach(ProjectFile pf in apf)
+		foreach (IOrderedEnumerable<ProjectFile> apf in SortListing(true)) {
+			foreach (ProjectFile pf in apf)
 				_gridView.AddChild(pieCache[pf]);
 		}
 	}
@@ -609,7 +581,7 @@ public class ProjectsPanel : Panel
 			}
 		} else {
 			foreach (CategoryList cl in _categoryView.GetChildren()) {
-				foreach(ProjectLineEntry cple in cl.List.GetChildren()) {
+				foreach (ProjectLineEntry cple in cl.List.GetChildren()) {
 					if (cple != ple)
 						cple.SelfModulate = new Color("00ffffff");
 				}
@@ -672,6 +644,9 @@ public class ProjectsPanel : Panel
 		_popupMenu.ProjectLineEntry = ple;
 		_popupMenu.ProjectIconEntry = null;
 		_popupMenu.Popup_(new Rect2(GetGlobalMousePosition(), _popupMenu.RectSize));
+		for (int indx = 0; indx < _popupMenu.GetItemCount(); indx++) {
+			if (indx != 4) _popupMenu.SetItemDisabled(indx, ple.MissingProject);
+		}
 	}
 
 	void OnListEntry_FavoriteUpdated(ProjectLineEntry ple) { 
@@ -706,6 +681,9 @@ public class ProjectsPanel : Panel
 		_popupMenu.ProjectLineEntry = null;
 		_popupMenu.ProjectIconEntry = pie;
 		_popupMenu.Popup_(new Rect2(GetGlobalMousePosition(), _popupMenu.RectSize));
+		for (int indx = 0; indx < _popupMenu.GetItemCount(); indx++) {
+			if (indx != 4) _popupMenu.SetItemDisabled(indx, pie.MissingProject);
+		}
 	}
 
 	public async void _IdPressed(int id) {
@@ -717,7 +695,7 @@ public class ProjectsPanel : Panel
 			pf = _popupMenu.ProjectIconEntry.ProjectFile;
 			_currentPIE = _popupMenu.ProjectIconEntry;
 		}
-		switch(id) {
+		switch (id) {
 			case 0:     // Open Project
 				ExecuteEditorProject(pf);
 				break;
@@ -752,7 +730,7 @@ public class ProjectsPanel : Panel
 			ple.ProjectFile = pf;
 		}
 
-		foreach(CategoryList cat in cpleCache.Keys) {
+		foreach (CategoryList cat in cpleCache.Keys) {
 			ple = cpleCache[cat].Where( x => x.Key == pf).Select( x => x.Value ).FirstOrDefault<ProjectLineEntry>();
 			if (ple != null)
 				ple.ProjectFile = pf;
@@ -802,8 +780,17 @@ public class ProjectsPanel : Panel
 	{
 		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
 		if (gv == null)
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The editor version associated with this project was not found."));
 			return;
-		
+		}
+
+		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} does not exist!"), gv.GetDisplayName()));
+			return;
+		}
+
 		ProcessStartInfo psi = new ProcessStartInfo();
 		psi.FileName = gv.GetExecutablePath().GetOSDir();
 		psi.Arguments = $"--path \"{pf.Location.GetBaseDir()}\"";
@@ -815,56 +802,24 @@ public class ProjectsPanel : Panel
 	}
 
 	private void UpdateIconsExcept(ProjectIconEntry pie) {
-		foreach(ProjectIconEntry cpie in _gridView.GetChildren()) {
+		foreach (ProjectIconEntry cpie in _gridView.GetChildren()) {
 			if (cpie != pie)
 				cpie.SelfModulate = new Color("00ffffff");
 		}
 	}
 
-	private async void ExecuteEditorProject(ProjectFile pf)
+	private void ExecuteEditorProject(ProjectFile pf)
 	{
 		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
 		if (gv == null)
 		{
-			gv = CentralStore.Instance.FindVersion(CentralStore.Settings.DefaultEngine);
-			if (gv == null)
-			{
-				AppDialogs.MessageDialog.ShowMessage("Failed to Launch Project", "The default editor version cannot be found. Please select a default version of Godot to use.");
-				return;
-			}
-
-			bool res = await AppDialogs.YesNoDialog.ShowDialog("Missing Editor Version",
-				string.Format(
-					Tr("The associated editor version for this project was not found. Do you want to associate it with Godot {0}?"),
-					gv.Tag
-				)
-			);
-			if (res)
-			{
-				pf.GodotId = CentralStore.Settings.DefaultEngine;
-				CentralStore.Instance.SaveDatabase();
-			}
-			else
-			{
-				return;
-			}
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The editor version associated with this project was not found."));
+			return;
 		}
 
 		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
 		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), string.Format(Tr("The executable path for Godot {0} does not exist!"), gv.Tag));
-			return;
-		}
-
-		int gdmv = gv.GetMajorVersion();
-		if (gdmv <= 2 && pf.Location.EndsWith("project.godot"))
-		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), Tr("You can't open Godot v3.x+ projects in this editor version."));
-			return;
-		}
-		else if (gdmv >= 3 && pf.Location.EndsWith("engine.cfg"))
-		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Launch Project"), Tr("You can't open Godot v1.x-v2.x projects in this editor version."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} does not exist!"), gv.GetDisplayName()));
 			return;
 		}
 
@@ -889,23 +844,18 @@ public class ProjectsPanel : Panel
 					(gv.GetMajorVersion() >= 4 && ssgv.GetMajorVersion() >= 4) ? fromPath.Join("editor_settings-4.tres") :
 						fromPath.Join("editor_settings-3.tres")
 				};
-				foreach(var path in copies)
+				foreach (var path in copies)
 					CopyRecursive(path, toPath);
 			}
 		}
-		
+
 		ProcessStartInfo psi = new ProcessStartInfo();
 		psi.FileName = gv.GetExecutablePath().GetOSDir();
 		psi.Arguments = $"--path \"{pf.Location.GetBaseDir()}\" -e";
 		psi.WorkingDirectory = pf.Location.GetBaseDir().GetOSDir().NormalizePath();
 		psi.UseShellExecute = !CentralStore.Settings.NoConsole;
 		psi.CreateNoWindow = CentralStore.Settings.NoConsole;
-
-		//Process proc = Process.Start(psi);
-		Process proc = Process.Start(psi);
-		if (CentralStore.Settings.CloseManagerOnEdit) {
-			GetTree().Quit(0);
-		}
+		Process.Start(psi);
 	}
 
 	void CopyRecursive(string fromPath, string toPath)
@@ -925,7 +875,9 @@ public class ProjectsPanel : Panel
 			if (newFile == toPath)
 				newFile = toPath.Join(FPath.GetFileName(file));
 			if (Dir.Exists(file) && !Dir.Exists(newFile))
+			{
 				Dir.CreateDirectory(newFile);
+			}
 			else if (SFile.Exists(file))
 			{
 				if (SFile.Exists(newFile))
@@ -933,6 +885,26 @@ public class ProjectsPanel : Panel
 				SFile.Copy(file, newFile);
 			}
 		}
+	}
+
+	Array<string> BuildSharedSettingsFiles(GodotVersion gv)
+	{
+		Array<string> files = new Array<string>();
+
+		int gmv = gv.GetMajorVersion();
+		string es = "editor_settings";
+		if (gmv <= 1) {
+			es = es.Join(".xml");
+		} else if (gmv == 2) {
+			es = es.Join(".tres");
+		} else if (gmv == 3) {
+			es = es.Join("-3.tres");
+		} else {
+			es = es.Join("-4.tres");
+		}
+		GD.Print(es);
+		files.Add(es);
+		return files;
 	}
 
 	[SignalHandler("clicked", nameof(_actionButtons))]
@@ -953,12 +925,14 @@ public class ProjectsPanel : Panel
 			case 4: // Remove Category
 				AppDialogs.RemoveCategory.ShowDialog();
 				break;
-			case 5: // Remove Project (May be removed completely)
+			case 5: // Remove Project
 				await OnRemoveKeyPressed();
 				break;
-			case 6:
-				var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Remove Missing Projects"), 
-					Tr("Are you sure you want to remove any missing projects?"));
+			case 6: // Remove Missing Projects
+				var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Please Confirm..."), 
+					Tr("Remove all missing projects from the list?"),
+					Tr("Remove All"),
+					Tr("Cancel"));
 				await res;
 				if (res.Result)
 					RemoveMissingProjects();
@@ -992,6 +966,11 @@ public class ProjectsPanel : Panel
 		_currentPLE = null;
 		if (deleteFiles)
 			RemoveFolders(pf.Location.GetBaseDir());
+		if (_missingProjects.Contains(pf)) {
+			_missingProjects.Remove(pf);
+			if (_missingProjects.Count <= 0)
+				_actionButtons.SetHidden(6);
+		}
 		CentralStore.Projects.Remove(pf);
 		CentralStore.Instance.SaveDatabase();
 		PopulateListing();
@@ -999,21 +978,25 @@ public class ProjectsPanel : Panel
 
 	private async Task RemoveProject(ProjectFile pf)
 	{
-		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Please Confirm..."),
-				string.Format(Tr("You are about to remove project \"{0}\".\nDo you wish to remove the files as well?"), pf.Name),
-				Tr("Project and Files"), Tr("Just Project"));
-		while (!task.IsCompleted)
-			await this.IdleFrame();
-		switch (task.Result)
-		{
-			case YesNoCancelDialog.ActionResult.FirstAction:
-				RemoveProjectListing(pf, true);
-				break;
-			case YesNoCancelDialog.ActionResult.SecondAction:
-				RemoveProjectListing(pf, false);
-				break;
-			case YesNoCancelDialog.ActionResult.CancelAction:
-				break;
+		if (!_missingProjects.Contains(pf)) {
+			var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Please Confirm..."),
+					string.Format(Tr("Remove {0} from the list?"), pf.Name),
+					Tr("Project and Files"), Tr("Just Project"));
+			while (!task.IsCompleted)
+				await this.IdleFrame();
+			switch (task.Result)
+			{
+				case YesNoCancelDialog.ActionResult.FirstAction:
+					RemoveProjectListing(pf, true);
+					break;
+				case YesNoCancelDialog.ActionResult.SecondAction:
+					RemoveProjectListing(pf, false);
+					break;
+				case YesNoCancelDialog.ActionResult.CancelAction:
+					break;
+			}
+		} else {
+			RemoveProjectListing(pf, false);
 		}
 	}
 
@@ -1038,10 +1021,7 @@ public class ProjectsPanel : Panel
 	[SignalHandler("Clicked", nameof(_viewSelector))]
 	void OnViewSelector_Clicked(int page) {
 		for (int i = 0; i < _views.Count; i++) {
-			if (i == page)
-				_views[i].Show();
-			else
-				_views[i].Hide();
+			_views[i].Visible = (i == page);
 		}
 		if (page == 2) {
 			_actionButtons.SetVisible(3);

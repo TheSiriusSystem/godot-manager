@@ -25,9 +25,6 @@ corner_detail = 20
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 4 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PC" type="PanelContainer" parent="."]
 anchor_right = 1.0
@@ -84,7 +81,7 @@ margin_right = 304.0
 margin_bottom = 19.0
 size_flags_vertical = 2
 custom_fonts/font = ExtResource( 2 )
-text = "Fetching information from Github."
+text = "Title"
 align = 1
 autowrap = true
 max_lines_visible = 5
@@ -94,7 +91,6 @@ margin_top = 117.0
 margin_right = 304.0
 margin_bottom = 134.0
 custom_fonts/font = ExtResource( 1 )
-text = "Downloaded xxx bytes...."
 align = 1
 autowrap = true
 max_lines_visible = 5

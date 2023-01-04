@@ -79,11 +79,6 @@ public class AssetLibPanel : Panel
     [NodePath("VC/ManageContainer/plmTemplates")]
     PaginatedListing _plmTemplates = null;
     #endregion
-
-    #region Timers
-    [NodePath("ExecuteDelay")]
-    Timer _executeDelay = null;
-    #endregion
 #endregion
 
 #region Private Variables
@@ -129,7 +124,7 @@ public class AssetLibPanel : Panel
         }
         AppDialogs.ImportFileDialog.CurrentFile = "";
         AppDialogs.ImportFileDialog.CurrentPath = "";
-        AppDialogs.ImportFileDialog.PopupCentered(new Vector2(510, 390));
+        AppDialogs.ImportFileDialog.PopupCentered();
     }
 
     void OnImportClosed() {
@@ -153,7 +148,7 @@ public class AssetLibPanel : Panel
 
     void OnTemplateImport(string filepath)
     {
-        if (filepath.EndsWith(".godot"))
+        if (filepath.EndsWith("engine.cfg") || filepath.EndsWith("project.godot"))
         {
             TemplateDirectoryImport(filepath);
         }
@@ -180,23 +175,8 @@ public class AssetLibPanel : Panel
         _supportPopup.Popup_(new Rect2(_support.RectGlobalPosition + new Vector2(0,_support.RectSize.y), _supportPopup.RectSize));
     }
 
-    [SignalHandler("timeout", nameof(_executeDelay))]
-    async void OnExecuteDelay_Timeout() {
-        if (lastSearch == _searchField.Text)
-            return;
-        await UpdatePaginatedListing(_addonsBtn.Pressed ? _plAddons : _plTemplates);
-        lastSearch = _searchField.Text;
-    }
-
-    [SignalHandler("text_changed", nameof(_searchField))]
-    void OnSearchField_TextChanged(string text) {
-        _executeDelay.Start();
-    }
-
     [SignalHandler("text_entered", nameof(_searchField))]
     async void OnSearchField_TextEntered(string text) {
-        if (!_executeDelay.IsStopped())
-            _executeDelay.Stop();
         await UpdatePaginatedListing(_addonsBtn.Pressed ? _plAddons : _plTemplates);
     }
 
@@ -294,13 +274,13 @@ public class AssetLibPanel : Panel
         if (GetParent<TabContainer>().GetCurrentTabControl() == this)
 		{
             if ((DateTime.Now - lastConfigureRequest) >= defaultWaitConfigure) {
-			    await Configure(_templatesBtn.Pressed);
+                await Configure(_templatesBtn.Pressed);
                 if (_category.GetItemCount() == 1)
                     return;
             }
 
             if ((DateTime.Now - lastSearchRequest) >= defaultWaitSearch) {
-			    await UpdatePaginatedListing(_addonsBtn.Pressed ? _plAddons : _plTemplates);
+                await UpdatePaginatedListing(_addonsBtn.Pressed ? _plAddons : _plTemplates);
             }
 		}
 	}
@@ -320,7 +300,7 @@ public class AssetLibPanel : Panel
         asset.Version = "-1";
         asset.Category = "Local";
         asset.CategoryId = "-3";
-        asset.GodotVersion = "x.x.x";
+        asset.GodotVersion = "vx.x.x";
         asset.Rating = "";
         asset.Cost = "";
         asset.SupportLevel = "";
@@ -346,7 +326,7 @@ public class AssetLibPanel : Panel
             asset.Author = cfg.GetValue("plugin", "author") as string;
             asset.VersionString = cfg.GetValue("plugin", "version") as string;
             asset.Description = cfg.GetValue("plugin", "description") as string;
-            asset.IconUrl = "res://Assets/Icons/default_project_icon_v3.png";
+            asset.IconUrl = MainWindow._plTextures["DefaultIconV3"].ResourcePath;
         } else {
             ProjectConfig pc = new ProjectConfig(filepath);
 			bool isOldGD = filepath.EndsWith("engine.cfg");
@@ -354,8 +334,8 @@ public class AssetLibPanel : Panel
             asset.Type = "project";
             asset.Title = pc.GetValue("application", isOldGD ? "name" : "config/name");
             asset.Author = "Template Importer";
-            asset.VersionString = "x.x.x";
-            asset.Description = pc.GetValue("application", isOldGD ? "No Description" : "config/description");
+            asset.VersionString = "vx.x.x";
+            asset.Description = pc.GetValue("application", isOldGD ? Tr("No Description") : "config/description", Tr("No Description"));
             asset.IconUrl = "zip+" + pc.GetValue("application", isOldGD ? "icon" : "config/icon");
         }
         asset = FinalizeVariables(asset, filepath);
@@ -369,7 +349,7 @@ public class AssetLibPanel : Panel
             bool found = false;
             
             using (var za = ZipFile.OpenRead(filepath)) {
-                foreach(var zae in za.Entries) {
+                foreach (var zae in za.Entries) {
                     if (zae.FullName.EndsWith("plugin.cfg")) {
                         found = true;
                         cfg.Parse(zae.ReadFile());
@@ -386,14 +366,14 @@ public class AssetLibPanel : Panel
             asset.Author = cfg.GetValue("plugin", "author") as string;
             asset.VersionString = cfg.GetValue("plugin", "version") as string;
             asset.Description = cfg.GetValue("plugin", "description") as string;
-            asset.IconUrl = "res://Assets/Icons/default_project_icon_v3.png";
+            asset.IconUrl = MainWindow._plTextures["DefaultIconV3"].ResourcePath;
         } else {
             ProjectConfig pc = new ProjectConfig();
             bool found = false;
 			bool isOldGD = false;
 
             using (var za = ZipFile.OpenRead(filepath)) {
-                foreach(var zae in za.Entries) {
+                foreach (var zae in za.Entries) {
                     if (zae.FullName.EndsWith("project.godot") || zae.FullName.EndsWith("engine.cfg")) {
                         found = true;
 						isOldGD = zae.FullName.EndsWith("engine.cfg");
@@ -409,8 +389,8 @@ public class AssetLibPanel : Panel
 			asset.Type = "project";
             asset.Title = pc.GetValue("application", isOldGD ? "name" : "config/name");
             asset.Author = "Asset Importer";
-            asset.VersionString = "x.x.x";
-            asset.Description = pc.GetValue("application", isOldGD ? "No Description" : "config/description");
+            asset.VersionString = "vx.x.x";
+            asset.Description = pc.GetValue("application", isOldGD ? Tr("No Description") : "config/description", Tr("No Description"));
             asset.IconUrl = "zip+" + pc.GetValue("application", isOldGD ? "icon" : "config/icon");
         }
         asset = FinalizeVariables(asset, filepath);
@@ -428,8 +408,6 @@ public class AssetLibPanel : Panel
 
                 foreach (string entry in Directory.EnumerateFileSystemEntries(addonPath,"*",System.IO.SearchOption.AllDirectories)) {
                     if (entry == "." || entry == "..")
-                        continue;
-                    if (entry.EndsWith(".import"))
                         continue;
                     if (Directory.Exists(entry))
                         continue;
@@ -503,11 +481,11 @@ public class AssetLibPanel : Panel
 
 	private async Task Configure(bool projectsOnly)
 	{
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Gathering information from GodotEngine Assetlib..."));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Connecting..."));
-		AppDialogs.BusyDialog.ShowDialog();
-
         string url = (string)_mirrorSite.GetItemMetadata(_mirrorSite.Selected);
+
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Assets"));
+		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching asset information from Godot Asset Library..."));
+		AppDialogs.BusyDialog.ShowDialog();
 
 		AssetLib.AssetLib.Instance.Connect("chunk_received", this, "OnChunkReceived");
 		var task = AssetLib.AssetLib.Instance.Configure(url,projectsOnly);
@@ -518,9 +496,6 @@ public class AssetLibPanel : Panel
 
 		AssetLib.AssetLib.Instance.Disconnect("chunk_received", this, "OnChunkReceived");
 
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Processing Data from GodotEngine Assetlib..."));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Processing..."));
-
 		_category.Clear();
         _category.AddItem("All", 0);
 		AssetLib.ConfigureResult configureResult = task.Result;
@@ -529,7 +504,7 @@ public class AssetLibPanel : Panel
             PaginatedListing pl = _addonsBtn.Pressed ? _plAddons : _plTemplates;
             pl.ClearResults();
             AppDialogs.BusyDialog.HideDialog();
-            AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"),string.Format(Tr("Unable to connect to {0}."),url));
+            AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("Cannot connect to Godot Asset Library."));
             return;
         }
 
@@ -549,7 +524,7 @@ public class AssetLibPanel : Panel
         if (_supportPopup.IsItemChecked(2))
             support.Add("testing");
         string[] asupport = new string[support.Count];
-        foreach(string t in support)
+        foreach (string t in support)
             asupport[support.IndexOf(t)] = t;
         return asupport;
     }
@@ -568,8 +543,8 @@ public class AssetLibPanel : Panel
             else
                 pl.UpdateTemplates();
         } else {
-            AppDialogs.BusyDialog.UpdateHeader(Tr("Getting search results..."));
-            AppDialogs.BusyDialog.UpdateByline(Tr("Connecting..."));
+            AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Assets"));
+            AppDialogs.BusyDialog.UpdateByline(Tr("Processing search results..."));
             AppDialogs.BusyDialog.ShowDialog();
 
             bool projectsOnly = (pl == _plTemplates);
@@ -592,10 +567,15 @@ public class AssetLibPanel : Panel
                 return;
             }
 
-            AppDialogs.BusyDialog.UpdateByline(Tr("Parsing results..."));
             pl.UpdateResults(stask.Result);
             AppDialogs.BusyDialog.HideDialog();
             lastSearchRequest = DateTime.Now;
         }
 	}
+
+    public async void UpdateManagedLists()
+    {
+        await UpdatePaginatedListing(_plmAddons);
+        await UpdatePaginatedListing(_plmTemplates);
+    }
 }

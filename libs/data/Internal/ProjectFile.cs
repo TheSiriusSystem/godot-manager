@@ -34,7 +34,7 @@ public class ProjectFile : Godot.Object {
 
 				projectFile = new ProjectFile();
 				projectFile.Name = project.GetValue("application", "name");
-				projectFile.Description = projectFile.Tr("No Description");
+				projectFile.Description = "";
 				projectFile.Location = filePath;
 				projectFile.Icon = project.GetValue("application", "icon", "res://icon.png");
 			} else if (gdMajorVers >= 3) {
@@ -53,7 +53,7 @@ public class ProjectFile : Godot.Object {
 
 				projectFile = new ProjectFile();
 				projectFile.Name = project.GetValue("application", "config/name");
-				projectFile.Description = project.GetValue("application", "config/description", projectFile.Tr("No Description"));
+				projectFile.Description = project.GetValue("application", "config/description", "");
 				projectFile.Location = filePath;
 				projectFile.Icon = project.GetValue("application", "config/icon", "res://icon.png");
 			}
@@ -97,11 +97,11 @@ public class ProjectFile : Godot.Object {
 		if (ret == Error.Ok) {
 			if (!pf.HasSection("header")) {
 				this.Name = pf.GetValue("application", "name");
-				this.Description = Tr("No Description");
+				this.Description = "";
 				this.Icon = pf.GetValue("application", "icon");
 			} else if (pf.GetValue("header", "config_version").ToInt() >= 3) {
 				this.Name = pf.GetValue("application", "config/name");
-				this.Description = pf.GetValue("application", "config/description", Tr("No Description"));
+				this.Description = pf.GetValue("application", "config/description", "");
 				this.Icon = pf.GetValue("application", "config/icon", "res://icon.png");
 			}
 		}
@@ -111,7 +111,7 @@ public class ProjectFile : Godot.Object {
 		ProjectConfig pf = new ProjectConfig();
 		var ret = pf.Load(Location);
 		if (ret == Error.Ok) {
-			if (!pf.HasSection("header")) {
+			if (CentralStore.Instance.FindVersion(GodotId).GetMajorVersion() <= 2) {
 				pf.SetValue("application", "name", $"\"{this.Name}\"");
 				pf.SetValue("application", "icon", $"\"{this.Icon}\"");
 			} else {

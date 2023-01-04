@@ -49,12 +49,12 @@ public class RemoveCategory : ReferenceRect
 		}
 		Category cat = CentralStore.Instance.GetCategoryByName(selectedItem);
 		var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Please Confirm..."),
-				string.Format(Tr("You are about to remove category \"{0}\".\nAll projects in this category will be moved to the \"Uncategorized\" category."), selectedItem));
+				string.Format(Tr("You are about to remove category \"{0}\".\nAll projects in this category will be moved to the \"Uncategorized\" category."), selectedItem), Tr("Remove"), Tr("Cancel"));
 		while (!res.IsCompleted) {
 			await this.IdleFrame();
 		}
 		if (res.Result) {
-			foreach(ProjectFile prj in CentralStore.Projects) {
+			foreach (ProjectFile prj in CentralStore.Projects) {
 				if (prj.CategoryId == cat.Id)
 					prj.CategoryId = -1;
 			}
@@ -74,6 +74,11 @@ public class RemoveCategory : ReferenceRect
 		_categoryList.Clear();
 		foreach (Category cat in CentralStore.Categories) {
 			_categoryList.AddItem(cat.Name);
+		}
+		if (_categoryList.Items.Count <= 0) {
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
+			Tr("There are no categories to remove."));
+			return;
 		}
 		Visible = true;
 	}

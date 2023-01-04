@@ -26,22 +26,6 @@ public class AddonInstaller : ReferenceRect
 #endregion
 
 #region Icon Registry
-	Texture ift_image = GD.Load<Texture>("res://Assets/Icons/icon_ft_image.svg");
-	Texture ift_audio = GD.Load<Texture>("res://Assets/Icons/icon_ft_audio.svg");
-	Texture ift_packedscene = GD.Load<Texture>("res://Assets/Icons/icon_ft_packed_scene.svg");
-	Texture ift_shader = GD.Load<Texture>("res://Assets/Icons/icon_ft_shader.svg");
-	Texture ift_gdscript = GD.Load<Texture>("res://Assets/Icons/icon_ft_gdscript.svg");
-	Texture ift_csharp = GD.Load<Texture>("res://Assets/Icons/icon_ft_csharp.svg");
-	Texture ift_visualscript = GD.Load<Texture>("res://Assets/Icons/icon_ft_visualscript.svg");
-	Texture ift_resource = GD.Load<Texture>("res://Assets/Icons/icon_ft_resource.svg");
-	Texture ift_atlastexture = GD.Load<Texture>("res://Assets/Icons/icon_ft_atlas_texture.svg");
-	Texture ift_mesh = GD.Load<Texture>("res://Assets/Icons/icon_ft_mesh.svg");
-	Texture ift_text = GD.Load<Texture>("res://Assets/Icons/icon_ft_text.svg");
-	Texture ift_font = GD.Load<Texture>("res://Assets/Icons/icon_ft_font.svg");
-	Texture ift_object = GD.Load<Texture>("res://Assets/Icons/icon_ft_object.svg");
-	Texture ift_file = GD.Load<Texture>("res://Assets/Icons/icon_ft_file.svg");
-	Texture ift_folder = GD.Load<Texture>("res://Assets/Icons/icon_ft_folder.svg");
-
 	Dictionary<string, Texture> IconRegistry = null;
 
 	Array<string> IgnoreFiles = null;
@@ -55,39 +39,39 @@ public class AddonInstaller : ReferenceRect
 	void InitRegistry() {
 		IconRegistry = new Dictionary<string, Texture>();
 		// Image Formats
-		AddRegistry(new string[] {".bmp",".dds",".exr",".hdr",".jpg",".jpeg",".png",".svg",".svgz",".tga",".webp"}, ift_image);
+		AddRegistry(new string[] {".bmp",".dds",".exr",".hdr",".jpg",".jpeg",".png",".svg",".svgz",".tga",".webp"}, MainWindow._plTextures["FT_Image"]);
 		// Audio Formats
-		AddRegistry(new string[] {".wav",".mp3",".ogg"}, ift_audio);
+		AddRegistry(new string[] {".wav",".mp3",".ogg"}, MainWindow._plTextures["FT_Audio"]);
 		// Packed Scene Formats
-		AddRegistry(new string[] {".scn",".tscn",".escn",".dae",".gltf",".glb"}, ift_packedscene);
+		AddRegistry(new string[] {".xml",".scn",".tscn",".escn",".dae",".gltf",".glb"}, MainWindow._plTextures["FT_PackedScene"]);
 		// Shader Formats
-		AddRegistry(new string[] {".gdshader",".shader"}, ift_shader);
+		AddRegistry(new string[] {".gdshader",".shader"}, MainWindow._plTextures["FT_Shader"]);
 		// Script Formats
-		AddRegistry(new string[] {".gd"}, ift_gdscript);
-		AddRegistry(new string[] {".cs"}, ift_csharp);
-		AddRegistry(new string[] {".vs"}, ift_visualscript);
+		AddRegistry(new string[] {".gd"}, MainWindow._plTextures["FT_GDScript"]);
+		AddRegistry(new string[] {".cs"}, MainWindow._plTextures["FT_CSharp"]);
+		AddRegistry(new string[] {".vs"}, MainWindow._plTextures["FT_VisualScript"]);
 		// Atlas Texture Format
-		AddRegistry(new string[] {".atlastex"}, ift_atlastexture);
+		AddRegistry(new string[] {".atlastex"}, MainWindow._plTextures["FT_AtlasTexture"]);
 		// Mesh Texture Format
-		AddRegistry(new string[] {".obj"}, ift_mesh);
+		AddRegistry(new string[] {".obj"}, MainWindow._plTextures["FT_Mesh"]);
 		// Text File Formats
-		AddRegistry(new string[] {".txt",".md",".rst",".json",".yml",".yaml",".toml",".cfg",".ini"}, ift_text);
+		AddRegistry(new string[] {".txt",".md",".rst",".json",".yml",".yaml",".toml",".cfg",".ini"}, MainWindow._plTextures["FT_Text"]);
 		// Font Formats
-		AddRegistry(new string[] {".ttf",".otf",".woff",".fnt"}, ift_font);
+		AddRegistry(new string[] {".ttf",".otf",".woff",".fnt"}, MainWindow._plTextures["FT_Font"]);
 		// No Extension
-		AddRegistry(new string[] {"::noext::"}, ift_object);
+		AddRegistry(new string[] {"::noext::"}, MainWindow._plTextures["FT_Object"]);
 		// Unknown Extension
-		AddRegistry(new string[] {"::unknown::"}, ift_file);
-		AddRegistry(new string[] {"::folder::"}, ift_folder);
+		AddRegistry(new string[] {"::unknown::"}, MainWindow._plTextures["FT_File"]);
+		AddRegistry(new string[] {"::folder::"}, MainWindow._plTextures["FT_Folder"]);
 	}
 
 	void InitIgnoreFiles() {
 		IgnoreFiles = new Array<string>();
 		IgnoreFiles.Add("res://icon.png");
-		IgnoreFiles.Add("res://icon.png.import");
 		IgnoreFiles.Add("res://icon.png.flags");
-		IgnoreFiles.Add("res://project.godot");
+		IgnoreFiles.Add("res://icon.png.import");
 		IgnoreFiles.Add("res://engine.cfg");
+		IgnoreFiles.Add("res://project.godot");
 		IgnoreFiles.Add("res://default_env.tres");
 		IgnoreFiles.Add("res://.gitignore");
 		IgnoreFiles.Add("res://.gitattributes");
@@ -100,6 +84,15 @@ public class AddonInstaller : ReferenceRect
 		IgnoreFiles.Add("res://LICENCE");
 		IgnoreFiles.Add("res://LICENCE.txt");
 		IgnoreFiles.Add("res://LICENCE.md");
+		IgnoreFiles.Add("res://CODE_OF_CONDUCT");
+		IgnoreFiles.Add("res://CODE_OF_CONDUCT.txt");
+		IgnoreFiles.Add("res://CODE_OF_CONDUCT.md");
+		IgnoreFiles.Add("res://CONTRIBUTING");
+		IgnoreFiles.Add("res://CONTRIBUTING.txt");
+		IgnoreFiles.Add("res://CONTRIBUTING.md");
+		IgnoreFiles.Add("res://SECURITY");
+		IgnoreFiles.Add("res://SECURITY.txt");
+		IgnoreFiles.Add("res://SECURITY.md");
 		IgnoreFiles.Add("res://CREDITS");
 		IgnoreFiles.Add("res://CREDITS.txt");
 		IgnoreFiles.Add("res://CREDITS.md");
@@ -118,7 +111,7 @@ public class AddonInstaller : ReferenceRect
 
 	public void ShowDialog(AssetPlugin asset) {
 		_installer = new PluginInstaller(asset);
-		_detailLabel.Text = string.Format(Tr("Contents of asset {0}\nSelect files to Install:"),asset.Asset.Title);
+		_detailLabel.Text = string.Format(Tr("Contents of asset \"{0}\"\nSelect the files to install for new projects:"), asset.Asset.Title);
 		PopulateTree();
 		Visible = true;
 	}
@@ -161,20 +154,30 @@ public class AddonInstaller : ReferenceRect
 	void OnPressed_OkButton() {
 		Array<string> installFiles = new Array<string>();
 
-		foreach(string key in _statusMap.Keys) {
-			if (_statusMap[key] != null) {
-				if (_statusMap[key].IsChecked(0))
-					installFiles.Add(key);
+		foreach (string key in _statusMap.Keys) {
+			if (_statusMap[key] != null && _statusMap[key].IsChecked(0)) {
+				installFiles.Add(key);
 			}
 		}
+
+		int selectedFiles = 0;
+		foreach (TreeItem value in _statusMap.Values) {
+			if (value.GetIcon(0) != IconRegistry["::folder::"] && value.IsChecked(0)) {
+				selectedFiles++;
+			}
+		}
+		if (selectedFiles <= 0) {
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("No files are selected."));
+			return;
+		}
+
 		_installer.AssetPlugin.InstallFiles = installFiles;
-		
 		CentralStore.Instance.SaveDatabase();
 		Visible = false;
 	}
 
 	[SignalHandler("item_edited", nameof(_addonTree))]
-	async void OnItemEdited() {
+	void OnItemEdited() {
 		// Code "Copied" from Godot editor_asset_installer.cpp
 		if (_updating)
 			return;
@@ -186,17 +189,6 @@ public class AddonInstaller : ReferenceRect
 		_updating = true;
 
 		string path = item.GetMetadata(0) as string;
-
-		if (item.GetCustomColor(0) == new Color(1,0,0)) {
-			if (item.IsChecked(0)) {
-				bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Addon Installer - Ignored File"), 
-				Tr("The file you have selected, is known to be a file that is part of your project structure, and can cause corruption if installed, do you wish to continue?"));
-				item.SetChecked(0,res);
-				_updating = false;
-				if (!res)
-					return;
-			}
-		}
 
 		if (path == string.Empty || item == _root) {
 			UpdateSubitems(item, item.IsChecked(0), true);
@@ -228,7 +220,7 @@ public class AddonInstaller : ReferenceRect
 
 		int indx = -1;
 		Array<string> _zipContents = _installer.GetZipContents();
-		foreach(string entry in _installer.GetFileList()) {
+		foreach (string entry in _installer.GetFileList()) {
 			string path = entry;
 			bool isdir = false;
 			indx++;

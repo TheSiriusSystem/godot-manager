@@ -56,7 +56,7 @@ public class FileConflictDialog : ReferenceRect
 		_result = ConflictAction.Abort;
 		Visible = true;
 
-		while(Visible)
+		while (Visible)
 			await this.IdleFrame();
 		
 		return _result;

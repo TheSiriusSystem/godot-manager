@@ -1,13 +1,2 @@
-* text=lf
-
-# Godot Files
-*.gd text
-*.tres text
-*.tscn text
-*.godot text
-*.cfg text
-
-# C# Files
-*.csproj text
-*.sln text
-*.cs text
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf

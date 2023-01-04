@@ -26,6 +26,8 @@ public class GodotLineEntry : HBoxContainer
 	public delegate void link_settings_clicked(GodotLineEntry entry);
 
 #region Private Node Variables
+	[NodePath("Icon")]
+	private TextureRect _icon = null;
 	[NodePath("vc/VersionTag")]
 	private Label _label = null;
 	[NodePath("vc/hc/Source")]
@@ -38,8 +40,6 @@ public class GodotLineEntry : HBoxContainer
 	private TextureRect _linked = null;
 	[NodePath("Download")]
 	private TextureRect _download = null;
-	[NodePath("Default")]
-	private TextureRect _default = null;
 
 	[NodePath("vc/DownloadProgress")]
 	private HBoxContainer _downloadProgress = null;
@@ -55,27 +55,21 @@ public class GodotLineEntry : HBoxContainer
 	[NodePath("vc/ETA/DownloadSpeed")]
 	private Label _downloadSpeed = null;
 
-	[NodePath("vc/Location")] private HBoxContainer _loc = null;
-
-	[NodePath("vc/Location/DownloadLocation")]
-	private Label _downloadLocation = null;
+	[NodePath("vc/Location")]
+	private Label _loc = null;
 
 	[NodePath("DownloadSpeedTimer")]
 	private Timer _downloadSpeedTimer = null;
-
-	private StreamTexture downloadIcon;
-	private StreamTexture uninstallIcon;
 #endregion
 
 #region Private String Variables
-	private string sLabel = "Godot x.x.x";
+	private string sLabel = "Godot vx.x.x";
 	private string sSource = "Source: TuxFamily";
 	private string sFilesize = "Size: Unknown";
 	private string sLocation = @"E:\Apps\GodotManager\versions\x.x.x";
 	private bool bDownloaded = false;
 	private bool bSettingsShare = false;
 	private bool bSettingsLinked = false;
-	private bool bDefault = false;
 	private bool bMono = false;
 	private GodotVersion gvGodotVersion = null;
 	private GithubVersion gvGithubVersion = null;
@@ -101,6 +95,7 @@ public class GodotLineEntry : HBoxContainer
 				File file = new File();
 				if (file.Open(Location, File.ModeFlags.Read) == Error.Ok) {
 					Filesize = Util.FormatSize(file.GetLen());
+					file.Close();
 				} else {
 					if (value.GithubVersion != null)
 						Filesize = Util.FormatSize(value.GithubVersion.PlatformDownloadSize);
@@ -109,7 +104,6 @@ public class GodotLineEntry : HBoxContainer
 					else if (value.CustomEngine != null)
 						Filesize = Util.FormatSize(value.CustomEngine.DownloadSize);
 				}
-				file.Close();
 				if (_loc != null)
 					_loc.Visible = true;
 			}
@@ -136,7 +130,7 @@ public class GodotLineEntry : HBoxContainer
 			Label = value.Name;
 			if (_loc != null)
 				_loc.Visible = false;
-			switch(Platform.OperatingSystem) {
+			switch (Platform.OperatingSystem) {
 				case "Windows":
 				case "UWP (Windows 10)":
 					if (Mono) {
@@ -205,7 +199,7 @@ public class GodotLineEntry : HBoxContainer
 			if (_loc != null)
 				_loc.Visible = false;
 			Source = value.PlatformDownloadURL;
-			switch(Platform.OperatingSystem) {
+			switch (Platform.OperatingSystem) {
 				case "Windows":
 				case "UWP (Windows 10)":
 					if (Platform.Bits == "32")
@@ -277,10 +271,11 @@ public class GodotLineEntry : HBoxContainer
 		set
 		{
 			sLocation = value;
-			if (_downloadLocation != null)
-				_downloadLocation.Text = sLocation.GetBaseDir();
-			if (_loc != null)
+			if (_loc != null) {
+				string path = sLocation.GetBaseDir().NormalizePath();
+				_loc.Text = string.Format(Tr("Location: {0}"), path);
 				_loc.Visible = true;
+			}
 		}
 	}
 
@@ -292,7 +287,6 @@ public class GodotLineEntry : HBoxContainer
 			bDownloaded = value;
 			if (_download != null) {
 				ToggleDownloadUninstall(bDownloaded);
-				_default.Visible = value;
 			}
 		}
 	}
@@ -321,11 +315,8 @@ public class GodotLineEntry : HBoxContainer
 
 	public bool IsDownloaded => bDownloaded;
 
-	public bool IsDefault => bDefault;
-
 	public int TotalSize { get; set; }
 #endregion
-
 
 	public override void _Ready()
 	{
@@ -338,21 +329,25 @@ public class GodotLineEntry : HBoxContainer
 		SettingsShared = bSettingsShare;
 		SettingsLinked = bSettingsLinked;
 
-		downloadIcon = GD.Load<StreamTexture>("res://Assets/Icons/download.svg");
-		uninstallIcon = GD.Load<StreamTexture>("res://Assets/Icons/uninstall.svg");
 		Downloaded = bDownloaded;
-		ToggleDefault(bDefault);
 		adSpeedStack = new Array<double>();
 
+		if (gvGodotVersion != null) {
+			IsGodotV1OrV2(gvGodotVersion.Tag);
+		} else if (gvGithubVersion != null) {
+			IsGodotV1OrV2(gvGithubVersion.Name);
+		} else if (gvMirrorVersion != null) {
+			IsGodotV1OrV2(gvMirrorVersion.Version);
+		}
 	}
 
 	public void ToggleDownloadUninstall(bool value) {
 		if (value) {
-			_download.Texture = uninstallIcon;
+			_download.Texture = MainWindow._plTextures["UninstallIcon"];
 			_download.SelfModulate = new Color("fc9c9c");
 		}
 		else {
-			_download.Texture = downloadIcon;
+			_download.Texture = MainWindow._plTextures["DownloadIcon"];
 			_download.SelfModulate = new Color("7defa7");
 		}
 	}
@@ -372,17 +367,6 @@ public class GodotLineEntry : HBoxContainer
 
 	public void StopDownloadStats() {
 		_downloadSpeedTimer.Stop();
-	}
-
-	public void ToggleDefault(bool value) {
-		bDefault = value;
-		if (_default != null) {
-			if (value) {
-				_default.SelfModulate = new Color("ffd684");
-			} else {
-				_default.SelfModulate = new Color("ffffff");
-			}
-		}
 	}
 
 	public async void ToggleSettingsShared()
@@ -405,6 +389,13 @@ public class GodotLineEntry : HBoxContainer
 		_linked.Visible = true;
 	}
 
+	void IsGodotV1OrV2(string gdVersTag)
+	{
+		if (gdVersTag[!gdVersTag.ToLower().StartsWith("v") ? 0 : 1].ToString().ToInt() <= 2) {
+			_icon.Texture = MainWindow._plTextures["EditorIconV1"];
+		}
+	}
+
 	[SignalHandler("gui_input")]
 	void OnGuiInput(InputEvent inputEvent)
 	{
@@ -418,18 +409,11 @@ public class GodotLineEntry : HBoxContainer
 	[SignalHandler("gui_input", nameof(_download))]
 	void OnDownload_GuiInput(InputEvent inputEvent) {
 		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && (ButtonList)iemb.ButtonIndex == ButtonList.Left) {
-			if (_download.Texture == downloadIcon)
+			if (_download.Texture == MainWindow._plTextures["DownloadIcon"])
 				EmitSignal("install_clicked", this);
 			else
 				EmitSignal("uninstall_clicked", this);
-			ToggleDownloadUninstall((_download.Texture == downloadIcon));
-		}
-	}
-
-	[SignalHandler("gui_input", nameof(_default))]
-	void OnDefault_GuiInput(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && (ButtonList)iemb.ButtonIndex == ButtonList.Left) {
-			EmitSignal("default_selected", this);
+			ToggleDownloadUninstall((_download.Texture == MainWindow._plTextures["DownloadIcon"]));
 		}
 	}
 

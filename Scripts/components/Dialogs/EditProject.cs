@@ -3,7 +3,6 @@ using Godot.Sharp.Extras;
 using Godot.Collections;
 using Guid = System.Guid;
 using SFile = System.IO.File;
-using System.Text.RegularExpressions;
 
 public class EditProject : ReferenceRect
 {
@@ -14,6 +13,9 @@ public class EditProject : ReferenceRect
 
 #region Node Paths
 #region General Tab
+[NodePath("PC/CC/P")]
+Panel _Panel = null;
+
 [NodePath("PC/CC/P/VB/MCContent/VC/HC/ProjectIcon")]
 TextureRect _Icon = null;
 
@@ -22,6 +24,9 @@ LineEdit _ProjectName = null;
 
 [NodePath("PC/CC/P/VB/MCContent/VC/GodotVersion")]
 OptionButton _GodotVersion = null;
+
+[NodePath("PC/CC/P/VB/MCContent/VC/ProjectDescriptionHeader")]
+Label _ProjectDescriptionHeader = null;
 
 [NodePath("PC/CC/P/VB/MCContent/VC/ProjectDescription")]
 TextEdit _ProjectDescription = null;
@@ -36,16 +41,9 @@ Button _CancelBtn = null;
 #endregion
 #endregion
 
-#region Resources
-[Resource("res://components/AddonLineEntry.tscn")] private PackedScene ALineEntry = null;
-[Resource("res://Assets/Icons/default_project_icon_v3.png")] private Texture DefaultIcon = null;
-[Resource("res://Assets/Icons/missing_icon.svg")] private Texture MissingIcon = null;
-#endregion
-
 #region Private Variables
 	ProjectFile _pf = null;
 	EPData _data;
-	Regex _gitTag = new Regex("-[A-Za-z0-9]{40,}");
 #endregion
 
 #region Internal Structure
@@ -100,20 +98,32 @@ Button _CancelBtn = null;
 
 #region Public Functions
 	public void ShowDialog(ProjectFile pf) {
+		if (CentralStore.Versions.Count <= 0)
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can edit a project."));
+			return;
+		}
+
 		ProjectFile = pf;
+		int gdmv = CentralStore.Instance.FindVersion(pf.GodotId).GetMajorVersion();
 		var texture = Util.LoadImage(ProjectFile.Location.GetResourceBase(IconPath));
+		_Panel.RectMinSize = new Vector2(_Panel.RectMinSize.x, gdmv <= 2 ? 210 : 410);
 		if (texture == null)
-			_Icon.Texture = MissingIcon;
+			_Icon.Texture = MainWindow._plTextures["MissingIcon"];
 		else
 			_Icon.Texture = texture;
 		_ProjectName.Text = ProjectName;
-		_ProjectDescription.Text = Description;
+		_ProjectDescriptionHeader.Visible = (gdmv >= 3);
+		_ProjectDescription.Visible = (gdmv >= 3);
+		if (CentralStore.Instance.FindVersion(pf.GodotId).GetMajorVersion() >= 3)
+			_ProjectDescription.Text = Description;
 		_GodotVersion.Clear();
-		foreach(GodotVersion gdver in CentralStore.Versions) {
+		foreach (GodotVersion gdver in CentralStore.Versions) {
 			_GodotVersion.AddItem(gdver.GetDisplayName());
 			_GodotVersion.SetItemMetadata(_GodotVersion.GetItemCount()-1, gdver.Id);
 			if (ProjectFile.GodotId == gdver.Id)
 				_GodotVersion.Selected = _GodotVersion.GetItemCount()-1;
+			OnGodotVersionItemSelected(_GodotVersion.Selected);
 		}
 
 		if (ProjectFile.Assets == null)
@@ -126,6 +136,13 @@ Button _CancelBtn = null;
 #region Event Handlers
 	[SignalHandler("pressed", nameof(_SaveBtn))]
 	void OnSaveBtnPressed() {
+		int gdmv = CentralStore.Instance.FindVersion(GodotId).GetMajorVersion();
+		if ((gdmv <= 2 && _pf.Location.EndsWith("project.godot")) || (gdmv >= 3 && _pf.Location.EndsWith("engine.cfg")))
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The project cannot be associated with this editor version."));
+			return;
+		}
+
 		ProjectFile.Name = ProjectName;
 		ProjectFile.Description = Description;
 		ProjectFile.Icon = IconPath;

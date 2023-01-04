@@ -103,7 +103,7 @@ public class PageButton : ColorRect
     }
 
     private void ClearActiveState() {
-        foreach(var pb in GetTree().GetNodesInGroup("page_buttons")) {
+        foreach (var pb in GetTree().GetNodesInGroup("page_buttons")) {
             if (pb is PageButton) {
                 var pbutt = pb as PageButton;
                 if (pbutt.IsActive)

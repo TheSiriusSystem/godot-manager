@@ -54,7 +54,7 @@ public static class Util
 		if (path.EndsWith("/"))
 			path = path.Substr(0,path.Length-1);
 		
-		foreach(string part in addTo) {
+		foreach (string part in addTo) {
 			path += "/" + part;
 		}
 		return path;
@@ -72,32 +72,25 @@ public static class Util
 
 	public static string GetUserFolder(params string[] parts)
 	{
-		var path = "user://";
-		if (OS.GetExecutablePath().GetFile().StartsWith("GodotManager"))
+		string path = "user://";
+		if (OS.HasFeature("standalone"))
 		{
-			if (SFile.Exists(OS.GetExecutablePath().GetBaseDir().Join("._sc_")) ||
-			    SFile.Exists(OS.GetExecutablePath().GetBaseDir().Join("_sc_")))
-			{
-				path = OS.GetExecutablePath().GetBaseDir().Join("godot_data");
-			}
+			string exePath = OS.GetExecutablePath().GetBaseDir().NormalizePath();
+			if (SFile.Exists(exePath.Join("._sc_")) || SFile.Exists(exePath.Join("_sc_")))
+				path = exePath.Join("data_" + ProjectSettings.GetSetting("application/config/name"));
 		}
-
 		return parts.Length == 0 ? path : path.Join(parts);
 	}
 	
 	public static string GetDatabaseFile()
-	{
-		var path = GetUserFolder("central_store.json");
-		if (OS.GetExecutablePath().GetFile().StartsWith("GodotManager"))
+	{	
+		string path = GetUserFolder("central_store.json");
+		if (OS.HasFeature("standalone"))
 		{
-			if (SFile.Exists(OS.GetExecutablePath().GetBaseDir().Join("._sc_")) ||
-			    SFile.Exists(OS.GetExecutablePath().GetBaseDir().Join("_sc_")))
-			{
-				if (!Dir.Exists(path.GetBaseDir()))
-					Dir.CreateDirectory(path.GetBaseDir());
-			}
+			string exePath = OS.GetExecutablePath().GetBaseDir().NormalizePath();
+			if ((SFile.Exists(exePath.Join("._sc_")) || SFile.Exists(exePath.Join("_sc_"))) && !Dir.Exists(path.GetBaseDir()))
+				Dir.CreateDirectory(path.GetBaseDir().NormalizePath());
 		}
-
 		return path;
 	}
 
@@ -111,7 +104,7 @@ public static class Util
 
 		Dir.CreateDirectory(destinationDir);
 
-		foreach(FileInfo file in dir.GetFiles()) {
+		foreach (FileInfo file in dir.GetFiles()) {
 			string targetFilePath = Path.Combine(destinationDir, file.Name);
 			file.CopyTo(targetFilePath);
 		}

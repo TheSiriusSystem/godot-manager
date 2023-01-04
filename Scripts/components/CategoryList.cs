@@ -93,10 +93,7 @@ public class CategoryList : VBoxContainer
 			bToggled = value;
 			if (_toggleIcon != null) {
 				_toggleIcon.FlipV = value;
-				if (_toggleIcon.FlipV)
-					_categoryList.Hide();
-				else
-					_categoryList.Show();
+				_categoryList.Visible = !(_toggleIcon.FlipV);
 			}
 		}
 	}
@@ -125,7 +122,7 @@ public class CategoryList : VBoxContainer
 
 	public ProjectLineEntry ProjectSelected {
 		get {
-			foreach(ProjectLineEntry ple in GetChildren()) {
+			foreach (ProjectLineEntry ple in GetChildren()) {
 				if (ple.SelfModulate == new Color("ffffffff"))
 					return ple;
 			}
@@ -134,16 +131,10 @@ public class CategoryList : VBoxContainer
 	}
 #endregion
 
-#region Templates
-	private readonly PackedScene pstProject = GD.Load<PackedScene>("res://components/ProjectLineEntry.tscn");
-	private readonly PackedScene pstGodot = GD.Load<PackedScene>("res://components/GodotLineEntry.tscn");
-#endregion
-
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		this.OnReady();
-		
 		CategoryName = sText;
 		Toggable = bToggable;
 		Toggled = bToggled;
@@ -162,9 +153,9 @@ public class CategoryList : VBoxContainer
 		
 		_toggleIcon.FlipV = !_toggleIcon.FlipV;
 		if (_toggleIcon.FlipV)
-			_categoryList.Hide();
+			_categoryList.Visible = false;
 		else
-			_categoryList.Show();
+			_categoryList.Visible = true;
 		EmitSignal("list_toggled");
 	}
 
@@ -188,7 +179,7 @@ public class CategoryList : VBoxContainer
 		Array<ProjectLineEntry> pleCache = new Array<ProjectLineEntry>();
 		Array<ProjectFile> pfCache = new Array<ProjectFile>();
 
-		foreach(ProjectLineEntry ple in _categoryList.GetChildren()) {
+		foreach (ProjectLineEntry ple in _categoryList.GetChildren()) {
 			pleCache.Add(ple);
 			pfCache.Add(ple.ProjectFile);
 			_categoryList.RemoveChild(ple);
@@ -200,8 +191,8 @@ public class CategoryList : VBoxContainer
 		var non_fav = pfCache.Where(pf => !pf.Favorite)
 					.OrderByDescending(pf => pf.LastAccessed);
 
-		foreach(IOrderedEnumerable<ProjectFile> apf in new System.Collections.ArrayList() { fav, non_fav }) {
-			foreach(ProjectFile pf in apf) {
+		foreach (IOrderedEnumerable<ProjectFile> apf in new System.Collections.ArrayList() { fav, non_fav }) {
+			foreach (ProjectFile pf in apf) {
 				int indx = pfCache.IndexOf(pf);
 				if (indx == -1)
 					continue;
@@ -211,7 +202,7 @@ public class CategoryList : VBoxContainer
 	}
 
 	public ProjectLineEntry AddProject(ProjectFile projectFile) {
-		ProjectLineEntry ple = pstProject.Instance<ProjectLineEntry>();
+		ProjectLineEntry ple = MainWindow._plScenes["ProjectLineEntry"].Instance<ProjectLineEntry>();
 		if (!ProjectFile.ProjectExists(projectFile.Location))
 			ple.MissingProject = true;
 		ple.ProjectFile = projectFile;
@@ -220,7 +211,7 @@ public class CategoryList : VBoxContainer
 	}
 
 	public void AddGodotVersion(GodotVersion godotVersion) {
-		GodotLineEntry gle = pstGodot.Instance<GodotLineEntry>();
+		GodotLineEntry gle = MainWindow._plScenes["GodotLineEntry"].Instance<GodotLineEntry>();
 		gle.GodotVersion = godotVersion;
 		_categoryList.AddChild(gle);
 	}

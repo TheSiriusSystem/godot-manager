@@ -36,23 +36,13 @@ public class GodotPanel : Panel
 	CategoryList Available = null;
 	#endregion
 
-	#region Templates
-
-	[Resource("res://components/GodotLineEntry.tscn")]
-	private PackedScene GodotLE = null;
-
-	[Resource("res://components/EnginePopup.tscn")]
-	private PackedScene EnginePopup = null;
-
-	#endregion
-
 	private EnginePopup _enginePopup = null;
 
 	[Export] private bool InWizard = false;
 
 	private List<string> NoHideWizard = new List<string>()
 	{
-		"Spacer2", "PC", "Spacer3", "Label2", "DownloadSource"
+		"ActionButtons", "Spacer2", "PC", "Spacer3", "Label2", "DownloadSource"
 	};
 
 	// Called when the node enters the scene tree for the first time.
@@ -68,54 +58,51 @@ public class GodotPanel : Panel
 					continue;
 				child.Visible = false;
 			}
+			Installed.Visible = false;
 		}
-		_enginePopup = EnginePopup.Instance<EnginePopup>();
-		_enginePopup.Name = "EngineContextMenu";
-		AddChild(_enginePopup);
-
-		if (!InWizard)
+		else
 		{
 			GetParent<TabContainer>().Connect("tab_changed", this, "OnPageChanged");
 			AppDialogs.AddCustomGodot.Connect("added_custom_godot", this, "PopulateList");
 			AppDialogs.EditCustomGodot.Connect("edited_custom_godot", this, "PopulateList");
 		}
+		_enginePopup = MainWindow._plScenes["EnginePopup"].Instance<EnginePopup>();
+		_enginePopup.Name = "EngineContextMenu";
+		AddChild(_enginePopup);
 
 		DownloadSource.Clear();
 		DownloadSource.AddItem("GitHub");
 
-		if (CentralStore.Mirrors.Count == 0 || CentralStore.Settings.LastMirrorCheck < (DateTime.UtcNow - CentralStore.Settings.CheckInterval)) {
+		if (CentralStore.Mirrors.Count == 0) {
 			var res = MirrorManager.Instance.GetMirrors();
 			while (!res.IsCompleted)
 				await this.IdleFrame();
 
-			foreach(MirrorSite site in res.Result) {
+			foreach (MirrorSite site in res.Result) {
 				var cres = from csite in CentralStore.Mirrors
 						where csite.Id == site.Id
 						select csite;
 				if (cres.FirstOrDefault<MirrorSite>() == null) {
 					CentralStore.Mirrors.Add(site);
 					CentralStore.MRVersions[site.Id] = new Array<MirrorVersion>();
-					CentralStore.Settings.LastUpdateMirrorCheck[site.Id] = new UpdateCheck() {
-						LastCheck = DateTime.UtcNow - TimeSpan.FromDays(1)
-					};
 				}
 			}
 		}
 
-		foreach(MirrorSite site in CentralStore.Mirrors)
+		foreach (MirrorSite site in CentralStore.Mirrors)
 			DownloadSource.AddItem(site.Name, site.Id);
 
 		TagSelection.GetPopup().HideOnCheckableItemSelection = false;
 		TagSelection.GetPopup().Connect("id_pressed", this, "OnIdPressed_TagSelection");
 		OnlyMono();
-		AppDialogs.ManageCustomDownloads.Connect("update_list", this, "OnUpdateList");
+		AppDialogs.ManageCustomDownloads.Connect("update_list", this, "PopulateList");
 	}
 
 	async void OnIdPressed_TagSelection(int id) {
 		if (id == 0)
 			TagSelection.GetPopup().SetItemChecked(id, !IsMono());
 		else {
-			for(int i = 2; i < TagSelection.GetPopup().GetItemCount(); i++) {
+			for (int i = 2; i < TagSelection.GetPopup().GetItemCount(); i++) {
 				TagSelection.GetPopup().SetItemChecked(i, (i == id));
 			}
 		}
@@ -167,14 +154,8 @@ public class GodotPanel : Panel
 			OnlyMono();
 			if (CentralStore.GHVersions.Count == 0) {
 				var t = GatherReleases();
-				while(!t.IsCompleted) {
+				while (!t.IsCompleted) {
 					await this.IdleFrame();
-				}
-			} else {
-				if (CentralStore.Settings.CheckForUpdates &&
-					(DateTime.UtcNow - CentralStore.Settings.LastCheck) >= CentralStore.Settings.CheckInterval)
-				{
-					await CheckForUpdates();
 				}
 			}
 		} else {
@@ -182,11 +163,6 @@ public class GodotPanel : Panel
 			int id = DownloadSource.GetSelectedId();
 			if (CentralStore.MRVersions[id].Count == 0) {
 				await GatherReleases();
-			} else {
-				if (CentralStore.Settings.CheckForUpdates &&
-					(DateTime.UtcNow - CentralStore.Settings.LastUpdateMirrorCheck[id].LastCheck) >= CentralStore.Settings.CheckInterval) {
-					await CheckForUpdates();
-				}
 			}
 		}
 
@@ -197,15 +173,19 @@ public class GodotPanel : Panel
 
 	[SignalHandler("clicked", nameof(ActionButtons))]
 	async void OnActionClicked(int index) {
-		switch(index) {
+		switch (index) {
 			case 0:     // Add Custom Godot
 				AppDialogs.AddCustomGodot.ShowDialog();
 				break;
 			case 1:     // Manage Custom Godot Downloads
 				AppDialogs.ManageCustomDownloads.ShowDialog();
 				break;
-			case 2:     // Manually Check for Updates for Godot
-				await CheckForUpdates();
+			case 2:     // Refresh List
+				var t = GatherReleases();
+				while (!t.IsCompleted) {
+					await this.IdleFrame();
+				}
+				await PopulateList();
 				break;
 		}
 	}
@@ -225,14 +205,8 @@ public class GodotPanel : Panel
 		if (DownloadSource.Selected == 0) {
 			if (CentralStore.GHVersions.Count == 0) {
 				var t = GatherReleases();
-				while(!t.IsCompleted) {
+				while (!t.IsCompleted) {
 					await this.IdleFrame();
-				}
-			} else {
-				if (CentralStore.Settings.CheckForUpdates &&
-					(DateTime.UtcNow - CentralStore.Settings.LastCheck) >= CentralStore.Settings.CheckInterval)
-				{
-					await CheckForUpdates();
 				}
 			}
 		} else {
@@ -241,91 +215,9 @@ public class GodotPanel : Panel
 				var t = GatherReleases();
 				while (!t.IsCompleted)
 					await this.IdleFrame();
-			} else {
-				if (CentralStore.Settings.CheckForUpdates &&
-					(DateTime.UtcNow - CentralStore.Settings.LastUpdateMirrorCheck[site.Id].LastCheck) >= CentralStore.Settings.CheckInterval)
-				{
-					await CheckForUpdates();
-				}
 			}
 		}
 		await PopulateList();
-	}
-
-	public async Task CheckForUpdates()
-	{
-		MirrorSite site = null;
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Loading Editor Downloads"));
-		if (DownloadSource.Selected == 0)
-		{
-			AppDialogs.BusyDialog.UpdateByline(Tr("Connecting to GitHub..."));
-		}
-		else
-		{
-			site = CentralStore.Mirrors[DownloadSource.Selected - 1];
-			AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Connecting to {0}..."), site.Name));
-		}
-		AppDialogs.BusyDialog.ShowDialog();
-		if (DownloadSource.Selected == 0)
-			await CheckForGithub();
-		else
-			await CheckForMirror();
-
-		if (DownloadSource.Selected == 0)
-			CentralStore.Settings.LastCheck = DateTime.UtcNow;
-		else
-			CentralStore.Settings.LastUpdateMirrorCheck[site.Id].LastCheck = DateTime.UtcNow;
-
-		AppDialogs.BusyDialog.HideDialog();
-		CentralStore.Instance.SaveDatabase();
-	}
-
-	private async Task CheckForMirror() {
-		int id = DownloadSource.GetSelectedId();
-		CentralStore.MRVersions[id].Clear();
-		var t = GatherMirrorReleases();
-		while (!t.IsCompleted)
-			await this.IdleFrame();
-		await PopulateList();
-	}
-
-	private async Task CheckForGithub()
-	{
-		var tres = Github.Github.Instance.GetLatestRelease();
-		while (!tres.IsCompleted)
-		{
-			await this.IdleFrame();
-		}
-		var gv = GithubVersion.FromAPI(tres.Result);
-		var l = from version in CentralStore.GHVersions
-				where version.Name == gv.Name
-				select gv;
-		var c = l.FirstOrDefault<GithubVersion>();
-		if (c == null)
-		{
-			CentralStore.GHVersions.Clear();
-			var t = GatherGithubReleases();
-			while (!t.IsCompleted)
-			{
-				await this.IdleFrame();
-			}
-			//AppDialogs.NewVersion.UpdateReleaseInfo(tres.Result);
-			//AppDialogs.NewVersion.Visible = true;
-			await PopulateList();
-			AppDialogs.NewVersion.Connect("download_update", this, "OnDownloadUpdate");
-			AppDialogs.NewVersion.ShowDialog(tres.Result);
-		}
-	}
-
-	async void OnDownloadUpdate(Github.Release release, bool useMono) {
-		AppDialogs.NewVersion.Disconnect("download_update", this, "OnDownloadUpdate");
-		foreach (GodotLineEntry gle in Available.List.GetChildren()) {
-			if (gle.GithubVersion.Name == release.Name) {
-				gle.Mono = useMono;
-				await OnInstallClicked(gle);
-				break;
-			}
-		}
 	}
 
 	async void OnDownloadCompleted(GodotInstaller installer, GodotLineEntry gle) {
@@ -337,21 +229,11 @@ public class GodotPanel : Panel
 		installer.Install();
 
 		CentralStore.Versions.Add(installer.GodotVersion);
-		
-		if (CentralStore.Versions.Count == 0) {
-			CentralStore.Settings.DefaultEngine = installer.GodotVersion.Id;
-			gle.ToggleDefault(true);
-		}
 
 		CentralStore.Instance.SaveDatabase();
 		gle.Downloaded = true;
 		gle.ToggleDownloadProgress(false);
 
-		await PopulateList();
-	}
-
-	async void OnUpdateList()
-	{
 		await PopulateList();
 	}
 
@@ -366,27 +248,27 @@ public class GodotPanel : Panel
 
 		string errDesc = "";
 		Uri dl = new Uri(installer.GodotVersion.Url);
-		switch(status) {
+		switch (status) {
 			case HTTPClient.Status.CantConnect:
-				errDesc = string.Format(Tr("Unable to connect to server {0}"), dl.Host);
+				errDesc = string.Format(Tr("Unable to connect to server {0}."), dl.Host);
 				break;
 			case HTTPClient.Status.CantResolve:
-				errDesc = string.Format(Tr("Unable to resolve server {0}"), dl.Host);
+				errDesc = string.Format(Tr("Unable to resolve server {0}."), dl.Host);
 				break;
 			case HTTPClient.Status.ConnectionError:
-				errDesc = string.Format(Tr($"Unable to connect to server {0}:{1}"), dl.Host, dl.Port);
+				errDesc = string.Format(Tr($"Unable to connect to server {0}:{1}."), dl.Host, dl.Port);
 				break;
 			case HTTPClient.Status.Requesting:
 				errDesc = string.Format(Tr("Request to server {0} failed to produce a result."), dl.Host);
 				break;
 			case HTTPClient.Status.SslHandshakeError:
-				errDesc = string.Format(Tr("SSL certificate/Communication failed with {0}."), dl.Host);
+				errDesc = string.Format(Tr("SSL certificate/communication failed with {0}."), dl.Host);
 				break;
 			case HTTPClient.Status.Body:
-				errDesc = string.Format(Tr("Unable to save Cache file to disk at location {0}."),installer.GodotVersion.CacheLocation);
+				errDesc = string.Format(Tr("Unable to save cached file to disk at \"{0}\"."),installer.GodotVersion.CacheLocation);
 				break;
 			default:
-				errDesc = Tr("Unknown error has ocurred, unable to download package.");
+				errDesc = Tr("An unknown error has ocurred.");
 				break;
 		}
 
@@ -399,13 +281,10 @@ public class GodotPanel : Panel
 		if (deleteFiles) {
 			GodotInstaller.FromVersion(gle.GodotVersion).Uninstall();
 		}
-		foreach(ProjectFile pf in CentralStore.Projects) {
+		foreach (ProjectFile pf in CentralStore.Projects) {
 			if (pf.GodotId == gle.GodotVersion.Id) {
 				pf.GodotId = Guid.Empty.ToString();
 			}
-		}
-		if (CentralStore.Settings.DefaultEngine == gle.GodotVersion.Id) {
-			CentralStore.Settings.DefaultEngine = Guid.Empty.ToString();
 		}
 		CentralStore.Versions.Remove(gle.GodotVersion);
 		CentralStore.Instance.SaveDatabase();
@@ -440,7 +319,7 @@ public class GodotPanel : Panel
 
 	async void OnUninstallClicked(GodotLineEntry gle) {
 		var task = AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Please Confirm..."),
-				string.Format(Tr("You are about to remove {0}.\nDo you wish to remove the files as well?"), gle.GodotVersion.GetDisplayName()),
+				string.Format(Tr("Remove {0} from the list?"), gle.GodotVersion.GetDisplayName()),
 				Tr("Editor and Files"), Tr("Just Editor"));
 		while (!task.IsCompleted)
 			await this.IdleFrame();
@@ -457,30 +336,24 @@ public class GodotPanel : Panel
 		}
 	}
 
-	void OnDefaultSelected(GodotLineEntry gle) {
-		if (gle.GodotVersion.Id == CentralStore.Settings.DefaultEngine)
-			return; // Don't need to do anything
-		else {
-			foreach(GodotLineEntry igle in Installed.List.GetChildren()) {
-				if (igle.IsDefault)
-					igle.ToggleDefault(false);
-			}
-			CentralStore.Settings.DefaultEngine = gle.GodotVersion.Id;
-			CentralStore.Instance.SaveDatabase();
-			gle.ToggleDefault(true);
-		}
-	}
-
 	void OnSettingsSharedClicked(GodotLineEntry gle)
 	{
 		gle.SettingsShared = !gle.SettingsShared;
 		if (gle.SettingsShared)
 		{
-			CentralStore.Settings.SettingsShare.Remove(gle.GodotVersion.Id);
+			CentralStore.Settings.SettingsShare.Add(gle.GodotVersion.Id);
 		}
 		else
 		{
-			CentralStore.Settings.SettingsShare.Add(gle.GodotVersion.Id);
+			foreach (GodotLineEntry dlGLE in Installed.List.GetChildren<GodotLineEntry>())
+			{
+				if (dlGLE.GodotVersion.SharedSettings == gle.GodotVersion.Id || dlGLE.GodotVersion.SharedSettings == gle.GodotVersion.Tag)
+				{
+					dlGLE.GodotVersion.SharedSettings = string.Empty;
+					dlGLE.SettingsLinked = false;
+				}
+			}
+			CentralStore.Settings.SettingsShare.Remove(gle.GodotVersion.Id);
 		}
 		CentralStore.Instance.SaveDatabase();
 	}
@@ -491,18 +364,27 @@ public class GodotPanel : Panel
 		{
 			gle.GodotVersion.SharedSettings = string.Empty;
 			gle.SettingsLinked = false;
+			CentralStore.Instance.SaveDatabase();
 			return;
 		}
 		var list = new Godot.Collections.Dictionary<string, string>();
 		foreach (var id in CentralStore.Settings.SettingsShare)
 		{
 			var gv = CentralStore.Instance.FindVersion(id);
-			list[gv.Tag] = id;
+			if (gv != null && gv != gle.GodotVersion)
+				list[gv.Tag] = id;
 		}
 
-		AppDialogs.ListSelectDialog.Connect("option_selected", this, "OnOptionSelected_LinkSettings", new Array() { gle });
-		AppDialogs.ListSelectDialog.Connect("option_cancelled", this, "OnOptionCancelled_LinkSettings");
-		AppDialogs.ListSelectDialog.ShowDialog("Link Settings", "Select a editor version to link the settings to:", list);
+		if (list.Count <= 0)
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
+			Tr("There are no editor versions to link the settings to."));
+			return;
+		}
+
+		AppDialogs.ListSelectDialog.Connect("option_selected", this, "OnOptionSelected_LinkSettings", new Array() { gle }, (uint)ConnectFlags.Oneshot);
+		AppDialogs.ListSelectDialog.Connect("option_cancelled", this, "OnOptionCancelled_LinkSettings", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.ListSelectDialog.ShowDialog(Tr("Link Settings"), Tr("Select an editor version to link the settings to:"), list);
 	}
 
 	void OnOptionSelected_LinkSettings(string id, GodotLineEntry gle)
@@ -510,12 +392,16 @@ public class GodotPanel : Panel
 		OnOptionCancelled_LinkSettings();
 		gle.GodotVersion.SharedSettings = id;
 		gle.SettingsLinked = true;
+		CentralStore.Instance.SaveDatabase();
 	}
 
 	void OnOptionCancelled_LinkSettings()
 	{
-		AppDialogs.ListSelectDialog.Disconnect("option_selected", this, "OnOptionSelected_LinkSettings");
-		AppDialogs.ListSelectDialog.Disconnect("option_cancelled", this, "OnOptionCancelled_LinkSettings");
+		if (AppDialogs.ListSelectDialog.IsConnected("option_selected", this, "OnOptionSelected_LinkSettings"))
+			AppDialogs.ListSelectDialog.Disconnect("option_selected", this, "OnOptionSelected_LinkSettings");
+
+		if (AppDialogs.ListSelectDialog.IsConnected("option_cancelled", this, "OnOptionCancelled_LinkSettings"))
+			AppDialogs.ListSelectDialog.Disconnect("option_cancelled", this, "OnOptionCancelled_LinkSettings");
 	}
 
 	public async Task PopulateList() {
@@ -527,13 +413,12 @@ public class GodotPanel : Panel
 		await this.IdleFrame();
 
 		foreach (GodotVersion gdv in CentralStore.Versions) {
-			GodotLineEntry gle = GodotLE.Instance<GodotLineEntry>();
+			GodotLineEntry gle = MainWindow._plScenes["GodotLineEntry"].Instance<GodotLineEntry>();
 			gle.GodotVersion = gdv;
 			gle.GithubVersion = gdv.GithubVersion;
 			gle.MirrorVersion = gdv.MirrorVersion;
 			gle.Mono = gdv.IsMono;
 			gle.Downloaded = true;
-			gle.ToggleDefault(CentralStore.Settings.DefaultEngine == gdv.Id);
 			if (CentralStore.Settings.SelfContainedEditors)
 			{
 				gle.ToggleSettingsShared();
@@ -544,7 +429,6 @@ public class GodotPanel : Panel
 			gle.SettingsLinked = CentralStore.Settings.SettingsShare.Contains(gdv.SharedSettings);
 			Installed.List.AddChild(gle);
 			gle.Connect("uninstall_clicked", this, "OnUninstallClicked");
-			gle.Connect("default_selected", this, "OnDefaultSelected");
 			gle.Connect("right_clicked", this, "OnRightClicked_Installed");
 			gle.Connect("settings_shared_clicked", this, "OnSettingsSharedClicked");
 			gle.Connect("link_settings_clicked", this, "OnLinkSettingsClicked");
@@ -553,7 +437,7 @@ public class GodotPanel : Panel
 		// Handle CustomEngineDownload first, before official mirrors
 		foreach (CustomEngineDownload ced in CentralStore.CustomEngines)
 		{
-			GodotLineEntry gle = GodotLE.Instance<GodotLineEntry>();
+			GodotLineEntry gle = MainWindow._plScenes["GodotLineEntry"].Instance<GodotLineEntry>();
 			gle.CustomEngine = ced;
 			Available.List.AddChild(gle);
 			gle.Connect("install_clicked", this, "OnInstallClicked");
@@ -562,8 +446,8 @@ public class GodotPanel : Panel
 
 		if (DownloadSource.Selected == 0) {
 			// Handle Github
-			foreach(GithubVersion gv in CentralStore.GHVersions) {
-				GodotLineEntry gle = GodotLE.Instance<GodotLineEntry>();
+			foreach (GithubVersion gv in CentralStore.GHVersions) {
+				GodotLineEntry gle = MainWindow._plScenes["GodotLineEntry"].Instance<GodotLineEntry>();
 				gle.GithubVersion = gv;
 				gle.Mono = IsMono();
 				Available.List.AddChild(gle);
@@ -572,8 +456,8 @@ public class GodotPanel : Panel
 			}
 		} else {
 			// Handle Mirror
-			foreach(MirrorVersion mv in CentralStore.MRVersions[DownloadSource.GetSelectedId()].Reverse()) {
-				GodotLineEntry gle = GodotLE.Instance<GodotLineEntry>();
+			foreach (MirrorVersion mv in CentralStore.MRVersions[DownloadSource.GetSelectedId()].Reverse()) {
+				GodotLineEntry gle = MainWindow._plScenes["GodotLineEntry"].Instance<GodotLineEntry>();
 				gle.MirrorVersion = mv;
 				gle.Mono = IsMono();
 				Available.List.AddChild(gle);
@@ -628,10 +512,10 @@ public class GodotPanel : Panel
 				OS.Clipboard = _enginePopup.GodotLineEntry.GodotVersion.GetExecutablePath();
 				break;
 			case 4:
-				OnDefaultSelected(_enginePopup.GodotLineEntry);
+				_enginePopup.GodotLineEntry.EmitSignal("settings_shared_clicked", _enginePopup.GodotLineEntry);
 				break;
 			case 5:
-				_enginePopup.GodotLineEntry.EmitSignal("settings_shared_clicked", _enginePopup.GodotLineEntry);
+				_enginePopup.GodotLineEntry.EmitSignal("link_settings_clicked", _enginePopup.GodotLineEntry);
 				break;
 			case 7:
 				OS.ShellOpen("file://" + _enginePopup.GodotLineEntry.GodotVersion.GetExecutablePath().GetBaseDir());
@@ -645,7 +529,7 @@ public class GodotPanel : Panel
 			gdName.Add(igle.Label);
 		}
 
-		foreach(GodotLineEntry agle in Available.List.GetChildren()) {
+		foreach (GodotLineEntry agle in Available.List.GetChildren()) {
 			agle.Visible = false;
 			// Is in Installed List?
 			if (gdName.IndexOf(agle.Label) != -1)
@@ -671,29 +555,24 @@ public class GodotPanel : Panel
 	private int downloadedBytes = 0;
 	void OnChunkReceived(int bytes) {
 		downloadedBytes += bytes;
-		AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Downloaded {0}..."),Util.FormatSize(downloadedBytes)));
 	}
 
 	public async Task GatherGithubReleases() {
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Loading Editor Downloads"));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Connecting to GitHub..."));
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Editor Downloads"));
+		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching release information from GitHub..."));
 		AppDialogs.BusyDialog.ShowDialog();
 		downloadedBytes = 0;
 		Github.Github.Instance.Connect("chunk_received", this, "OnChunkReceived");
 		var task = Github.Github.Instance.GetAllReleases();
-		while(!task.IsCompleted) {
+		while (!task.IsCompleted) {
 			await this.IdleFrame();
 		}
 
 		Github.Github.Instance.Disconnect("chunk_received", this, "OnChunkReceived");
 
-		int i = 0;
-		foreach(Github.Release release in task.Result) {
-			i++;
-			AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Releases Processed: {0}/{1}"), i, task.Result.Count));
+		foreach (Github.Release release in task.Result) {
 			GithubVersion gv = GithubVersion.FromAPI(release);
-			CentralStore.GHVersions.Add(gv);
-			await this.IdleFrame();
+			if (gv.PlatformDownloadSize > 0) CentralStore.GHVersions.Add(gv);
 		}
 		CentralStore.Instance.SaveDatabase();
 
@@ -706,24 +585,20 @@ public class GodotPanel : Panel
 		if (mirror == null)
 			return;
 
-		AppDialogs.BusyDialog.UpdateHeader("Loading Editor Downloads");
-		AppDialogs.BusyDialog.UpdateByline(Tr(string.Format(Tr("Connecting to {0}..."), mirror.Name)));
+		AppDialogs.BusyDialog.UpdateHeader("Fetching Editor Downloads");
+		AppDialogs.BusyDialog.UpdateByline(Tr(string.Format(Tr("Fetching release information from {0}..."), mirror.Name)));
 		AppDialogs.BusyDialog.ShowDialog();
 		downloadedBytes = 0;
 		Mirrors.MirrorManager.Instance.Connect("chunk_received", this, "OnChunkReceived");
 		var task = Mirrors.MirrorManager.Instance.GetEngineLinks(id);
 
-		while(!task.IsCompleted)
+		while (!task.IsCompleted)
 			await this.IdleFrame();
 
 		Mirrors.MirrorManager.Instance.Disconnect("chunk_received", this, "OnChunkReceived");
 
-		int i = 0;
 		foreach (MirrorVersion version in task.Result) {
-			i++;
-			AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Releases Processed: {0}/{1}"), i, task.Result.Count));
 			CentralStore.MRVersions[id].Add(version);
-			await this.IdleFrame();
 		}
 		CentralStore.Instance.SaveDatabase();
 

@@ -452,6 +452,3 @@ margin_bottom = 923.0
 margin_top = 700.0
 margin_right = 1024.0
 margin_bottom = 700.0
-
-[node name="ExecuteDelay" type="Timer" parent="."]
-one_shot = true

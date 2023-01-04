@@ -77,18 +77,15 @@ color = Color( 0.219608, 0.239216, 0.290196, 1 )
 [node name="HB" type="HBoxContainer" parent="PC/CC/P/VB/MC/TitleBarBG"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Title" type="Label" parent="PC/CC/P/VB/MC/TitleBarBG/HB"]
-margin_left = 117.0
+margin_left = 132.0
 margin_top = 2.0
-margin_right = 294.0
+margin_right = 280.0
 margin_bottom = 21.0
 size_flags_horizontal = 6
 custom_fonts/font = ExtResource( 1 )
-text = "Addon Installer - Setup"
+text = "Addon Downloader"
 
 [node name="Close" parent="PC/CC/P/VB/MC/TitleBarBG/HB" instance=ExtResource( 3 )]
 margin_left = 416.0
@@ -118,8 +115,9 @@ size_flags_vertical = 3
 [node name="DetailLabel" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
 margin_right = 454.0
 margin_bottom = 37.0
-text = "Contents of asset {Asset.Title}
-Select files to Install:"
+text = "Contents of asset \"Addon\"
+Select the files to install for new projects:"
+align = 1
 clip_text = true
 max_lines_visible = 2
 

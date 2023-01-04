@@ -3,9 +3,6 @@ using Godot.Sharp.Extras;
 using Godot.Collections;
 using ActionStack = System.Collections.Generic.Stack<System.Action>;
 using Uri = System.Uri;
-using TimeSpan = System.TimeSpan;
-using System.IO.Compression;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 public class SettingsPanel : Panel
@@ -53,9 +50,6 @@ public class SettingsPanel : Panel
 	[NodePath("VB/MC/TC/General/GC/ProjectView")]
 	OptionButton _defaultProjectView = null;
 
-	[NodePath("VB/MC/TC/General/GC/GodotDefault")]
-	OptionButton _defaultEngine = null;
-
 	[NodePath("VB/MC/TC/General/GC/TitleBar")]
 	private CheckBox _useSystemTitlebar = null;
 
@@ -78,9 +72,6 @@ public class SettingsPanel : Panel
 
 	[NodePath("VB/MC/TC/Projects/GC/HBPL/BrowseProjectLocation")]
 	Button _browseProjectLocation = null;
-
-	[NodePath("VB/MC/TC/Projects/GC/ExitManager")]
-	CheckBox _exitGodotManager = null;
 
 	[NodePath("VB/MC/TC/Projects/GC/AutoScanProjects")]
 	CheckBox _autoScanProjects = null;
@@ -196,22 +187,12 @@ public class SettingsPanel : Panel
 	}
 
 #region Internal Functions for use in the Settings Page
-	int GetIntervalIndex() {
-		// _dCheckInterval.(CentralStore.Settings.CheckInterval.TotalHours)
-		for (int i = 0; i < _dCheckInterval.Length; i++) {
-			if (_dCheckInterval[i] == CentralStore.Settings.CheckInterval.TotalHours)
-				return i;
-		}
-		return -1;
-	}
-
 	void LoadSettings() {
 		// General Page
 		bPInternal = true;
 		_godotInstallLocation.Text = CentralStore.Settings.EnginePath.GetOSDir().NormalizePath();
 		_cacheInstallLocation.Text = CentralStore.Settings.CachePath.GetOSDir().NormalizePath();
 		_defaultProjectView.Select(_views.IndexOf(CentralStore.Settings.DefaultView));
-		PopulateGodotEngine();
 		_useSystemTitlebar.Pressed = CentralStore.Settings.UseSystemTitlebar;
 		_useLastMirror.Pressed = CentralStore.Settings.UseLastMirror;
 		_editorProfiles.Pressed = CentralStore.Settings.SelfContainedEditors;
@@ -237,7 +218,6 @@ public class SettingsPanel : Panel
 
 		// Project Page
 		_defaultProjectLocation.Text = CentralStore.Settings.ProjectPath.NormalizePath();
-		_exitGodotManager.Pressed = CentralStore.Settings.CloseManagerOnEdit;
 		_directoryScan.Clear();
 		foreach (string dir in CentralStore.Settings.ScanDirs) {
 			_directoryScan.AddItem(dir.NormalizePath());
@@ -250,14 +230,10 @@ public class SettingsPanel : Panel
 		CentralStore.Settings.EnginePath = _godotInstallLocation.Text.GetOSDir().NormalizePath();
 		CentralStore.Settings.CachePath = _cacheInstallLocation.Text.GetOSDir().NormalizePath();
 		CentralStore.Settings.DefaultView = _defaultProjectView.GetItemText(_defaultProjectView.Selected);
-		CentralStore.Settings.DefaultEngine = (string)_defaultEngine.GetItemMetadata(_defaultEngine.Selected);
 		CentralStore.Settings.UseSystemTitlebar = _useSystemTitlebar.Pressed;
 		CentralStore.Settings.UseLastMirror = _useLastMirror.Pressed;
 		CentralStore.Settings.SelfContainedEditors = _editorProfiles.Pressed;
-
-		OS.WindowBorderless = !CentralStore.Settings.UseSystemTitlebar;
-		GetTree().Root.GetNode<Titlebar>("MainWindow/bg/Shell/VC/TitleBar").Visible = !CentralStore.Settings.UseSystemTitlebar;
-		GetTree().Root.GetNode<Control>("MainWindow/bg/Shell/VC/VisibleSpacer").Visible = CentralStore.Settings.UseSystemTitlebar;
+		GetTree().Root.GetNode<MainWindow>("MainWindow").UpdateWindow();
 
 		foreach (GodotVersion version in CentralStore.Versions) {
 			if (_editorProfiles.Pressed) {
@@ -282,7 +258,6 @@ public class SettingsPanel : Panel
 		}
 		
 		CentralStore.Settings.ProjectPath = _defaultProjectLocation.Text.GetOSDir().NormalizePath();
-		CentralStore.Settings.CloseManagerOnEdit = _exitGodotManager.Pressed;
 		CentralStore.Settings.ScanDirs.Clear();
 		for (int i = 0; i < _directoryScan.GetItemCount(); i++) {
 			CentralStore.Settings.ScanDirs.Add(_directoryScan.GetItemText(i));
@@ -290,23 +265,6 @@ public class SettingsPanel : Panel
 		CentralStore.Instance.SaveDatabase();
 		_undoActions.Clear();
 		updateActionButtons(); 
-	}
-
-	void PopulateGodotEngine() {
-		int defaultGodot = -1;
-		_defaultEngine.Clear();
-		foreach(GodotVersion version in CentralStore.Versions) {
-			string gdName = version.GetDisplayName();
-			int indx = CentralStore.Versions.IndexOf(version);
-			if (version.Id == (string)CentralStore.Settings.DefaultEngine) {
-				defaultGodot = indx;
-			}
-			_defaultEngine.AddItem(gdName, indx);
-			_defaultEngine.SetItemMetadata(indx, version.Id);
-		}
-		if (defaultGodot != -1)
-			_defaultEngine.Select(defaultGodot);
-		
 	}
 #endregion
 
@@ -387,7 +345,7 @@ public class SettingsPanel : Panel
 #region Event Handlers for Action Buttons
 	[SignalHandler("clicked", nameof(_actionButtons))]
 	void OnActionButtonsClicked(int index) {
-		switch(index) {
+		switch (index) {
 			case 0:
 				UpdateSettings();
 				updateActionButtons();
@@ -423,7 +381,7 @@ public class SettingsPanel : Panel
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseGodot_DirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.CurrentDir = "";
-		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
+		AppDialogs.BrowseFolderDialog.PopupCentered();
 	}
 
 	void OnBrowseGodot_DirSelected(string dir_name) {
@@ -466,7 +424,7 @@ public class SettingsPanel : Panel
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseCache_DirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.CurrentDir = "";
-		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
+		AppDialogs.BrowseFolderDialog.PopupCentered();
 	}
 
 	void OnBrowseCache_DirSelected(string dir_name) {
@@ -485,30 +443,6 @@ public class SettingsPanel : Panel
 			updateActionButtons();
 		}
 		CentralStore.Settings.DefaultView = _defaultProjectView.GetItemText(index);
-	}
-
-	[SignalHandler("item_selected", nameof(_defaultEngine))]
-	async void OnDefaultEngine(int index) {
-		string oldVal = CentralStore.Settings.DefaultEngine;
-		string engine = (string)_defaultEngine.GetItemMetadata(index);
-		int oldIndex = -1;
-		for (int i = 0; i < _defaultEngine.GetItemCount(); i++) {
-			if (oldVal == (string)_defaultEngine.GetItemMetadata(index)) {
-				oldIndex = i;
-				break;
-			}
-		}
-
-		if (!bPInternal) {
-			_undoActions.Push(async () => {
-				CentralStore.Settings.DefaultEngine = oldVal;
-				_defaultEngine.Select(oldIndex);
-				await GetNode<GodotPanel>("/root/MainWindow/bg/Shell/VC/TabContainer/Godot").PopulateList();
-			});
-			updateActionButtons();
-		}
-		CentralStore.Settings.DefaultEngine = engine;
-		await GetNode<GodotPanel>("/root/MainWindow/bg/Shell/VC/TabContainer/Godot").PopulateList();
 	}
 
 	[SignalHandler("toggled", nameof(_noConsole))]
@@ -655,7 +589,7 @@ public class SettingsPanel : Panel
 	[SignalHandler("pressed", nameof(_browseProjectLocation))]
 	void OnBrowseProjectLocation_Pressed() {
 		AppDialogs.BrowseFolderDialog.CurrentDir = _defaultProjectLocation.Text.NormalizePath();
-		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
+		AppDialogs.BrowseFolderDialog.PopupCentered();
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnBrowseProjectLocation_DirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 	}
@@ -664,19 +598,6 @@ public class SettingsPanel : Panel
 		_defaultProjectLocation.Text = path.NormalizePath();
 		AppDialogs.BrowseFolderDialog.Visible = false;
 		OnDefaultProjectLocation();
-	}
-
-	[SignalHandler("toggled", nameof(_exitGodotManager))]
-	void OnExitGodotManager(bool toggle) {
-		bool oldVal = CentralStore.Settings.CloseManagerOnEdit;
-		if (!bPInternal) {
-			_undoActions.Push(() => {
-				CentralStore.Settings.CloseManagerOnEdit = oldVal;
-				_exitGodotManager.Pressed = oldVal;
-			});
-			updateActionButtons();
-		}
-		CentralStore.Settings.CloseManagerOnEdit = toggle;
 	}
 
 	[SignalHandler("toggled", nameof(_autoScanProjects))]
@@ -727,7 +648,7 @@ public class SettingsPanel : Panel
 	[SignalHandler("add_requested", nameof(_directoryScan))]
 	void OnDirScan_AddRequest() {
 		AppDialogs.BrowseFolderDialog.CurrentDir = _defaultProjectLocation.Text.NormalizePath();
-		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
+		AppDialogs.BrowseFolderDialog.PopupCentered();
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirScan_DirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
 	}
@@ -750,7 +671,7 @@ public class SettingsPanel : Panel
 		AppDialogs.BrowseFolderDialog.CurrentDir = _directoryScan.GetItemText(index).NormalizePath();
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnEditDirScan_DirSelected", new Array() {index}, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnPopupHide", null, (uint)ConnectFlags.Oneshot);
-		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
+		AppDialogs.BrowseFolderDialog.PopupCentered();
 	}
 
 	void OnEditDirScan_DirSelected(string path, int index) {
@@ -788,45 +709,6 @@ public class SettingsPanel : Panel
 	[SignalHandler("meta_clicked", nameof(_contributors))]
 	void OnMetaClicked(object meta) {
 		OS.ShellOpen((string)meta);
-	}
-
-	void OnDownloadManagerUpdate(Github.Release release) {
-		AppDialogs.NewVersion.Disconnect("download_manager_update", this, "OnDownloadManagerUpdate");
-		AppDialogs.DownloadGodotManager.ShowDialog(release);
-		AppDialogs.DownloadGodotManager.Connect("download_complete", this, "OnDownloadGodotManagerCompleted");
-	}
-
-	void OnDownloadGodotManagerCompleted(Github.Release release,Github.Asset asset) {
-		AppDialogs.DownloadGodotManager.Disconnect("download_complete", this,"OnDownloadGodotManagerCompleted");
-		string updatePath = Util.GetUpdateFolder().Join("update.zip").GetOSDir().NormalizePath();
-		#if GODOT_WINDOWS || GODOT_UWP || GODOT_LINUXBSD || GODOT_X11
-		string updater = Util.GetUpdateFolder().Join(OS.GetExecutablePath().GetFile()).NormalizePath();
-		#else
-		string updater = Util.GetUpdateFolder().Join("Godot Manager.app", "Contents", "MacOS", OS.GetExecutablePath().GetFile()).NormalizePath();
-		#endif
-		ZipFile.ExtractToDirectory(updatePath, updatePath.GetBaseDir());
-
-		#if GODOT_LINUXBSD || GODOT_X11 || GODOT_MACOS || GODOT_OSX
-		Util.Chmod(updater,0755);
-		#endif
-
-		#if GODOT_MACOS || GODOT_OSX
-		Util.XAttr(Util.GetUpdateFolder().Join("Godot Manager.app").NormalizePath(), "-cr");
-		#endif
-
-		ProcessStartInfo psi = new ProcessStartInfo();
-		psi.FileName = updater;
-		#if GODOT_WINDOWS || GODOT_UWP || GODOT_LINUXBSD || GODOT_X11
-		psi.WorkingDirectory = updater.GetBaseDir().NormalizePath();
-		#else
-		psi.WorkingDirectory = updater.GetParentFolder().GetBaseDir().NormalizePath();
-		#endif
-		psi.Arguments = $"--update {Process.GetCurrentProcess().Id}";
-		psi.UseShellExecute = false;
-		psi.CreateNoWindow = false;
-
-		Process proc = Process.Start(psi);
-		GetTree().Quit(0);
 	}
 
 	[SignalHandler("gui_input", nameof(_buyMe))]

@@ -10,8 +10,6 @@ public class NewsPanel : Panel
 	[NodePath] private VBoxContainer NewsList = null;
 	[NodePath] private TextureRect RefreshIcon = null;
 
-	[Resource("res://components/NewsItem.tscn")] private PackedScene NewsItem = null;
-
 	private readonly Uri NEWS_URI = new Uri("https://godotengine.org/news/");
 	private GDCSHTTPClient _client = null;
 	private DownloadQueue _queue = null;
@@ -52,14 +50,10 @@ public class NewsPanel : Panel
 				item.QueueFree();
 			}
 		}
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Loading News"));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching news from godotengine.org..."));
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching News"));
+		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching articles from the Godot Engine website..."));
 		AppDialogs.BusyDialog.ShowDialog();
 		InitClient();
-		if (CentralStore.Settings.UseProxy)
-			_client.SetProxy(CentralStore.Settings.ProxyHost, CentralStore.Settings.ProxyPort, true);
-		else
-			_client.ClearProxy();
 
 		Task<HTTPClient.Status> cres = _client.StartClient(NEWS_URI.Host, NEWS_URI.Port, true);
 
@@ -84,11 +78,10 @@ public class NewsPanel : Panel
 			return;
 		}
 
-		AppDialogs.BusyDialog.UpdateByline(Tr("Parsing news entries..."));
 		var feed = ParseNews(result.Body);
 		foreach (Dictionary<string,string> item in feed)
 		{
-			var newsItem = NewsItem.Instance<NewsItem>();
+			var newsItem = MainWindow._plScenes["NewsItem"].Instance<NewsItem>();
 			newsItem.Headline = "    " + item["title"];
 			newsItem.Byline = $"    {item["author"]}{item["date"].Replace("&nbsp;", " ")}";
 			newsItem.Url = item["link"];
@@ -96,7 +89,7 @@ public class NewsPanel : Panel
 			
 			//newsItem.Image = item["image"];
 			Uri uri = new Uri(item["image"]);
-			string imgPath = $"{CentralStore.Settings.CachePath}/images/news/{uri.AbsolutePath.GetFile()}";
+			string imgPath = $"{CentralStore.Settings.CachePath}/images/{uri.AbsolutePath.GetFile()}";
 			if (!SFile.Exists(imgPath.GetOSDir().NormalizePath()))
 			{
 				ImageDownloader dld = new ImageDownloader(item["image"], imgPath);
@@ -110,7 +103,7 @@ public class NewsPanel : Panel
 			}
 
 			uri = new Uri(item["avatar"]);
-			imgPath = $"{CentralStore.Settings.CachePath}/images/news/{uri.AbsolutePath.GetFile()}";
+			imgPath = $"{CentralStore.Settings.CachePath}/images/{uri.AbsolutePath.GetFile()}";
 			if (!SFile.Exists(imgPath.GetOSDir().NormalizePath()))
 			{
 				ImageDownloader dld = new ImageDownloader(item["avatar"], imgPath);

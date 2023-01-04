@@ -54,10 +54,6 @@ namespace AssetLib {
 		public async Task<ConfigureResult> Configure(string url, bool templatesOnly) {
 			ConfigureResult ret = null;
 			Uri uri = new Uri(url);
-			if (CentralStore.Settings.UseProxy)
-				client.SetProxy(CentralStore.Settings.ProxyHost, CentralStore.Settings.ProxyPort, uri.Scheme == "https");
-			else
-				client.ClearProxy();
 			Task<HTTPClient.Status> cres = client.StartClient(uri.Host, uri.Port, uri.Scheme == "https");
 
 			while (!cres.IsCompleted) {
@@ -106,8 +102,6 @@ namespace AssetLib {
 		public async Task<QueryResult> Search(string query) {
 			QueryResult ret = null;
 			Uri uri = new Uri(query);
-			if (CentralStore.Settings.UseProxy)
-				client.SetProxy(CentralStore.Settings.ProxyHost, CentralStore.Settings.ProxyPort, uri.Scheme == "https");
 			Task<HTTPClient.Status> cres = client.StartClient(uri.Host, uri.Port, uri.Scheme == "https");
 
 			while (!cres.IsCompleted)
@@ -178,10 +172,6 @@ namespace AssetLib {
 		public async Task<Asset> GetAsset(string assetId) {
 			Asset res = null;
 			Uri uri = new Uri($"https://godotengine.org/asset-library/api/asset/{assetId}");
-			if (CentralStore.Settings.UseProxy)
-				client.SetProxy(CentralStore.Settings.ProxyHost, CentralStore.Settings.ProxyPort, uri.Scheme == "https");
-			else
-				client.ClearProxy();
 			Task<HTTPClient.Status> cres = client.StartClient(uri.Host, uri.Port, uri.Scheme == "https");
 
 			while (!cres.IsCompleted)

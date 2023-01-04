@@ -94,11 +94,7 @@ public class GodotInstaller : Object {
 			Id = Guid.NewGuid().ToString(),
 			Tag = ced.TagName,
 			Url = ced.Url,
-#if GODOT_MACOS || GODOT_OSX
 			Location = $"{CentralStore.Settings.EnginePath}/{ced.TagName}",
-#else
-			Location = $"{CentralStore.Settings.EnginePath}/{ced.TagName}",
-#endif
 			CacheLocation = $"{CentralStore.Settings.CachePath}/downloads/editors/{ced.Url.GetFile()}",
 			DownloadedDate = DateTime.Now,
 			CustomEngine = ced
@@ -158,11 +154,6 @@ public class GodotInstaller : Object {
 
 	public async Task Download() {
 		Uri dlUri = new Uri(_version.Url);
-		if (CentralStore.Settings.UseProxy)
-			_client.SetProxy(CentralStore.Settings.ProxyHost, CentralStore.Settings.ProxyPort, dlUri.Scheme == "https");
-		else
-			_client.ClearProxy();
-		
 		var resp = FollowRedirect();
 
 		while (!resp.IsCompleted)
@@ -197,7 +188,7 @@ public class GodotInstaller : Object {
 
 		Array<string> fileList = new Array<string>();
 		using (ZipArchive za = ZipFile.OpenRead(_version.CacheLocation.GetOSDir().NormalizePath())) {
-			foreach(ZipArchiveEntry zae in za.Entries) {
+			foreach (ZipArchiveEntry zae in za.Entries) {
 				fileList.Add(zae.Name);
 			}
 		}
@@ -247,14 +238,14 @@ public class GodotInstaller : Object {
 
 	public static Array<string> RecurseDirectory(string path) {
 		Array<string> files = new Array<string>();
-		foreach(string dir in SDirectory.EnumerateDirectories(path)) {
-			foreach(string file in RecurseDirectory(FPath.Combine(path,dir).NormalizePath())) {
+		foreach (string dir in SDirectory.EnumerateDirectories(path)) {
+			foreach (string file in RecurseDirectory(FPath.Combine(path,dir).NormalizePath())) {
 				files.Add(file);
 			}
 			files.Add(FPath.Combine(path,dir).NormalizePath());
 		}
 
-		foreach(string file in SDirectory.EnumerateFiles(path)) {
+		foreach (string file in SDirectory.EnumerateFiles(path)) {
 			files.Add(file.NormalizePath());
 		}
 
@@ -264,7 +255,7 @@ public class GodotInstaller : Object {
 	}
 
 	public void Uninstall() {
-		foreach(string file in RecurseDirectory(_version.Location)) {
+		foreach (string file in RecurseDirectory(_version.Location)) {
 			if (SDirectory.Exists(file))
 				SDirectory.Delete(file);
 			else if (SFile.Exists(file))

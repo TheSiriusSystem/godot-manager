@@ -33,7 +33,7 @@ public class HeaderButton : PanelContainer
     public SortDirection Direction {
         get {
             if (_dirIcon != null) {
-                if (_dirIcon.Texture == arrow)
+                if (_dirIcon.Texture == MainWindow._plTextures["DropDown"])
                     return (_dirIcon.FlipV ? SortDirection.Up : SortDirection.Down);
                 else
                     return SortDirection.Indeterminate;
@@ -46,9 +46,9 @@ public class HeaderButton : PanelContainer
             _direction = value;
             if (_dirIcon != null) {
                 if (value == SortDirection.Indeterminate)
-                    _dirIcon.Texture = minus;
+                    _dirIcon.Texture = MainWindow._plTextures["Minus"];
                 else {
-                    _dirIcon.Texture = arrow;
+                    _dirIcon.Texture = MainWindow._plTextures["DropDown"];
                     _dirIcon.FlipV = (value == SortDirection.Up);
                 }
             }
@@ -63,9 +63,6 @@ public class HeaderButton : PanelContainer
 
     private string _title;
     private SortDirection _direction;
-
-    Texture arrow = GD.Load<Texture>("res://Assets/Icons/drop_down1.svg");
-    Texture minus = GD.Load<Texture>("res://Assets/Icons/minus.svg");
 
     public override void _Ready()
     {

@@ -7,6 +7,7 @@ using StreamWriter = System.IO.StreamWriter;
 public class NewProject : Object {
 	public string ProjectName;
 	public string ProjectLocation;
+	public int VersionControlSystem;
 	public AssetProject Template;
 	public string GodotId;
 	public int GodotMajorVersion;
@@ -21,6 +22,7 @@ public class NewProject : Object {
 		{
 			// Need to create the Project File ourselves.
 			CreateProjectFile();
+			CreateVersionControlMetadata();
 			CreateDefaultEnvironment();
 			CopyIcon();
 			ExtractPlugins();
@@ -45,7 +47,7 @@ public class NewProject : Object {
 	private void ExtractTemplate()
 	{
 		using (ZipArchive za = ZipFile.OpenRead(ProjectSettings.GlobalizePath(Template.Location))) {
-			foreach(ZipArchiveEntry zae in za.Entries) {
+			foreach (ZipArchiveEntry zae in za.Entries) {
 				int pp = zae.FullName.Find("/") + 1;
 				string path = zae.FullName.Substr(pp, zae.FullName.Length);
 				if (zae.FullName.EndsWith("/")) {
@@ -61,10 +63,11 @@ public class NewProject : Object {
 	private void ExtractPlugins()
 	{
 		if ((GodotMajorVersion == 2 && GodotMinorVersion >= 1) || GodotMajorVersion >= 3) {
-			if (!Directory.Exists(ProjectLocation.PlusFile("addons").NormalizePath()))
-				Directory.CreateDirectory(ProjectLocation.PlusFile("addons"));
+			string addonsPath = ProjectLocation.PlusFile("addons").NormalizePath();
+			if (!Directory.Exists(addonsPath))
+				Directory.CreateDirectory(addonsPath);
 
-			foreach(AssetPlugin plgn in Plugins) {
+			foreach (AssetPlugin plgn in Plugins) {
 				PluginInstaller installer = new PluginInstaller(plgn);
 				installer.Install(ProjectLocation);
 			}
@@ -73,16 +76,13 @@ public class NewProject : Object {
 
 	private void CopyIcon()
 	{
-		Texture image = null;
+		Texture image = MainWindow._plTextures["DefaultIconV3"];
 		if (GodotMajorVersion <= 2) {
-			image = GD.Load<Texture>("res://assets/textures/icons/default_project_icon_v1.png");
-		} else if (GodotMajorVersion == 3) {
-			image = GD.Load<Texture>("res://assets/textures/icons/default_project_icon_v3.png");
-		} else {
-			image = GD.Load<Texture>("res://assets/textures/icons/default_project_icon_v4.png");
+			image = MainWindow._plTextures["DefaultIconV1"];
+		} else if (GodotMajorVersion >= 4) {
+			image = MainWindow._plTextures["DefaultIconV4"];
 		}
-		if (image != null)
-			image.GetData().SavePng(ProjectLocation.PlusFile("icon.png").NormalizePath());
+		image.GetData().SavePng(ProjectLocation.PlusFile("icon.png").NormalizePath());
 	}
 
 	private void CreateDefaultEnvironment()
@@ -135,9 +135,39 @@ public class NewProject : Object {
 			}
 		}
 		pf.Save(ProjectLocation.PlusFile(GodotMajorVersion <= 2 ? "engine.cfg" : "project.godot").NormalizePath());
+	}
 
-		if (!Directory.Exists(ProjectLocation.PlusFile(".builds").NormalizePath())) {
-			Directory.CreateDirectory(ProjectLocation.PlusFile(".builds"));
+	private void CreateVersionControlMetadata()
+	{
+		switch (VersionControlSystem) {
+			case 1: // Git
+				using (StreamWriter writer = new StreamWriter(ProjectLocation.PlusFile(".gitattributes").NormalizePath())) {
+					writer.WriteLine("# Auto detect text files and perform LF normalization");
+					writer.WriteLine("* text=auto eol=lf");
+				}
+				using (StreamWriter writer = new StreamWriter(ProjectLocation.PlusFile(".gitignore").NormalizePath())) {
+					writer.WriteLine(".DS_Store");
+					writer.WriteLine("");
+					writer.WriteLine("# Godot 1 specific ignores");
+					writer.WriteLine(".fscache");
+					writer.WriteLine("");
+					writer.WriteLine("# Godot 4+ specific ignores");
+					writer.WriteLine(".godot/");
+					writer.WriteLine("");
+					writer.WriteLine("# Godot-specific ignores");
+					writer.WriteLine(".import/");
+					writer.WriteLine("export.cfg");
+					writer.WriteLine("export_presets.cfg");
+					writer.WriteLine("");
+					writer.WriteLine("# Imported translations (automatically generated from CSV files)");
+					writer.WriteLine("*.translation");
+					writer.WriteLine("");
+					writer.WriteLine("# Mono-specific ignores");
+					writer.WriteLine(".mono/");
+					writer.WriteLine("data_*/");
+					writer.WriteLine("mono_crash.*.json");
+				}
+				break;
 		}
 	}
 }

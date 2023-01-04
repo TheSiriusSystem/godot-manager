@@ -1,7 +1,8 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Scripts/components/Dialogs/RemoveCategory.cs" type="Script" id=2]
+[ext_resource path="res://Resources/Fonts/droid-regular-14.tres" type="DynamicFont" id=3]
 [ext_resource path="res://components/SysButton.tscn" type="PackedScene" id=4]
 
 [sub_resource type="StyleBoxFlat" id=4]
@@ -22,9 +23,6 @@ corner_detail = 20
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PC" type="PanelContainer" parent="."]
 anchor_right = 1.0
@@ -116,12 +114,13 @@ custom_constants/separation = 10
 
 [node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
 margin_right = 304.0
-margin_bottom = 19.0
-custom_fonts/font = ExtResource( 1 )
-text = "Select Category to Remove:"
+margin_bottom = 17.0
+custom_fonts/font = ExtResource( 3 )
+text = "Select a category to remove:"
+align = 1
 
 [node name="Categories" type="ItemList" parent="PC/CC/P/VB/MCContent/VB"]
-margin_top = 29.0
+margin_top = 27.0
 margin_right = 304.0
 margin_bottom = 234.0
 size_flags_horizontal = 3

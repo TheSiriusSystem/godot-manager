@@ -15,10 +15,10 @@ public class SysButton : ColorRect
     [ResolveNode(nameof(WindowMain))]
     Control WindowHandle = null;
 
-    private StreamTexture _icon = ResourceLoader.Load<StreamTexture>("res://Assets/Icons/x.svg");
+    private Texture _icon = MainWindow._plTextures["X"];
 
     [Export]
-    StreamTexture Icon {
+    Texture Icon {
         get {
             return _icon;
         }
@@ -47,24 +47,23 @@ public class SysButton : ColorRect
             return;
         
         var iemb = inputEvent as InputEventMouseButton;
-        if (!iemb.Pressed && (ButtonList)iemb.ButtonIndex != ButtonList.Left)
-            return;
-        
-        switch(ButtonType) {
-            case TYPES.close:
-                if (WindowHandle is MainWindow) {
-                    GetTree().Quit();
-                } else {
-                    WindowHandle.Visible = false;
-                    Color = BaseColor;
-                }
-                break;
-            case TYPES.minimize:
-                OS.WindowMinimized = true;
-                break;
-            default:
-                OS.WindowMaximized = !OS.WindowMaximized;
-                break;
+        if (iemb.Pressed && (ButtonList)iemb.ButtonIndex == ButtonList.Left) {
+            switch (ButtonType) {
+                case TYPES.close:
+                    if (WindowHandle is MainWindow) {
+                        GetTree().Quit();
+                    } else {
+                        WindowHandle.Visible = false;
+                        Color = BaseColor;
+                    }
+                    break;
+                case TYPES.minimize:
+                    OS.WindowMinimized = true;
+                    break;
+                default:
+                    OS.WindowMaximized = !OS.WindowMaximized;
+                    break;
+            }
         }
     }
 

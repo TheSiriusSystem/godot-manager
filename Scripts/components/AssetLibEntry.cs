@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 public class AssetLibEntry : ColorRect
 {
 #region Node Paths
+	[NodePath("/root/MainWindow/bg/Shell/VC/TabContainer/AssetLib")]
+	AssetLibPanel _assetLibPanel = null;
+
 	[NodePath("hc/Icon")]
 	TextureRect _icon = null;
 
@@ -135,8 +138,8 @@ public class AssetLibEntry : ColorRect
 			{
 				AssetLib.Asset asset = null;
 				if (!AssetId.StartsWith("local-")) {
-					AppDialogs.BusyDialog.UpdateHeader(Tr("Getting asset information..."));
-					AppDialogs.BusyDialog.UpdateByline(Tr("Connecting..."));
+					AppDialogs.BusyDialog.UpdateHeader(Tr("Loading Asset"));
+					AppDialogs.BusyDialog.UpdateByline(Tr("Fetching asset information..."));
 					AppDialogs.BusyDialog.ShowDialog();
 					Task<AssetLib.Asset> res = AssetLib.AssetLib.Instance.GetAsset(AssetId);
 					while (!res.IsCompleted)
@@ -149,8 +152,8 @@ public class AssetLibEntry : ColorRect
 					if (res == null) {
 						var tres = CentralStore.Instance.GetTemplateId(AssetId);
 						if (tres == null) {
-							AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Fetch Asset"), 
-								string.Format(Tr("Unable to get Asset information for {0}"),AssetId));
+							AppDialogs.MessageDialog.ShowMessage(Tr("Error"), 
+								string.Format(Tr("Failed to fetch asset information for {0}."), AssetId));
 							return;
 						} else {
 							asset = tres.Asset;
@@ -160,8 +163,8 @@ public class AssetLibEntry : ColorRect
 					}
 				}
 				if (asset == null) {
-					AppDialogs.MessageDialog.ShowMessage(Tr("Failed to Fetch Asset"), 
-						string.Format(Tr($"Unable to get Asset information for {0}"),AssetId));
+					AppDialogs.MessageDialog.ShowMessage(Tr("Error"), 
+						string.Format(Tr("Failed to fetch asset information for {0}."), AssetId));
 					return;
 				}
 				AppDialogs.AssetLibPreview.ShowDialog(asset);
@@ -172,12 +175,12 @@ public class AssetLibEntry : ColorRect
 		}
 	}
 
-	async void OnInstalledAddon(bool update) {
+	void OnInstalledAddon(bool update) {
 		Downloaded = true;
 		if (update) {
 			UpdateAvailable = false;
 			Array<ProjectFile> updateList = new Array<ProjectFile>();
-			foreach(ProjectFile pf in CentralStore.Projects) {
+			foreach (ProjectFile pf in CentralStore.Projects) {
 				if (pf.Assets == null)
 					continue;
 				
@@ -185,32 +188,14 @@ public class AssetLibEntry : ColorRect
 					updateList.Add(pf);
 				}
 			}
-
-			if (updateList.Count > 0) {
-				bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Update Plugins"), 
-					string.Format(Tr("Found {0} project(s) that currently reference this addon, do you wish to update them?"),updateList.Count));
-				if (!res)
-					return;
-				
-				AppDialogs.BusyDialog.UpdateHeader(Tr("Updating Projects..."));
-				AppDialogs.BusyDialog.UpdateByline(Tr("Processing..."));
-				AppDialogs.BusyDialog.ShowDialog();
-
-				foreach(ProjectFile pf in updateList) {
-					AppDialogs.BusyDialog.UpdateByline(string.Format(Tr("Updating Project {0}..."),pf.Name));
-					PluginInstaller installer = new PluginInstaller(CentralStore.Instance.GetPluginId(AssetId));
-					installer.Uninstall(pf.Location.GetBaseDir().NormalizePath(),false);
-					installer.Install(pf.Location.GetBaseDir().NormalizePath());
-				}
-				AppDialogs.BusyDialog.UpdateByline(Tr("Completed."));
-				AppDialogs.BusyDialog.HideDialog();
-			}
 		}
+		_assetLibPanel.UpdateManagedLists();
 	}
 
 	void OnUninstallAddon() {
 		Downloaded = false;
 		UpdateAvailable = false;
+		_assetLibPanel.UpdateManagedLists();
 	}
 
 	void OnPreviewClosed() {

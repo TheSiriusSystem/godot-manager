@@ -176,7 +176,7 @@ public class GDCSHTTPClient : Node {
 	}
 
 	public bool SuccessConnect(HTTPClient.Status result, bool dialogErrors = false, bool printErrors = true) {
-		switch(result) {
+		switch (result) {
 			case HTTPClient.Status.CantResolve:
 				if (printErrors) GD.PrintErr(string.Format(Tr("Unable to resolve {0}"),sHost));
 				if (dialogErrors) OS.Alert(string.Format(Tr("Unable to resolve {0}"),sHost), string.Format(Tr("{0} Failure"),sProperName));

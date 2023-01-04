@@ -22,9 +22,6 @@ corner_detail = 20
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PC" type="PanelContainer" parent="."]
 anchor_right = 1.0
@@ -99,7 +96,7 @@ WindowMain = NodePath("../../../../../../../..")
 [node name="MCContent" type="MarginContainer" parent="PC/CC/P/VB"]
 margin_top = 30.0
 margin_right = 320.0
-margin_bottom = 224.0
+margin_bottom = 225.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/margin_right = 8
@@ -111,7 +108,7 @@ custom_constants/margin_bottom = 8
 margin_left = 8.0
 margin_top = 8.0
 margin_right = 312.0
-margin_bottom = 186.0
+margin_bottom = 187.0
 custom_constants/separation = 10
 
 [node name="Label1" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
@@ -123,72 +120,72 @@ text = "Protocol:"
 [node name="Protocol" type="OptionButton" parent="PC/CC/P/VB/MCContent/VB"]
 margin_top = 29.0
 margin_right = 304.0
-margin_bottom = 51.0
+margin_bottom = 50.0
 text = "http"
 items = [ "http", null, false, 0, null, "https", null, false, 1, null ]
 selected = 0
 
 [node name="Label2" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
-margin_top = 61.0
+margin_top = 60.0
 margin_right = 304.0
-margin_bottom = 80.0
+margin_bottom = 79.0
 custom_fonts/font = ExtResource( 2 )
 text = "Domain:"
 
 [node name="DomainName" type="LineEdit" parent="PC/CC/P/VB/MCContent/VB"]
-margin_top = 90.0
+margin_top = 89.0
 margin_right = 304.0
-margin_bottom = 112.0
+margin_bottom = 110.0
 placeholder_text = "godotengine.org"
 
 [node name="Label3" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
-margin_top = 122.0
+margin_top = 120.0
 margin_right = 304.0
-margin_bottom = 141.0
+margin_bottom = 139.0
 custom_fonts/font = ExtResource( 2 )
 text = "Path:"
 
 [node name="PathTo" type="LineEdit" parent="PC/CC/P/VB/MCContent/VB"]
-margin_top = 151.0
+margin_top = 149.0
 margin_right = 304.0
-margin_bottom = 173.0
+margin_bottom = 170.0
 placeholder_text = "/asset-library/api/"
 
 [node name="MCButtons" type="MarginContainer" parent="PC/CC/P/VB"]
-margin_top = 228.0
+margin_top = 229.0
 margin_right = 320.0
 margin_bottom = 265.0
 custom_constants/margin_bottom = 15
 
 [node name="HB" type="HBoxContainer" parent="PC/CC/P/VB/MCButtons"]
 margin_right = 320.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 
 [node name="Sep1" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_right = 76.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 size_flags_horizontal = 3
 
 [node name="AddBtn" type="Button" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_left = 80.0
 margin_right = 109.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 text = "Add"
 
 [node name="Sep2" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_left = 113.0
 margin_right = 190.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 size_flags_horizontal = 3
 
 [node name="CancelBtn" type="Button" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_left = 194.0
 margin_right = 239.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 text = "Cancel"
 
 [node name="Sep3" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
 margin_left = 243.0
 margin_right = 320.0
-margin_bottom = 22.0
+margin_bottom = 21.0
 size_flags_horizontal = 3

@@ -37,7 +37,7 @@ public class AddonMirror : ReferenceRect
 		else
 			GetNode<Label>("PC/CC/P/VB/MC/TitleBarBG/HB/Title").Text = Tr("Edit Addon Mirror");
 
-		for(int i = 0; i < _protocol.GetItemCount(); i++) {
+		for (int i = 0; i < _protocol.GetItemCount(); i++) {
 			if (_protocol.GetItemText(i) == protocol) {
 				_protocol.Select(i);
 				break;

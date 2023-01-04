@@ -150,10 +150,10 @@ public class AssetLibPreview : ReferenceRect
 		_asset = asset;
 		
 		if (asset.IconUrl == null || asset.IconUrl == "") {
-			sIconPath = "res://Assets/Icons/missing_icon.svg";
+			sIconPath = MainWindow._plTextures["MissingIcon"].ResourcePath;
 		} else {
 			Uri uri = new Uri(asset.IconUrl);
-			sIconPath = $"user://cache/images/{asset.AssetId}{uri.AbsolutePath.GetExtension()}";
+			sIconPath = $"{CentralStore.Settings.CachePath}/images/{asset.AssetId}{uri.AbsolutePath.GetExtension()}";
 		}
 		
 		if (!File.Exists(sIconPath.GetOSDir().NormalizePath())) {
@@ -166,16 +166,16 @@ public class AssetLibPreview : ReferenceRect
 			} else {
 				Texture icon = Util.LoadImage(sIconPath);
 				if (icon == null)
-					_Icon.Texture = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
+					_Icon.Texture = MainWindow._plTextures["MissingIcon"];
 				else
 					_Icon.Texture = icon;
 			}
 		}
-		_Preview.Texture = GD.Load<Texture>("res://Assets/Icons/icon_thumbnail_wait.svg");
+		_Preview.Texture = MainWindow._plTextures["WaitThumbnail"];
 		_MissingThumbnails.Visible = false;
 		_PlayButton.Visible = false;
 		
-		foreach(TextureRect rect in _Thumbnails.GetChildren()) {
+		foreach (TextureRect rect in _Thumbnails.GetChildren()) {
 			_Thumbnails.RemoveChild(rect);
 			rect.QueueFree();
 		}
@@ -183,13 +183,13 @@ public class AssetLibPreview : ReferenceRect
 		for (int i = 0; i < asset.Previews.Count; i++) {
 			TextureRect preview = new TextureRect();
 			preview.RectMinSize = new Vector2(120,120);
-			preview.Texture = GD.Load<Texture>("res://Assets/Icons/icon_thumbnail_wait.svg");
+			preview.Texture = MainWindow._plTextures["WaitThumbnail"];
 			preview.Expand = true;
 			preview.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
 			preview.Connect("gui_input", this, "OnGuiInput_Preview", new Array { preview });
 			_Thumbnails.AddChild(preview);
 			Uri tnUri = new Uri(asset.Previews[i].Thumbnail);
-			string iconPath = $"user://cache/images/{asset.AssetId}-{i}-{asset.Previews[i].PreviewId}{tnUri.AbsolutePath.GetExtension()}";
+			string iconPath = $"{CentralStore.Settings.CachePath}/images/{asset.AssetId}-{i}-{asset.Previews[i].PreviewId}{tnUri.AbsolutePath.GetExtension()}";
 			if (!File.Exists(iconPath.GetOSDir().NormalizePath())) {
 				ImageDownloader dld = new ImageDownloader(asset.Previews[i].Thumbnail, iconPath);
 				dldPreviews.Add(dld);
@@ -203,7 +203,7 @@ public class AssetLibPreview : ReferenceRect
 				} else {
 					Texture icon = Util.LoadImage(iconPath);
 					if (icon == null)
-						preview.Texture = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
+						preview.Texture = MainWindow._plTextures["MissingIcon"];
 					else
 						preview.Texture = icon;
 				}
@@ -214,7 +214,7 @@ public class AssetLibPreview : ReferenceRect
 		
 		if (_Thumbnails.GetChildCount() > 0) {
 			if (_Thumbnails.GetChild(0) is TextureRect fp && fp.Texture != null) {
-				if (fp.Texture.ResourcePath != "res://Assets/Icons/icon_thumbnail_wait.svg") {
+				if (fp.Texture.ResourcePath != MainWindow._plTextures["WaitThumbnail"].ResourcePath) {
 					UpdatePreview(fp);
 				}
 			}
@@ -280,32 +280,19 @@ public class AssetLibPreview : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_Uninstall))]
 	async void OnPressed_Uninstall() {
-		if (CentralStore.Instance.HasPluginId(_asset.AssetId)) {
-			// Handle Asset Uninstall
-			Array<ProjectFile> usingPlugin = new Array<ProjectFile>();
-			foreach(ProjectFile pf in CentralStore.Projects) {
-				if (pf.Assets == null)
-					continue;
-				if (pf.Assets.Contains(_asset.AssetId))
-					usingPlugin.Add(pf);
-			}
+		bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Please Confirm..."),
+					string.Format(Tr("Remove {0} from the list?\nThe project folders' contents won't be modified."), _asset.Title),
+					Tr("Remove"), Tr("Cancel"));
+		if (!res) return;
 
-			if (usingPlugin.Count > 0) {
-				bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Uninstall - Plugin in Use"),
-					string.Format(Tr("The plugin {0} is currently used in {1} project(s). Uninstalling" +
-									" will remove tracking of this plugin, continue?"),
-					_asset.Title,usingPlugin.Count));
-				if (!res) {
-					return;
-				}
-				foreach(ProjectFile pf in usingPlugin) {
-					pf.Assets.Remove(_asset.AssetId);
-				}
-			}
+		if (CentralStore.Instance.HasPluginId(_asset.AssetId)) {
+			// Handle Addon Uninstall
 			AssetPlugin plg = CentralStore.Instance.GetPluginId(_asset.AssetId);
+			if (plg == null) {
+				AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"), string.Format(Tr("{0} was not found."), _asset.Title));
+				return;
+			}
 			CentralStore.Plugins.Remove(plg);
-			AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"),
-				string.Format(Tr("{0} has been removed. Any projects that use this addon won't be affected, you have to do it manually."), _asset.Title));
 		} else if (CentralStore.Instance.HasTemplateId(_asset.AssetId)) {
 			// Handle Template Uninstall
 			AssetProject prj = CentralStore.Instance.GetTemplateId(_asset.AssetId);
@@ -313,10 +300,9 @@ public class AssetLibPreview : ReferenceRect
 				AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"), string.Format(Tr("{0} was not found."), _asset.Title));
 				return;
 			}
-
 			CentralStore.Templates.Remove(prj);
-			AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"), string.Format(Tr("{0} has been removed."), _asset.Title));
 		}
+		AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"), string.Format(Tr("{0} has been removed."), _asset.Title));
 		EmitSignal("uninstalled_addon");
 		Visible = false;
 	}
@@ -365,7 +351,7 @@ public class AssetLibPreview : ReferenceRect
 			} else {
 				Texture icon = Util.LoadImage(sIconPath);
 				if (icon == null)
-					_Icon.Texture = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
+					_Icon.Texture = MainWindow._plTextures["MissingIcon"];
 				else
 					_Icon.Texture = icon;
 			}
@@ -405,13 +391,13 @@ public class AssetLibPreview : ReferenceRect
 			} else {
 				Texture icon = Util.LoadImage(iconPath);
 				if (icon == null)
-					icon = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
+					icon = MainWindow._plTextures["MissingIcon"];
 				preview.Texture = icon;
 			}
 		}
 		else
 		{
-			preview.Texture = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
+			preview.Texture = MainWindow._plTextures["MissingIcon"];
 		}
 	}
 }

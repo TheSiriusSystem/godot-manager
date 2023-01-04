@@ -25,7 +25,7 @@ public class PluginInstaller : Object
 	}
 
 	private void GetSubFolder(ZipArchive za) {
-		foreach(ZipArchiveEntry zae in za.Entries) {
+		foreach (ZipArchiveEntry zae in za.Entries) {
 			if (zae.Name.EndsWith(".gd")) {
 				byte[] buffer = new byte[zae.Length];
 				using (var fh = zae.Open()) {
@@ -48,7 +48,7 @@ public class PluginInstaller : Object
 		Array<string> files = new Array<string>();
 
 		using (ZipArchive za = ZipFile.OpenRead(ProjectSettings.GlobalizePath(_plugin.Location))) {
-			foreach(ZipArchiveEntry zae in za.Entries) {
+			foreach (ZipArchiveEntry zae in za.Entries) {
 				files.Add(zae.FullName);
 			}
 		}
@@ -64,11 +64,11 @@ public class PluginInstaller : Object
 
 		using (ZipArchive za = ZipFile.OpenRead(ProjectSettings.GlobalizePath(_plugin.Location))) {
 			bool needAddonsFolder = true;
-			foreach(ZipArchiveEntry zae in za.Entries) {
+			foreach (ZipArchiveEntry zae in za.Entries) {
 				files.Add(zae.FullName);
 			}
 
-			foreach(string file in files) {
+			foreach (string file in files) {
 				if (file.IndexOf("addons") >= 0) {
 					needAddonsFolder = false;
 					break;
@@ -80,7 +80,7 @@ public class PluginInstaller : Object
 			else
 				return files;
 			
-			foreach(string file in files) {
+			foreach (string file in files) {
 				string path = file.Substr(file.IndexOf("/")+1,file.Length);
 				if (subFolder != "")
 					path = "addons/".Join(subFolder,path);
@@ -96,7 +96,7 @@ public class PluginInstaller : Object
 		Array<string> files = _plugin.InstallFiles;
 		bool needAddonsFolder = true;
 		bool confirm_all = false;
-		foreach(string file in files) {
+		foreach (string file in files) {
 			if (file.IndexOf("addons") >= 0) {
 				needAddonsFolder = false;
 				break;
@@ -107,7 +107,7 @@ public class PluginInstaller : Object
 			if (needAddonsFolder)
 				GetSubFolder(za);
 			
-			foreach(ZipArchiveEntry zae in za.Entries) {
+			foreach (ZipArchiveEntry zae in za.Entries) {
 				string path = zae.FullName;
 				if (path.IndexOf("/") >= 0)
 					path = path.Substr(path.IndexOf("/")+1,path.Length);
@@ -139,7 +139,7 @@ public class PluginInstaller : Object
 									confirm_all = true;
 							} else
 								res = FileConflictDialog.ConflictAction.ConfirmAll;
-							switch(res) {
+							switch (res) {
 								case FileConflictDialog.ConflictAction.Confirm:
 								case FileConflictDialog.ConflictAction.ConfirmAll:
 									try {
@@ -169,7 +169,7 @@ public class PluginInstaller : Object
 		if (!Directory.Exists(path.GetOSDir().NormalizePath()))
 			return;
 		
-		foreach(string file in Directory.EnumerateFiles(path)) {
+		foreach (string file in Directory.EnumerateFiles(path)) {
 			if (file.EndsWith(".import"))
 				SFile.Delete(file);
 		}
@@ -180,7 +180,7 @@ public class PluginInstaller : Object
 		Array<string> dirs = new Array<string>();
 		bool needAddonsFolder = true;
 		bool dirtyUninstall = false;
-		foreach(string file in files) {
+		foreach (string file in files) {
 			if (file.IndexOf("addons") >= 0) {
 				needAddonsFolder = false;
 				break;
@@ -193,7 +193,7 @@ public class PluginInstaller : Object
 			}
 		}
 
-		foreach(string file in files) {
+		foreach (string file in files) {
 			if (file.EndsWith("/")) {
 				dirs.Add(file);
 			} else {
@@ -210,7 +210,7 @@ public class PluginInstaller : Object
 			}
 		}
 
-		foreach(string dir in dirs.Reverse()) {
+		foreach (string dir in dirs.Reverse()) {
 			string path = dir.Substr(dir.IndexOf("/")+1,dir.Length);
 			if (needAddonsFolder)
 				if (subFolder != "")

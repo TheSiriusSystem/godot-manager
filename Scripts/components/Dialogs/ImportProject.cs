@@ -23,11 +23,6 @@ public class ImportProject : ReferenceRect
 	Button _cancelBtn = null;
 #endregion
 
-#region Private Variables
-	GodotVersion gvDefault;
-	int iDefault;
-#endregion
-
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -45,30 +40,30 @@ public class ImportProject : ReferenceRect
 			int id = CentralStore.Versions.IndexOf(gdVers);
 			_godotVersions.AddItem(gdVers.GetDisplayName(), id);
 			_godotVersions.SetItemMetadata(id, gdVers.Id);
-			if (CentralStore.Settings.DefaultEngine == gdVers.Id)
-			{
-				gvDefault = gdVers;
-				iDefault = id;
-			}
 		}
 	}
 
 	public void ShowDialog(string location = "") {
+		if (CentralStore.Versions.Count <= 0)
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can import a project."));
+			return;
+		}
+
 		UpdateGodotVersions();
 		_locationValue.Text = location;
-		_godotVersions.Selected = iDefault;
 		Visible = true;
 	}
 
 	[SignalHandler("pressed", nameof(_addBtn))]
 	void OnAddBtnPressed() {
 		if (_locationValue.Text == "") {
-			AppDialogs.MessageDialog.ShowMessage(Tr("No Project Selected"),
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
 				Tr("You need to select a project before it can be added."));
 			return;
 		}
 		if (_godotVersions.Selected == -1) {
-			AppDialogs.MessageDialog.ShowMessage(Tr("No Editor Version Selected"),
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
 				Tr("You need to select an editor version to associate with this project."));
 			return;
 		}
@@ -91,8 +86,8 @@ public class ImportProject : ReferenceRect
 	void OnLocationBrowsePressed() {
 		AppDialogs.ImportFileDialog.Filters = new string[] {"project.godot", "engine.cfg"};
 		AppDialogs.ImportFileDialog.CurrentFile = "";
-		AppDialogs.ImportFileDialog.CurrentPath = CentralStore.Settings.ProjectPath.NormalizePath();
-		AppDialogs.ImportFileDialog.PopupCentered(new Vector2(510, 390));
+		AppDialogs.ImportFileDialog.CurrentPath = (CentralStore.Settings.ProjectPath + "/").NormalizePath();
+		AppDialogs.ImportFileDialog.PopupCentered();
 		AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnFileSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.ImportFileDialog.Connect("popup_hide", this, "OnLocationImportHidden", null, (uint)ConnectFlags.Oneshot);
 	}

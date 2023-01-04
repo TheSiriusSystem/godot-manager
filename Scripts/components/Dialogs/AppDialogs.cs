@@ -8,7 +8,6 @@ public class AppDialogs : Control
     public AddCustomGodot AddCustomGodot_ = null;
     public EditCustomGodot EditCustomGodot_ = null;
     public BusyDialog BusyDialog_ = null;
-    public NewVersion NewVersion_ = null;
     public YesNoDialog YesNoDialog_ = null;
     public YesNoCancelDialog YesNoCancelDialog_ = null;
     public ImportProject ImportProject_ = null;
@@ -23,7 +22,6 @@ public class AppDialogs : Control
     public RemoveCategory RemoveCategory_ = null;
     public AssetLibPreview AssetLibPreview_ = null;
     public DownloadAddon DownloadAddon_ = null;
-    public DownloadGodotManager DownloadGodotManager_ = null;
     public AddonInstaller AddonInstaller_ = null;
     public FileConflictDialog FileConflictDialog_ = null;
     public AddonMirror AddonMirror_ = null;
@@ -36,7 +34,6 @@ public class AppDialogs : Control
     public static AddCustomGodot AddCustomGodot => Instance.AddCustomGodot_;
     public static EditCustomGodot EditCustomGodot => Instance.EditCustomGodot_;
     public static BusyDialog BusyDialog => Instance.BusyDialog_;
-    public static NewVersion NewVersion => Instance.NewVersion_;
     public static YesNoDialog YesNoDialog => Instance.YesNoDialog_;
     public static YesNoCancelDialog YesNoCancelDialog => Instance.YesNoCancelDialog_;
     public static ImportProject ImportProject => Instance.ImportProject_;
@@ -51,7 +48,6 @@ public class AppDialogs : Control
     public static RemoveCategory RemoveCategory => Instance.RemoveCategory_;
     public static AssetLibPreview AssetLibPreview => Instance.AssetLibPreview_;
     public static DownloadAddon DownloadAddon => Instance.DownloadAddon_;
-    public static DownloadGodotManager DownloadGodotManager => Instance.DownloadGodotManager_;
     public static AddonInstaller AddonInstaller => Instance.AddonInstaller_;
     public static FileConflictDialog FileConflictDialog => Instance.FileConflictDialog_;
     public static AddonMirror AddonMirror => Instance.AddonMirror_;
@@ -80,7 +76,6 @@ public class AppDialogs : Control
         AddCustomGodot_ = GD.Load<PackedScene>("res://components/Dialogs/AddCustomGodot.tscn").Instance<AddCustomGodot>();
         EditCustomGodot_ = GD.Load<PackedScene>("res://components/Dialogs/EditCustomGodot.tscn").Instance<EditCustomGodot>();
         BusyDialog_ = GD.Load<PackedScene>("res://components/Dialogs/BusyDialog.tscn").Instance<BusyDialog>();
-        NewVersion_ = GD.Load<PackedScene>("res://components/Dialogs/NewVersion.tscn").Instance<NewVersion>();
         YesNoDialog_ = GD.Load<PackedScene>("res://components/Dialogs/YesNoDialog.tscn").Instance<YesNoDialog>();
         YesNoCancelDialog_ = GD.Load<PackedScene>("res://components/Dialogs/YesNoCancelDialog.tscn").Instance<YesNoCancelDialog>();
         ImportProject_ = GD.Load<PackedScene>("res://components/Dialogs/ImportProject.tscn").Instance<ImportProject>();
@@ -91,7 +86,6 @@ public class AppDialogs : Control
         RemoveCategory_ = GD.Load<PackedScene>("res://components/Dialogs/RemoveCategory.tscn").Instance<RemoveCategory>();
         AssetLibPreview_ = GD.Load<PackedScene>("res://components/Dialogs/AssetLibPreview.tscn").Instance<AssetLibPreview>();
         DownloadAddon_ = GD.Load<PackedScene>("res://components/Dialogs/DownloadAddon.tscn").Instance<DownloadAddon>();
-        DownloadGodotManager_ = GD.Load<PackedScene>("res://components/Dialogs/DownloadGodotManager.tscn").Instance<DownloadGodotManager>();
         AddonInstaller_ = GD.Load<PackedScene>("res://components/Dialogs/AddonInstaller.tscn").Instance<AddonInstaller>();
         FileConflictDialog_ = GD.Load<PackedScene>("res://components/Dialogs/FileConflictDialog.tscn").Instance<FileConflictDialog>();
         AddonMirror_ = GD.Load<PackedScene>("res://components/Dialogs/AddonMirror.tscn").Instance<AddonMirror>();
@@ -146,13 +140,12 @@ public class AppDialogs : Control
 
         dialogs = new Array<ReferenceRect> {    // Hierarchy of Dialogs in window, for proper displaying
             FirstRunWizard_,                    // First Run Wizard Helper
-            AddCustomGodot_, NewVersion_,       // Add Custom Godot / New Godot Version Prompt
-            EditCustomGodot_,
+            AddCustomGodot_,                    // Add Custom Godot
+            EditCustomGodot_,                   // Edit Custom Godot
             CreateProject_, ImportProject_,     // Create Project / Import Project
             EditProject_,                       // Edit Project
             AssetLibPreview_, DownloadAddon_,   // Asset Library Preview / Download Addon/Project
             ManageCustomDownloads_,             // Custom Godot Editor Downloads
-            DownloadGodotManager_,              // Download Godot Manager Update
             AddonMirror_,                       // Adding Addon Mirror to list
             CreateCategory_,                    // Create a Category
             RemoveCategory_,                    // Remove a Category
@@ -170,7 +163,7 @@ public class AppDialogs : Control
 
     public override void _EnterTree() {
         // Setup Full Rect for dialogs:
-        foreach(ReferenceRect dlg in dialogs) {
+        foreach (ReferenceRect dlg in dialogs) {
             dlg.SetAnchorsAndMarginsPreset(LayoutPreset.Wide);
             dlg.Visible = false;
             AddChild(dlg);

@@ -36,12 +36,8 @@ public class ProjectLineEntry : ColorRect
 	public HeartIcon HeartIcon = null;
 #endregion
 
-#region Preload Resources
-	private Texture _missingIcon = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
-#endregion
-
 #region Private Variables
-	private string sIcon = "res://Assets/Icons/missing_icon.svg";
+	private string sIcon = MainWindow._plTextures["MissingIcon"].ResourcePath;
 	private string sName = "Project Name";
 	private string sDesc = "Project Description";
 	private string sLocation = "/home/eumario/Projects/Godot/ProjectName";
@@ -59,10 +55,10 @@ public class ProjectLineEntry : ColorRect
 
 		set {
 			pfProjectFile = value;
-			Name = value.Name;
+			Name = value.Name + (!MissingProject ? "" : " - Missing Project");
 			Description = value.Description;
 			Icon = value.Location.GetResourceBase(value.Icon);
-			Location = MissingProject ? Tr("Unknown Location") : value.Location;
+			Location = value.Location;
 			GodotId = value.GodotId;
 			if (HeartIcon != null) {
 				HeartIcon.SetCheck(value.Favorite);
@@ -82,16 +78,16 @@ public class ProjectLineEntry : ColorRect
 			sIcon = value;
 			if (_icon != null) {
 				if (MissingProject)
-					_icon.Texture = _missingIcon;
+					_icon.Texture = MainWindow._plTextures["MissingIcon"];
 				else {
 					if (System.IO.File.Exists(value)) {
 						var texture = Util.LoadImage(value);
 						if (texture == null)
-							_icon.Texture = _missingIcon;
+							_icon.Texture = MainWindow._plTextures["MissingIcon"];
 						else
 							_icon.Texture = texture;
 					} else {
-						_icon.Texture = _missingIcon;
+						_icon.Texture = MainWindow._plTextures["MissingIcon"];
 					}
 				}
 			}
@@ -119,7 +115,7 @@ public class ProjectLineEntry : ColorRect
 		set {
 			sDesc = value;
 			if (_desc != null) {
-				if (sDesc == null || sDesc.StripEdges() == "")
+				if (string.IsNullOrEmpty(sDesc))
 					_desc.Text = Tr("No Description");
 				else
 					_desc.Text = value;
@@ -134,10 +130,7 @@ public class ProjectLineEntry : ColorRect
 		set {
 			sLocation = value;
 			if (_location != null)
-				if (MissingProject)
-					_location.Text = value;
-				else
-					_location.Text = value.GetBaseDir();
+				_location.Text = value.GetBaseDir().NormalizePath();
 		}
 	}
 
@@ -170,6 +163,7 @@ public class ProjectLineEntry : ColorRect
 		Location = sLocation;
 		GodotId = sGodotVersion;
 		HeartIcon.SetCheck(ProjectFile.Favorite);
+		Modulate = new Color(Modulate.r, Modulate.g, Modulate.b, !MissingProject ? 1.0f : 0.5f);
 	}
 
 	[SignalHandler("clicked", nameof(HeartIcon))]
@@ -222,7 +216,7 @@ public class ProjectLineEntry : ColorRect
 		Dictionary data = new Dictionary();
 		data["source"] = this;
 		data["parent"] = this.GetParent().GetParent();
-		var preview = GD.Load<PackedScene>("res://components/ProjectLineEntry.tscn").Instance<ProjectLineEntry>();
+		var preview = MainWindow._plScenes["ProjectLineEntry"].Instance<ProjectLineEntry>();
 		var notifier = new VisibilityNotifier2D();
 		preview.AddChild(notifier);
 		notifier.Connect("screen_entered", this, "OnDragStart");

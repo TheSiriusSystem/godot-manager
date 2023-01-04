@@ -49,11 +49,12 @@ public class ListSelectDialog : ReferenceRect
 		_title.Text = title;
 		_messageText.Text = message;
 		_options.Clear();
+		int indx = 0;
 		foreach (var okv in options)
 		{
-			int indx = _options.Items.Count;
 			_options.AddItem(okv.Key);
 			_options.SetItemMetadata(indx, okv.Value);
+			indx++;
 		}
 
 		Visible = true;

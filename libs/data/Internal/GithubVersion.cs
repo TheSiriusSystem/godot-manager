@@ -16,7 +16,7 @@ public class GithubVersion : Object
 
 	public string PlatformDownloadURL {
 		get {
-			switch(Platform.OperatingSystem) {
+			switch (Platform.OperatingSystem) {
 				case "Windows":
 				case "UWP (Windows 10)":
 					return (Platform.Bits == "32") ? Standard.Win32 : Standard.Win64;
@@ -32,7 +32,7 @@ public class GithubVersion : Object
 
 	public string PlatformMonoDownloadURL {
 		get {
-			switch(Platform.OperatingSystem) {
+			switch (Platform.OperatingSystem) {
 				case "Windows":
 				case "UWP (Windows 10)":
 					return (Platform.Bits == "32") ? Mono.Win32 : Mono.Win64;
@@ -48,7 +48,7 @@ public class GithubVersion : Object
 
 	public int PlatformDownloadSize {
 		get {
-			switch(Platform.OperatingSystem) {
+			switch (Platform.OperatingSystem) {
 				case "Windows":
 				case "UWP (Windows 10)":
 					return (Platform.Bits == "32") ? Standard.Win32_Size : Standard.Win64_Size;
@@ -64,7 +64,7 @@ public class GithubVersion : Object
 
 	public int PlatformMonoDownloadSize {
 		get {
-			switch(Platform.OperatingSystem) {
+			switch (Platform.OperatingSystem) {
 				case "Windows":
 				case "UWP (Windows 10)":
 					return (Platform.Bits == "32") ? Mono.Win32_Size : Mono.Win64_Size;

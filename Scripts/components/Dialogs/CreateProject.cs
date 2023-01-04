@@ -3,7 +3,6 @@ using System.Linq;
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
-using Guid = System.Guid;
 using Directory = System.IO.Directory;
 
 public class CreateProject : ReferenceRect
@@ -51,6 +50,9 @@ public class CreateProject : ReferenceRect
 	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB/Description")]
 	Label _rendererDesc = null;
 
+	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Settings/VersionControlMetadata/Option")]
+	OptionButton _vcMetadata = null;
+
 	[NodePath("PC/CC/P/VB/MCContent/TabContainer/Addons/ScrollContainer")]
 	ScrollContainer _sc = null;
 
@@ -67,17 +69,6 @@ public class CreateProject : ReferenceRect
 	Button _cancelBtn = null;
 #endregion
 
-#region Resources
-	Texture StatusError = GD.Load<Texture>("res://Assets/Icons/icon_status_error.svg");
-	Texture StatusSuccess = GD.Load<Texture>("res://Assets/Icons/icon_status_success.svg");
-	Texture StatusWarning = GD.Load<Texture>("res://Assets/Icons/icon_status_warning.svg");
-#endregion
-
-#region Assets
-	[Resource("res://components/AddonLineEntry.tscn")] private PackedScene ALineEntry = null;
-	[Resource("res://Assets/Icons/default_project_icon_v3.png")] private Texture DefaultIcon = null;
-#endregion
-
 #region Variables
 #endregion
 
@@ -90,17 +81,19 @@ public class CreateProject : ReferenceRect
 
 	public void ShowMessage(string msg, DirError err) {
 		_errorText.Text = msg;
-		switch(err) {
+		switch (err) {
 			case DirError.OK:
-				_errorIcon.Texture = StatusSuccess;
+				_errorIcon.Texture = MainWindow._plTextures["StatusSuccess"];
 				_createBtn.Disabled = false;
 				break;
 			case DirError.WARNING:
-				_errorIcon.Texture = StatusWarning;
+				_errorIcon.Texture = MainWindow._plTextures["StatusWarning"];
+				_errorText.SelfModulate = new Color("ffdd65");
 				_createBtn.Disabled = false;
 				break;
 			case DirError.ERROR:
-				_errorIcon.Texture = StatusError;
+				_errorIcon.Texture = MainWindow._plTextures["StatusError"];
+				_errorText.SelfModulate = new Color("ff4848");
 				_createBtn.Disabled = true;
 				break;
 		}
@@ -115,7 +108,14 @@ public class CreateProject : ReferenceRect
 	}
 
 	[SignalHandler("pressed", nameof(_createBtn))]
-	void OnCreatePressed() {
+	async void OnCreatePressed() {
+		if (!_projectLocation.Text.IsDirEmpty())
+		{
+			bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Warning"),
+				Tr("You are about to create a Godot project in a non-empty folder. The entire contents of this folder will be imported as project resources!\nAre you sure you wish to continue?"));
+			if (!res) return;
+		}
+
 		GodotVersion gdVers = _godotVersion.GetSelectedMetadata() as GodotVersion;
 		int gdMajorVers = gdVers.GetMajorVersion();
 		Dictionary modifiedKeys = new Dictionary();
@@ -133,6 +133,7 @@ public class CreateProject : ReferenceRect
 		NewProject prj = new NewProject {
 			ProjectName = _projectName.Text,
 			ProjectLocation = _projectLocation.Text,
+			VersionControlSystem = _vcMetadata.Selected,
 			GodotId = gdVers.Id,
 			GodotMajorVersion = gdMajorVers,
 			GodotMinorVersion = gdVers.GetMinorVersion(),
@@ -142,7 +143,7 @@ public class CreateProject : ReferenceRect
 		if (_templateProject.Selected > 0)
 			prj.Template = _templateProject.GetSelectedMetadata() as AssetProject;
 
-		foreach(AddonLineEntry ale in _pluginList.GetChildren()) {
+		foreach (AddonLineEntry ale in _pluginList.GetChildren()) {
 			if (ale.Installed) {
 				prj.Plugins.Add(ale.GetMeta("asset") as AssetPlugin);
 			}
@@ -153,7 +154,7 @@ public class CreateProject : ReferenceRect
 		pf.GodotId = prj.GodotId;
 		pf.Assets = new Array<string>();
 
-		foreach(AssetPlugin plugin in prj.Plugins)
+		foreach (AssetPlugin plugin in prj.Plugins)
 			pf.Assets.Add(plugin.Asset.AssetId);
 
 		CentralStore.Projects.Add(pf);
@@ -174,7 +175,7 @@ public class CreateProject : ReferenceRect
 	[SignalHandler("pressed", nameof(_browseLocation))]
 	void OnBrowseLocationPressed() {
 		AppDialogs.BrowseFolderDialog.CurrentDir = CentralStore.Settings.ProjectPath.NormalizePath();
-		AppDialogs.BrowseFolderDialog.PopupCentered(new Vector2(510, 390));
+		AppDialogs.BrowseFolderDialog.PopupCentered();
 		AppDialogs.BrowseFolderDialog.Connect("dir_selected", this, "OnDirSelected", null, (uint)ConnectFlags.Oneshot);
 		AppDialogs.BrowseFolderDialog.Connect("popup_hide", this, "OnDirSelected_PopupHidden", null, (uint)ConnectFlags.Oneshot);
 	}
@@ -246,10 +247,10 @@ public class CreateProject : ReferenceRect
 				string imgLoc =
 					$"{CentralStore.Settings.CachePath}/images/assets/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
 						.NormalizePath();
-				AddonLineEntry ale = ALineEntry.Instance<AddonLineEntry>();
+				AddonLineEntry ale = MainWindow._plScenes["AddonLineEntry"].Instance<AddonLineEntry>();
 
 				ale.Icon = Util.LoadImage(imgLoc);
-				if (ale.Icon == null) ale.Icon = DefaultIcon;
+				if (ale.Icon == null) ale.Icon = MainWindow._plTextures["DefaultIconV3"];
 
 				ale.Title = plgn.Asset.Title;
 				ale.Version = plgn.Asset.VersionString;
@@ -262,50 +263,32 @@ public class CreateProject : ReferenceRect
 	}
 
 	public void ShowDialog() {
-		GodotVersion defaultEngine;
-		if (CentralStore.Settings.DefaultEngine != string.Empty && CentralStore.Settings.DefaultEngine != Guid.Empty.ToString())
+		if (CentralStore.Versions.Count <= 0)
 		{
-			defaultEngine = CentralStore.Instance.GetVersion(CentralStore.Settings.DefaultEngine);
-		}
-		else if (CentralStore.Versions.Count > 0)
-		{
-			defaultEngine = CentralStore.Instance.GetVersion(CentralStore.Versions[0].Id);
-		}
-		else
-		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("No Editor Versions Found"), Tr("You need to add an editor version before you can create a project."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can create a project."));
 			return;
 		}
 
 		_godotVersion.Clear();
-		int defaultGodot = -1;
 		for (int indx = 0; indx < CentralStore.Versions.Count; indx++)
 		{
-			if (CentralStore.Versions[indx].Id == (string)CentralStore.Settings.DefaultEngine)
-			{
-				defaultGodot = indx;
-			}
-
 			_godotVersion.AddItem(CentralStore.Versions[indx].GetDisplayName(), indx);
 			_godotVersion.SetItemMetadata(indx, CentralStore.Versions[indx]);
 		}
-
-		if (defaultGodot != -1)
-			_godotVersion.Select(defaultGodot);
 
 		_tabs.CurrentTab = 0;
 		_projectName.Text = "New Game Project";
 		_projectLocation.Text = CentralStore.Settings.ProjectPath;
 		TestPath(CentralStore.Settings.ProjectPath);
-		OnVersionSelected(_godotVersion.Selected);
 		_templateProject.Clear();
 		_templateProject.AddItem("None");
-		foreach(AssetProject tmpl in CentralStore.Templates) {
+		foreach (AssetProject tmpl in CentralStore.Templates) {
 			string gdName = tmpl.Asset.Title;
 			_templateProject.AddItem(gdName);
 			_templateProject.SetItemMetadata(CentralStore.Templates.IndexOf(tmpl)+1, tmpl);
 		}
-		PopulatePlugins();
+		_vcMetadata.Selected = 0;
+		OnVersionSelected(_godotVersion.Selected);
 
 		Visible = true;
 	}
@@ -322,7 +305,7 @@ public class CreateProject : ReferenceRect
 		}
 
 		if (!path.IsDirEmpty()) {
-			ShowMessage(Tr("Please choose an empty folder."), DirError.ERROR);
+			ShowMessage(Tr("The selected path is not empty. Choosing an empty folder is highly recommended."), DirError.WARNING);
 		} else {
 			ShowMessage("", DirError.OK);
 		}

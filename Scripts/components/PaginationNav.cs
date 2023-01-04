@@ -44,7 +44,7 @@ public class PaginationNav : CenterContainer
 
     public void UpdateConfig(int totalPages) {
         iTotalPages = totalPages;
-        foreach(Button btn in abPages)
+        foreach (Button btn in abPages)
             btn.QueueFree();
         abPages.Clear();
         for (int i = 0; i < totalPages; i++) {

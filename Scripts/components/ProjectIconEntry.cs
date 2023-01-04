@@ -25,10 +25,6 @@ public class ProjectIconEntry : ColorRect
     private Label _godotVersion = null;
 #endregion
 
-#region Preload Resources
-    private Texture _missingIcon = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
-#endregion
-
 #region Private Variables
     private string sIcon;
     private string sProjectName;
@@ -36,9 +32,6 @@ public class ProjectIconEntry : ColorRect
     private string sGodotVersion;
     //private int iGodotVersion;
     private ProjectFile pfProjectFile;
-
-    [Resource("res://Resources/Fonts/droid-bold-16.tres")] private Font titleFont = null;
-    [Resource("res://Resources/Fonts/droid-regular-14.tres")]private Font subLineFont = null;
 #endregion
 
 #region Public Accessors
@@ -56,16 +49,16 @@ public class ProjectIconEntry : ColorRect
             sIcon = value;
             if (_icon != null)
                 if (MissingProject)
-                    _icon.Texture = _missingIcon;
+                    _icon.Texture = MainWindow._plTextures["MissingIcon"];
                 else {
                     if (System.IO.File.Exists(value)) {
                         var texture = Util.LoadImage(value);
                         if (texture == null)
-                            _icon.Texture = _missingIcon;
+                            _icon.Texture = MainWindow._plTextures["MissingIcon"];
                         else
                             _icon.Texture = texture;
                     } else {
-                        _icon.Texture = _missingIcon;
+                        _icon.Texture = MainWindow._plTextures["MissingIcon"];
                     }
                 }
         }
@@ -82,7 +75,7 @@ public class ProjectIconEntry : ColorRect
         set {
             sProjectName = value;
             if (_projectName != null) {
-                Vector2 size = titleFont.GetStringSize(value);
+                Vector2 size = MainWindow._plFonts["DroidSansBold16"].GetStringSize(value);
                 if (size.x > 280) {
                     _projectName.Align = Label.AlignEnum.Left;
                 } else {
@@ -103,19 +96,8 @@ public class ProjectIconEntry : ColorRect
 
         set {
             sProjectLocation = value;
-            if (_projectLocation != null) {
-                Vector2 size = subLineFont.GetStringSize(value);
-                if (size.x > 280) {
-                    _projectLocation.Align = Label.AlignEnum.Left;
-                } else {
-                    _projectLocation.Align = Label.AlignEnum.Center;
-                }
-
-                if (MissingProject)
-                    _projectLocation.Text = value;
-                else
-                    _projectLocation.Text = value.GetBaseDir();
-            }
+            if (_projectLocation != null)
+                _projectLocation.Text = value.GetBaseDir().NormalizePath();
         }
     }
 
@@ -126,9 +108,9 @@ public class ProjectIconEntry : ColorRect
 
         set {
             pfProjectFile = value;
-            ProjectName = value.Name;
+            ProjectName = value.Name + (!MissingProject ? "" : " - Missing Project");
             Icon = value.Location.GetResourceBase(value.Icon);
-            Location = MissingProject ? Tr("Unknown Location") : value.Location;
+            Location = value.Location;
             GodotId = value.GodotId;
         }
     }
@@ -144,7 +126,7 @@ public class ProjectIconEntry : ColorRect
             if (_godotVersion != null) {
                 if (gv != null) {
                     _godotVersion.Text = gv.GetDisplayName();
-                    Vector2 size = subLineFont.GetStringSize(gv.GetDisplayName());
+                    Vector2 size = MainWindow._plFonts["DroidSans14"].GetStringSize(gv.GetDisplayName());
                     if (size.x > 280) {
                         _godotVersion.Align = Label.AlignEnum.Left;
                     } else {
@@ -166,6 +148,7 @@ public class ProjectIconEntry : ColorRect
         ProjectName = sProjectName;
         Location = sProjectLocation;
         GodotId = sGodotVersion;
+        Modulate = new Color(Modulate.r, Modulate.g, Modulate.b, !MissingProject ? 1.0f : 0.5f);
     }
 
     [SignalHandler("gui_input")]
@@ -175,7 +158,7 @@ public class ProjectIconEntry : ColorRect
         var iemb = inputEvent as InputEventMouseButton;
         if (!iemb.Pressed)
             return;
-        
+
         if (iemb.ButtonIndex == (int)ButtonList.Left) {
             if (iemb.Doubleclick)
                 EmitSignal("DoubleClicked", this);
@@ -191,6 +174,5 @@ public class ProjectIconEntry : ColorRect
                 EmitSignal("RightClicked", this);
             }
         }
-
     }
 }

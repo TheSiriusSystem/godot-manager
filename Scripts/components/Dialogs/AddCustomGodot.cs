@@ -80,7 +80,7 @@ public class AddCustomGodot : ReferenceRect
 		}
 
 		bool isExtensionValid = false;
-		foreach (string extension in MainWindow._godotExtensions) {
+		foreach (string extension in MainWindow._customGDExtensions) {
 			if (_Location.Text.GetExtension() == extension) {
 				isExtensionValid = true;
 				break;
@@ -90,6 +90,18 @@ public class AddCustomGodot : ReferenceRect
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
 			Tr("The file's extension is invalid."));
 			return;
+		}
+
+		foreach (GodotVersion gdver in CentralStore.Versions) {
+			if (gdver.ExecutableName == _Location.Text.GetFile()) {
+				AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
+				Tr(string.Format("This editor version is already added as {0}.", gdver.GetDisplayName())));
+				return;
+			} else if (gdver.Tag == _Tag.Text) {
+				AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
+				Tr(string.Format("This tag is already used by {0}.", gdver.GetDisplayName())));
+				return;
+			}
 		}
 
 		bool isProblematicName = true;

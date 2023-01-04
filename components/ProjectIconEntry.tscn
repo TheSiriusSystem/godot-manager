@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-regular-14.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Assets/Icons/missing_icon.svg" type="Texture" id=2]
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=3]
 [ext_resource path="res://Scripts/components/ProjectIconEntry.cs" type="Script" id=4]
+[ext_resource path="res://Resources/Fonts/droid-bold-14.tres" type="DynamicFont" id=5]
 
 [node name="ProjectIconEntry" type="ColorRect"]
 self_modulate = Color( 1, 1, 1, 0 )
@@ -68,7 +69,7 @@ margin_right = 280.0
 margin_bottom = 130.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
-custom_fonts/font = ExtResource( 1 )
+custom_fonts/font = ExtResource( 5 )
 text = "Godot vx.x.x"
 align = 1
 clip_text = true

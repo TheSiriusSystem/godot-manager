@@ -22,10 +22,6 @@ public class PaginatedListing : ScrollContainer
     PaginationNav _bottomPageCount = null;
 #endregion
 
-#region Templates
-    PackedScene tAssetLibEntry = GD.Load<PackedScene>("res://components/AssetLibEntry.tscn");
-#endregion
-
 #region Private Variables
     AssetLib.QueryResult alqrLastResult = null;
     DownloadQueue dlq = null;
@@ -40,7 +36,7 @@ public class PaginatedListing : ScrollContainer
     }
 
     public void ClearResults() {
-        foreach(AssetLibEntry ale in _listing.GetChildren()) {
+        foreach (AssetLibEntry ale in _listing.GetChildren()) {
             ale.QueueFree();
         }
         alqrLastResult = null;
@@ -50,15 +46,15 @@ public class PaginatedListing : ScrollContainer
     }
 
     public void UpdateAddons() {
-        foreach(AssetLibEntry ale in _listing.GetChildren()) {
+        foreach (AssetLibEntry ale in _listing.GetChildren()) {
             ale.QueueFree();
         }
 
         _topPageCount.Visible = false;
         _bottomPageCount.Visible = false;
 
-        foreach(AssetPlugin plgn in CentralStore.Plugins) {
-            AssetLibEntry ale = tAssetLibEntry.Instance<AssetLibEntry>();
+        foreach (AssetPlugin plgn in CentralStore.Plugins) {
+            AssetLibEntry ale = MainWindow._plScenes["AssetLibEntry"].Instance<AssetLibEntry>();
             ale.Title = plgn.Asset.Title;
             ale.Category = plgn.Asset.Category;
             ale.Author = plgn.Asset.Author;
@@ -68,13 +64,13 @@ public class PaginatedListing : ScrollContainer
             ale.Downloaded = false;
             _listing.AddChild(ale);
             if (plgn.Asset.IconUrl == null || plgn.Asset.IconUrl == "") {
-                ale.Icon = Util.LoadImage("res://Assets/Icons/default_project_icon_v3.png");
+                ale.Icon = MainWindow._plTextures["DefaultIconV3"];
             } else {
                 if (plgn.Asset.IconUrl.StartsWith("res://")) {
                     ale.Icon = Util.LoadImage(plgn.Asset.IconUrl);
                 } else {
                     Uri uri = new Uri(plgn.Asset.IconUrl);
-                    string iconPath = $"{CentralStore.Settings.CachePath}/images/assets/{plgn.Asset.AssetId}{uri.AbsolutePath.GetExtension()}";
+                    string iconPath = $"{CentralStore.Settings.CachePath}/images/{plgn.Asset.AssetId}{uri.AbsolutePath.GetExtension()}";
                     ale.SetMeta("iconPath", iconPath);
                     if (!File.Exists(iconPath.GetOSDir().NormalizePath())) {
                         // Implement Image Downloader through Download Queue
@@ -84,7 +80,7 @@ public class PaginatedListing : ScrollContainer
                     } else {
                         Texture icon = Util.LoadImage(iconPath);
                         if (icon == null)
-                            ale.Icon = Util.LoadImage("res://Assets/Icons/missing_icon.svg");
+                            ale.Icon = MainWindow._plTextures["MissingIcon"];
                         else
                             ale.Icon = icon;
                     }
@@ -103,15 +99,15 @@ public class PaginatedListing : ScrollContainer
     }
 
     public void UpdateTemplates() {
-        foreach(AssetLibEntry ale in _listing.GetChildren()) {
+        foreach (AssetLibEntry ale in _listing.GetChildren()) {
             ale.QueueFree();
         }
 
         _topPageCount.Visible = false;
         _bottomPageCount.Visible = false;
 
-        foreach(AssetProject prj in CentralStore.Templates) {
-            AssetLibEntry ale = tAssetLibEntry.Instance<AssetLibEntry>();
+        foreach (AssetProject prj in CentralStore.Templates) {
+            AssetLibEntry ale = MainWindow._plScenes["AssetLibEntry"].Instance<AssetLibEntry>();
             ale.Title = prj.Asset.Title;
             ale.Category = prj.Asset.Category;
             ale.Author = prj.Asset.Author;
@@ -121,11 +117,11 @@ public class PaginatedListing : ScrollContainer
             ale.Downloaded = false;
             _listing.AddChild(ale);
             if (prj.Asset.IconUrl == null || prj.Asset.IconUrl == "") {
-                ale.Icon = Util.LoadImage("res://Assets/Icons/missing_icon.svg");
+                ale.Icon = MainWindow._plTextures["MissingIcon"];
             } else {
                 string iconPath;
                 if (prj.Asset.IconUrl.StartsWith("zip+")) {
-                    iconPath = $"{CentralStore.Settings.CachePath}/images/assets/{prj.Asset.AssetId}{prj.Asset.IconUrl.GetExtension()}";
+                    iconPath = $"{CentralStore.Settings.CachePath}/images/{prj.Asset.AssetId}{prj.Asset.IconUrl.GetExtension()}";
                     string zipPath = prj.Asset.IconUrl.Substring("zip+res://".Length);
                     if (!File.Exists(iconPath)) {
                         using (ZipArchive za = ZipFile.Open(prj.Location,ZipArchiveMode.Read)) {
@@ -142,7 +138,7 @@ public class PaginatedListing : ScrollContainer
                     }
                 } else {
                     Uri uri = new Uri(prj.Asset.IconUrl);
-                    iconPath = $"{CentralStore.Settings.CachePath}/images/assets/{prj.Asset.AssetId}{uri.AbsolutePath.GetExtension()}";
+                    iconPath = $"{CentralStore.Settings.CachePath}/images/{prj.Asset.AssetId}{uri.AbsolutePath.GetExtension()}";
                     ale.SetMeta("iconPath", iconPath);
                     if (!File.Exists(iconPath.GetOSDir().NormalizePath())) {
                         // Implement Image Downloader through Download Queue
@@ -154,7 +150,7 @@ public class PaginatedListing : ScrollContainer
                 if (File.Exists(iconPath.GetOSDir().NormalizePath())) {
                     Texture icon = Util.LoadImage(iconPath);
                     if (icon == null)
-                        ale.Icon = Util.LoadImage("res://Assets/Icons/missing_icon.svg");
+                        ale.Icon = MainWindow._plTextures["MissingIcon"];
                     else
                         ale.Icon = icon;
                 }
@@ -164,7 +160,7 @@ public class PaginatedListing : ScrollContainer
     }
 
     public void UpdateResults(AssetLib.QueryResult result) {
-        foreach(AssetLibEntry ale in _listing.GetChildren()) {
+        foreach (AssetLibEntry ale in _listing.GetChildren()) {
             ale.QueueFree();
         }
         if (alqrLastResult != null) {
@@ -180,8 +176,8 @@ public class PaginatedListing : ScrollContainer
         _topPageCount.SetPage(result.Page);
         _bottomPageCount.SetPage(result.Page);
         ScrollVertical = 0;
-        foreach(AssetLib.AssetResult asset in result.Result) {
-            AssetLibEntry ale = tAssetLibEntry.Instance<AssetLibEntry>();
+        foreach (AssetLib.AssetResult asset in result.Result) {
+            AssetLibEntry ale = MainWindow._plScenes["AssetLibEntry"].Instance<AssetLibEntry>();
             ale.Title = asset.Title;
             ale.Category = asset.Category;
             ale.Author = asset.Author;
@@ -210,7 +206,7 @@ public class PaginatedListing : ScrollContainer
             }
             _listing.AddChild(ale);
             Uri uri = new Uri(asset.IconUrl);
-            string iconPath = $"{CentralStore.Settings.CachePath}/images/assets/{asset.AssetId}{uri.AbsolutePath.GetExtension()}";
+            string iconPath = $"{CentralStore.Settings.CachePath}/images/{asset.AssetId}{uri.AbsolutePath.GetExtension()}";
             ale.SetMeta("iconPath", iconPath);
             if (!File.Exists(iconPath.GetOSDir().NormalizePath())) {
                 // Implement Image Downloader through Download Queue
@@ -220,7 +216,7 @@ public class PaginatedListing : ScrollContainer
             } else {
                 Texture icon = Util.LoadImage(iconPath);
                 if (icon == null)
-                    ale.Icon = Util.LoadImage("res://Assets/Icons/missing_icon.svg");
+                    ale.Icon = MainWindow._plTextures["MissingIcon"];
                 else
                     ale.Icon = icon;
             }
@@ -230,7 +226,7 @@ public class PaginatedListing : ScrollContainer
 
     [SignalHandler("download_completed", nameof(dlq))]
     void OnImageDownloaded(ImageDownloader dld) {
-        foreach(AssetLibEntry ale in _listing.GetChildren()) {
+        foreach (AssetLibEntry ale in _listing.GetChildren()) {
             if (ale.HasMeta("dld")) {
                 if ((ale.GetMeta("dld") as ImageDownloader) == dld) {
                     ale.RemoveMeta("dld");
@@ -238,10 +234,10 @@ public class PaginatedListing : ScrollContainer
                     if (File.Exists(iconPath.GetOSDir().NormalizePath())) {
                         Texture icon = Util.LoadImage(iconPath);
                         if (icon == null)
-                            icon = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
+                            icon = MainWindow._plTextures["MissingIcon"];
                         ale.Icon = icon;
                     } else {
-                        ale.Icon = GD.Load<Texture>("res://Assets/Icons/missing_icon.svg");
+                        ale.Icon = MainWindow._plTextures["MissingIcon"];
                     }
                     return;
                 }
