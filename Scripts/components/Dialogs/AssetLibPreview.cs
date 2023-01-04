@@ -124,8 +124,8 @@ public class AssetLibPreview : ReferenceRect
 			await this.IdleFrame();
 		EmitSignal("installed_addon", (_Download.Text != "Download"));
 		Visible = false;
-		AppDialogs.MessageDialog.ShowMessage((apl == null ? Tr("Template Download") : Tr("Plugin Download")), 
-			string.Format(Tr("Download of {0} completed."),asset.Title));
+		AppDialogs.MessageDialog.ShowMessage(Tr("Asset Downloaded"), 
+			string.Format(Tr("{0} has finished downloading. You can find it in the Downloaded {1} tab."),asset.Title,apl != null ? "Addons" : "Templates"));
 	}
 
 	[SignalHandler("hide")]
@@ -202,9 +202,7 @@ public class AssetLibPreview : ReferenceRect
 					preview.Texture = gif;
 				} else {
 					Texture icon = Util.LoadImage(iconPath);
-					if (icon == null)
-						preview.Texture = MainWindow._plTextures["MissingIcon"];
-					else
+					if (icon != null)
 						preview.Texture = icon;
 				}
 			}
@@ -302,7 +300,6 @@ public class AssetLibPreview : ReferenceRect
 			}
 			CentralStore.Templates.Remove(prj);
 		}
-		AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"), string.Format(Tr("{0} has been removed."), _asset.Title));
 		EmitSignal("uninstalled_addon");
 		Visible = false;
 	}
@@ -350,9 +347,7 @@ public class AssetLibPreview : ReferenceRect
 				_Icon.Texture = gif;
 			} else {
 				Texture icon = Util.LoadImage(sIconPath);
-				if (icon == null)
-					_Icon.Texture = MainWindow._plTextures["MissingIcon"];
-				else
+				if (icon != null)
 					_Icon.Texture = icon;
 			}
 		} else {
@@ -390,14 +385,9 @@ public class AssetLibPreview : ReferenceRect
 				preview.Texture = gif;
 			} else {
 				Texture icon = Util.LoadImage(iconPath);
-				if (icon == null)
-					icon = MainWindow._plTextures["MissingIcon"];
-				preview.Texture = icon;
+				if (icon != null)
+					preview.Texture = icon;
 			}
-		}
-		else
-		{
-			preview.Texture = MainWindow._plTextures["MissingIcon"];
 		}
 	}
 }
