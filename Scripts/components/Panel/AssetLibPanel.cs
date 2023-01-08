@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
+using Guid = System.Guid;
 using TimeSpan = System.TimeSpan;
 using DateTime = System.DateTime;
 using FileStream = System.IO.FileStream;
@@ -32,9 +33,6 @@ public class AssetLibPanel : Panel
     [NodePath("VC/SearchContainer/HC/SearchField")]
     LineEdit _searchField = null;
 
-    [NodePath("VC/SearchContainer/HC/Import")]
-    Button _import = null;
-
     [NodePath("VC/SearchContainer/HC2/SortBy")]
     OptionButton _sortBy = null;
 
@@ -42,10 +40,10 @@ public class AssetLibPanel : Panel
     OptionButton _category = null;
 
     [NodePath("VC/SearchContainer/HC2/GodotVersion")]
-    private OptionButton _godotVersion = null;
+    OptionButton _godotVersion = null;
 
-    [NodePath("VC/SearchContainer/HC2/MirrorSite")]
-    OptionButton _mirrorSite = null;
+    [NodePath("VC/SearchContainer/HC2/VisitWebsite")]
+    Button _visitWebsite = null;
 
     [NodePath("VC/SearchContainer/HC2/Support")]
     Button _support = null;
@@ -73,6 +71,12 @@ public class AssetLibPanel : Panel
     [NodePath("VC/ManageContainer/HC/PC/HC/Templates")]
     Button _mTemplateBtn = null;
 
+    [NodePath("VC/ManageContainer/HC2/SearchField")]
+    LineEdit _mSearchField = null;
+
+    [NodePath("VC/ManageContainer/HC2/Import")]
+    Button _import = null;
+
     [NodePath("VC/ManageContainer/plmAddons")]
     PaginatedListing _plmAddons = null;
 
@@ -82,6 +86,55 @@ public class AssetLibPanel : Panel
 #endregion
 
 #region Private Variables
+    const string url = "https://godotengine.org/asset-library/api/";
+    readonly Dictionary<string, string> localLicenses = new Dictionary<string, string>()
+    {
+        {"BSD Zero Clause License", "0BSD"},
+        {"Academic Free License (\"AFL\") v. 3.0", "AFL-3.0"},
+        {"GNU AFFERO GENERAL PUBLIC LICENSE", "AGPLv3"},
+        {"Apache License", "Apache-2.0"},
+        {"The Artistic License 2.0", "Artistic-2.0"},
+        {"BSD 2-Clause License", "BSD-2-Clause"},
+        {"The Clear BSD License", "BSD-3-Clause-Clear"},
+        {"BSD 3-Clause License", "BSD-3-Clause"},
+        {"BSD 4-Clause License", "BSD-4-Clause"},
+        {"Boost Software License - Version 1.0 - August 17th, 2003", "BSL-1.0"},
+        {"Attribution 4.0 International", "CC-BY-4.0"},
+        {"Attribution-ShareAlike 4.0 International", "CC-BY-SA-4.0"},
+        {"Creative Commons Legal Code", "CC0"},
+        {"CONTRAT DE LICENCE DE LOGICIEL LIBRE CeCILL", "CECILL-2.1"},
+        {"CERN Open Hardware Licence Version 2 - Permissive", "CERN-OHL-P-2.0"},
+        {"CERN Open Hardware Licence Version 2 - Strongly Reciprocal", "CERN-OHL-S-2.0"},
+        {"CERN Open Hardware Licence Version 2 - Weakly Reciprocal", "CERN-OHL-W-2.0"},
+        {"Educational Community License", "ECL-2.0"},
+        {"Eclipse Public License - v 1.0", "EPL-1.0"},
+        {"Eclipse Public License - v 2.0", "EPL-2.0"},
+        {"Licensed under the EUPL V.1.1", "EUPL-1.1"},
+        {"EUROPEAN UNION PUBLIC LICENCE v. 1.2", "EUPL-1.2"},
+        {"GNU Free Documentation License", "GFDL-1.3"},
+        {"the Free Software Foundation; either version 2 of the License, or", "GPLv2"},
+        {"\"This License\" refers to version 3 of the GNU General Public License.", "GPLv3"},
+        {"ISC License", "ISC"},
+        {"as the successor of the GNU Library Public License, version 2, hence", "LGPLv2.1"},
+        {"As used herein, \"this License\" refers to version 3 of the GNU Lesser", "LGPLv3"},
+        {"The LaTeX Project Public License", "LPPL-1.3c"},
+        {"MIT No Attribution", "MIT-0"},
+        {"MIT License", "MIT"},
+        {"Mozilla Public License Version 2.0", "MPL-2.0"},
+        {"Microsoft Public License (Ms-PL)", "MS-PL"},
+        {"Microsoft Reciprocal License (Ms-RL)", "MS-RL"},
+        {"You may obtain a copy of Mulan PSL v2 at:", "MulanPSL-2.0"},
+        {"University of Illinois/NCSA Open Source License", "NCSA"},
+        {"ODC Open Database License (ODbL)", "ODbL-1.0"},
+        {"SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007", "OFL-1.1"},
+        {"Open Software License (\"OSL\") v. 3.0", "OSL-3.0"},
+        {"PostgreSQL License", "PostgreSQL"},
+        {"This is free and unencumbered software released into the public domain.", "Unlicense"},
+        {"The Universal Permissive License (UPL), Version 1.0", "UPL-1.0"},
+        {"VIM LICENSE", "Vim"},
+        {"DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE", "WTFPL"},
+        {"zlib License", "Zlib"}
+    };
     int _plaCurrentPage = 0;
     int _pltCurrentPage = 0;
     int _plmCurrentPage = 0;
@@ -98,12 +151,6 @@ public class AssetLibPanel : Panel
         lastConfigureRequest = DateTime.Now - TimeSpan.FromHours(3);
         lastSearchRequest = DateTime.Now - TimeSpan.FromMinutes(6);
         GetParent<TabContainer>().Connect("tab_changed", this, "OnPageChanged");
-        _mirrorSite.Clear();
-        foreach (Dictionary<string, string> mirror in CentralStore.Settings.AssetMirrors) {
-            var indx = _mirrorSite.GetItemCount();
-            _mirrorSite.AddItem(mirror["name"]);
-            _mirrorSite.SetItemMetadata(indx, mirror["url"]);
-        }
     }
 
     [SignalHandler("pressed", nameof(_import))]
@@ -112,18 +159,18 @@ public class AssetLibPanel : Panel
         AppDialogs.ImportFileDialog.Connect("popup_hide", this, "OnImportClosed", null, (uint)ConnectFlags.Oneshot);
         var result = await AppDialogs.YesNoCancelDialog.ShowDialog(Tr("Import Asset"),
             Tr("What type of asset would you like to import?"),
-            Tr("Template"), Tr("Addon"));
+            Tr("Addon"), Tr("Template"));
         if (result == YesNoCancelDialog.ActionResult.FirstAction) {
-            AppDialogs.ImportFileDialog.Filters = new string[] {"project.godot", "engine.cfg", "*.zip"};
-            AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnTemplateImport", null, (uint)ConnectFlags.Oneshot);
-        } else if (result == YesNoCancelDialog.ActionResult.SecondAction) {
             AppDialogs.ImportFileDialog.Filters = new string[] {"plugin.cfg", "*.zip"};
             AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnPluginImport", null, (uint)ConnectFlags.Oneshot);
+        } else if (result == YesNoCancelDialog.ActionResult.SecondAction) {
+            AppDialogs.ImportFileDialog.Filters = new string[] {"engine.cfg", "project.godot", "*.zip"};
+            AppDialogs.ImportFileDialog.Connect("file_selected", this, "OnTemplateImport", null, (uint)ConnectFlags.Oneshot);
         } else {
             return;
         }
         AppDialogs.ImportFileDialog.CurrentFile = "";
-        AppDialogs.ImportFileDialog.CurrentPath = "";
+        AppDialogs.ImportFileDialog.CurrentPath = (CentralStore.Settings.ProjectPath + "/").NormalizePath();
         AppDialogs.ImportFileDialog.PopupCentered();
     }
 
@@ -136,30 +183,25 @@ public class AssetLibPanel : Panel
     }
 
     void OnPluginImport(string filepath) {
-        if (filepath.EndsWith(".cfg")) {  // Plugin Directory Selected
+        if (filepath.EndsWith("plugin.cfg")) {
             PluginDirectoryImport(filepath);
-        } else if (filepath.EndsWith(".zip")) { // Zip File Selected
+        } else if (filepath.EndsWith(".zip")) {
             AssetZipImport(filepath, true);
         } else {
-            AppDialogs.MessageDialog.ShowMessage(Tr("Import Plugin"), 
-                string.Format(Tr("Unable to use {0} to import the plugin."),filepath));
+            AppDialogs.MessageDialog.ShowMessage(Tr("Error"), 
+                string.Format(Tr("{0} is not a valid plugin file."), filepath.GetFile()));
         }
     }
 
     void OnTemplateImport(string filepath)
     {
-        if (filepath.EndsWith("engine.cfg") || filepath.EndsWith("project.godot"))
-        {
+        if (filepath.EndsWith("engine.cfg") || filepath.EndsWith("project.godot")) {
             TemplateDirectoryImport(filepath);
-        }
-        else if (filepath.EndsWith(".zip"))
-        {
+        } else if (filepath.EndsWith(".zip")) {
             AssetZipImport(filepath, false);
-        }
-        else
-        {
-            AppDialogs.MessageDialog.ShowMessage(Tr("Import Template"),
-                string.Format(Tr("Unable to use {0} to import the template."), filepath));
+        } else {
+            AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
+                string.Format(Tr("{0} is not a valid project file."), filepath.GetFile()));
         }
     }
 
@@ -168,6 +210,11 @@ public class AssetLibPanel : Panel
     {
         _supportPopup.SetItemChecked(id, !_supportPopup.IsItemChecked(id));
         await UpdatePaginatedListing(_addonsBtn.Pressed ? _plAddons : _plTemplates);
+    }
+
+    [SignalHandler("pressed", nameof(_visitWebsite))]
+    void OnVisitWebsitePressed() {
+        OS.ShellOpen("https://godotengine.org/asset-library");
     }
 
     [SignalHandler("pressed", nameof(_support))]
@@ -285,35 +332,31 @@ public class AssetLibPanel : Panel
 		}
 	}
 
-    [SignalHandler("item_selected", nameof(_mirrorSite))]
-    async void OnMirrorSiteSelected(int indx) {
-        await Configure(_templatesBtn.Pressed);
-        if (_category.GetItemCount() == 1)
-            return;
-        
-        await UpdatePaginatedListing(_addonsBtn.Pressed ? _plAddons : _plTemplates);
-    }
-
-    AssetLib.Asset FinalizeVariables(AssetLib.Asset asset, string filepath) {
-		asset.AssetId = $"local-{CentralStore.Settings.LocalAddonCount}";
-        asset.AuthorId = "-1";
+    void FinalizeAssetInfo(ref AssetLib.Asset asset, string filepath) {
+        string baseDir = filepath.GetBaseDir();
+		asset.AssetId = $"local-{Guid.NewGuid().ToString()}";
         asset.Version = "-1";
-        asset.Category = "Local";
-        asset.CategoryId = "-3";
-        asset.GodotVersion = "vx.x.x";
-        asset.Rating = "";
-        asset.Cost = "";
-        asset.SupportLevel = "";
-        asset.DownloadProvider = "local";
-        asset.DownloadCommit = "";
-        asset.BrowseUrl = $"file://{filepath.GetBaseDir()}";
+        asset.Cost = "None";
+        asset.BrowseUrl = $"file://{baseDir}";
         asset.IssuesUrl = "";
-        asset.Searchable = "";
         asset.ModifyDate = DateTime.UtcNow.ToString();
         asset.DownloadUrl = $"file://{filepath}";
         asset.Previews = new Array<AssetLib.Preview>();
-        asset.DownloadHash = "";
-		return asset;
+        if (!filepath.EndsWith(".zip")) {
+            File file = new File();
+            foreach (string ext in new string[] {"", ".txt", ".md", ".rst"}) {
+                if (file.Open(baseDir.Join("LICENSE" + ext), File.ModeFlags.Read) == Error.Ok) {
+                    foreach (string key in localLicenses.Keys) {
+                        if (file.GetAsText().Find(key) != -1) {
+                            asset.Cost = localLicenses[key];
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            file.Close();
+        }
 	}
 
     AssetLib.Asset CreateAssetDirectory(string filepath, bool is_plugin) {
@@ -322,23 +365,27 @@ public class AssetLibPanel : Panel
             ConfigFile cfg = new ConfigFile();
             cfg.Load(filepath);
             asset.Type = "addon";
-            asset.Title = cfg.GetValue("plugin", "name") as string;
-            asset.Author = cfg.GetValue("plugin", "author") as string;
-            asset.VersionString = cfg.GetValue("plugin", "version") as string;
+            asset.Title = cfg.GetValue("plugin", "name", filepath.GetBaseDir().BaseName()) as string;
+            asset.Author = cfg.GetValue("plugin", "author", "Unknown") as string;
+            asset.VersionString = cfg.GetValue("plugin", "version", "Unknown") as string;
+            asset.Category = "Misc";
+            asset.GodotVersion = "2.1+";
             asset.Description = cfg.GetValue("plugin", "description") as string;
             asset.IconUrl = MainWindow._plTextures["DefaultIconV3"].ResourcePath;
         } else {
             ProjectConfig pc = new ProjectConfig(filepath);
-			bool isOldGD = filepath.EndsWith("engine.cfg");
+			bool isOldPrj = filepath.EndsWith("engine.cfg");
             pc.Load();
             asset.Type = "project";
-            asset.Title = pc.GetValue("application", isOldGD ? "name" : "config/name");
-            asset.Author = "Template Importer";
-            asset.VersionString = "vx.x.x";
-            asset.Description = pc.GetValue("application", isOldGD ? Tr("No Description") : "config/description", Tr("No Description"));
-            asset.IconUrl = "zip+" + pc.GetValue("application", isOldGD ? "icon" : "config/icon");
+            asset.Title = pc.GetValue("application", isOldPrj ? "name" : "config/name");
+            asset.Author = "Unknown";
+            asset.VersionString = "Unknown";
+            asset.Category = "Projects";
+            asset.GodotVersion = isOldPrj ? "1.x-2.x" : "3.x+";
+            asset.Description = isOldPrj ? "" : pc.GetValue("application", "config/description");
+            asset.IconUrl = "zip+" + pc.GetValue("application", isOldPrj ? "icon" : "config/icon");
         }
-        asset = FinalizeVariables(asset, filepath);
+        FinalizeAssetInfo(ref asset, filepath);
         return asset;
     }
 
@@ -347,9 +394,9 @@ public class AssetLibPanel : Panel
         if (is_plugin) {
             ConfigFile cfg = new ConfigFile();
             bool found = false;
-            
-            using (var za = ZipFile.OpenRead(filepath)) {
-                foreach (var zae in za.Entries) {
+
+            using (ZipArchive za = ZipFile.OpenRead(filepath)) {
+                foreach (ZipArchiveEntry zae in za.Entries) {
                     if (zae.FullName.EndsWith("plugin.cfg")) {
                         found = true;
                         cfg.Parse(zae.ReadFile());
@@ -362,22 +409,23 @@ public class AssetLibPanel : Panel
                 return null;
 
             asset.Type = "addon";
-            asset.Title = cfg.GetValue("plugin", "name") as string;
-            asset.Author = cfg.GetValue("plugin", "author") as string;
-            asset.VersionString = cfg.GetValue("plugin", "version") as string;
+            asset.Title = cfg.GetValue("plugin", "name", filepath.GetFile().BaseName()) as string;
+            asset.Author = cfg.GetValue("plugin", "author", "Unknown") as string;
+            asset.VersionString = cfg.GetValue("plugin", "version", "Unknown") as string;
+            asset.Category = "Misc";
+            asset.GodotVersion = "2.1+";
             asset.Description = cfg.GetValue("plugin", "description") as string;
             asset.IconUrl = MainWindow._plTextures["DefaultIconV3"].ResourcePath;
         } else {
             ProjectConfig pc = new ProjectConfig();
             bool found = false;
-			bool isOldGD = false;
+			bool isOldPrj = false;
 
-            using (var za = ZipFile.OpenRead(filepath)) {
-                foreach (var zae in za.Entries) {
-                    if (zae.FullName.EndsWith("project.godot") || zae.FullName.EndsWith("engine.cfg")) {
+            using (ZipArchive za = ZipFile.OpenRead(filepath)) {
+                foreach (ZipArchiveEntry zae in za.Entries) {
+                    if (!zae.FullName.EndsWith("/") && (zae.Name == "engine.cfg" || zae.Name == "project.godot") && pc.LoadBuffer(zae.ReadFile()) == Error.Ok) {
                         found = true;
-						isOldGD = zae.FullName.EndsWith("engine.cfg");
-                        pc.LoadBuffer(zae.ReadFile());
+						isOldPrj = (zae.Name == "engine.cfg");
                         break;
                     }
                 }
@@ -387,32 +435,32 @@ public class AssetLibPanel : Panel
                 return null;
 
 			asset.Type = "project";
-            asset.Title = pc.GetValue("application", isOldGD ? "name" : "config/name");
-            asset.Author = "Asset Importer";
-            asset.VersionString = "vx.x.x";
-            asset.Description = pc.GetValue("application", isOldGD ? Tr("No Description") : "config/description", Tr("No Description"));
-            asset.IconUrl = "zip+" + pc.GetValue("application", isOldGD ? "icon" : "config/icon");
+            asset.Title = pc.GetValue("application", isOldPrj ? "name" : "config/name");
+            asset.Author = "Unknown";
+            asset.VersionString = "Unknown";
+            asset.Category = "Projects";
+            asset.GodotVersion = isOldPrj ? "1.x-2.x" : "3.x+";
+            asset.Description = isOldPrj ? "" : pc.GetValue("application", "config/description");
+            asset.IconUrl = "zip+" + pc.GetValue("application", isOldPrj ? "icon" : "config/icon");
         }
-        asset = FinalizeVariables(asset, filepath);
+        FinalizeAssetInfo(ref asset, filepath);
         return asset;
     }
 
     async void PluginDirectoryImport(string filepath) {
-        // "E:\Projects\Godot\EditorPlugins\addons\data_editor\plugin.cfg"
-        string addonPath = filepath.GetBaseDir().NormalizePath();
-        string addonName = addonPath.GetFile();
-        // "E:\Projects\Godot\EditorPlugins\addons\data_editor"
-        string zipFile = $"{CentralStore.Settings.CachePath}/downloads/assets/local-{CentralStore.Settings.LocalAddonCount}-{addonName}.zip";
-        using(var fh = new FileStream(zipFile, FileMode.Create)) {
+        string pluginPath = filepath.GetBaseDir().NormalizePath();
+        string pluginName = pluginPath.GetFile();
+        string zipName = $"addon-local-{pluginName}.zip".NormalizeFileName();
+        string zipFile = $"{CentralStore.Settings.CachePath}/downloads/{zipName}";
+        using (var fh = new FileStream(zipFile, FileMode.Create)) {
             using (var afh = new ZipArchive(fh, ZipArchiveMode.Create)) {
-
-                foreach (string entry in Directory.EnumerateFileSystemEntries(addonPath,"*",System.IO.SearchOption.AllDirectories)) {
+                foreach (string entry in Directory.EnumerateFileSystemEntries(pluginPath, "*", System.IO.SearchOption.AllDirectories)) {
                     if (entry == "." || entry == "..")
                         continue;
                     if (Directory.Exists(entry))
                         continue;
-                    
-                    var zipPath = $"addons/{addonName}".Join(entry.Substring(addonPath.Length+1));
+
+                    var zipPath = $"addons/{pluginName}".Join(entry.Substring(pluginPath.Length+1));
                     afh.CreateEntryFromFile(entry, zipPath);
                 }
             }
@@ -424,26 +472,30 @@ public class AssetLibPanel : Panel
         while (AppDialogs.AddonInstaller.Visible)
             await this.IdleFrame();
         CentralStore.Plugins.Add(plgn);
-        CentralStore.Settings.LocalAddonCount++;
         CentralStore.Instance.SaveDatabase();
+        UpdateAssetListing();
+        AppDialogs.MessageDialog.ShowMessage(Tr("Asset Added"), 
+			string.Format(Tr("{0} has been imported. You can find it in the Downloaded Addons tab."), pluginName.BaseName()));
     }
 
     void TemplateDirectoryImport(string filepath) {
         string templatePath = filepath.GetBaseDir().NormalizePath();
         string templateName = templatePath.GetFile();
-        string zipFile = $"{CentralStore.Settings.CachePath}/downloads/assets/local-{CentralStore.Settings.LocalAddonCount}-{templateName}.zip";
-        using(var fh = new FileStream(zipFile, FileMode.Create)) {
-            using(var afh = new ZipArchive(fh, ZipArchiveMode.Create)) {
-                foreach (string entry in Directory.EnumerateFileSystemEntries(templatePath, "", System.IO.SearchOption.AllDirectories)) {
+        string zipName = $"project-local-{templateName}.zip".NormalizeFileName();
+        string zipFile = $"{CentralStore.Settings.CachePath}/downloads/{zipName}";
+        using (var fh = new FileStream(zipFile, FileMode.Create)) {
+            using (var afh = new ZipArchive(fh, ZipArchiveMode.Create)) {
+                foreach (string entry in Directory.EnumerateFileSystemEntries(templatePath, "*", System.IO.SearchOption.AllDirectories)) {
+                    GD.Print(entry.GetFile());
                     if (entry == "." || entry == "..")
                         continue;
                     if (entry.EndsWith(".import"))
                         continue;
                     if (Directory.Exists(entry))
                         continue;
-                    
+
                     var zipPath = entry.Substring(templatePath.Length+1);
-                    afh.CreateEntryFromFile(entry, zipPath);
+                    afh.CreateEntryFromFile(entry, "zip/" + zipPath);
                 }
             }
         }
@@ -451,14 +503,16 @@ public class AssetLibPanel : Panel
         prj.Asset = CreateAssetDirectory(filepath, false);
         prj.Location = zipFile;
         CentralStore.Templates.Add(prj);
-        CentralStore.Settings.LocalAddonCount++;
         CentralStore.Instance.SaveDatabase();
+        UpdateAssetListing();
+        AppDialogs.MessageDialog.ShowMessage(Tr("Asset Added"), 
+			string.Format(Tr("{0} has been imported. You can find it in the Downloaded Templates tab."), templateName.BaseName()));
     }
 
     async void AssetZipImport(string filepath, bool is_plugin) {
         string zipFile = filepath.NormalizePath();
-        string zipName = zipFile.GetFile().BaseName();
-        string newZipFile = $"{CentralStore.Settings.CachePath}/downloads/assets/local-{CentralStore.Settings.LocalAddonCount}-{zipName}.zip";
+        string zipName = $"{(is_plugin ? "addon" : "project")}-local-{zipFile.GetFile().BaseName()}.zip".NormalizeFileName();
+        string newZipFile = $"{CentralStore.Settings.CachePath}/downloads/{zipName}";
         SFile.Copy(zipFile, newZipFile);
         AssetLib.Asset asset = CreateAssetZip(filepath, is_plugin);
         if (is_plugin) {
@@ -475,14 +529,14 @@ public class AssetLibPanel : Panel
             prj.Location = newZipFile;
             CentralStore.Templates.Add(prj);
         }
-        CentralStore.Settings.LocalAddonCount++;
         CentralStore.Instance.SaveDatabase();
+        UpdateAssetListing();
+        AppDialogs.MessageDialog.ShowMessage(Tr("Asset Added"), 
+			string.Format(Tr("{0} has been imported. You can find it in the Downloaded {1} tab."), asset.Title, is_plugin ? "Addons" : "Templates"));
     }
 
 	private async Task Configure(bool projectsOnly)
 	{
-        string url = (string)_mirrorSite.GetItemMetadata(_mirrorSite.Selected);
-
 		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Assets"));
 		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching asset information from Godot Asset Library..."));
 		AppDialogs.BusyDialog.ShowDialog();
@@ -497,14 +551,14 @@ public class AssetLibPanel : Panel
 		AssetLib.AssetLib.Instance.Disconnect("chunk_received", this, "OnChunkReceived");
 
 		_category.Clear();
-        _category.AddItem("All", 0);
+        _category.AddItem("Any", 0);
 		AssetLib.ConfigureResult configureResult = task.Result;
 
         if (configureResult == null) {
             PaginatedListing pl = _addonsBtn.Pressed ? _plAddons : _plTemplates;
             pl.ClearResults();
             AppDialogs.BusyDialog.HideDialog();
-            AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("Cannot connect to Godot Asset Library."));
+            AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("Unable to connect to Godot Asset Library."));
             return;
         }
 
@@ -536,6 +590,7 @@ public class AssetLibPanel : Panel
 
 	private async Task UpdatePaginatedListing(PaginatedListing pl)
 	{
+        GetTree().Root.GetNode<MainWindow>("MainWindow").RemoveMissingAssets();
         if (pl == _plmAddons || pl == _plmTemplates) {
             pl.ClearResults();
             if (pl == _plmAddons)
@@ -551,7 +606,6 @@ public class AssetLibPanel : Panel
             int sortBy = _sortBy.Selected;
             int categoryId = _category.GetSelectedId();
             string filter = _searchField.Text;
-            string url = (string)_mirrorSite.GetItemMetadata(_mirrorSite.Selected);
 
             Task<AssetLib.QueryResult> stask = AssetLib.AssetLib.Instance.Search(url, 
                 projectsOnly ? _pltCurrentPage : _plaCurrentPage,
@@ -562,8 +616,7 @@ public class AssetLibPanel : Panel
             if (stask.Result == null) {
                 pl.ClearResults();
                 AppDialogs.BusyDialog.HideDialog();
-                AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"),
-                    string.Format(Tr("Unable to connect to {0}."),url));
+                AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("Unable to connect to Godot Asset Library."));
                 return;
             }
 
@@ -573,9 +626,11 @@ public class AssetLibPanel : Panel
         }
 	}
 
-    public async void UpdateManagedLists()
+    public async void UpdateAssetListing()
     {
-        await UpdatePaginatedListing(_plmAddons);
-        await UpdatePaginatedListing(_plmTemplates);
+        if (_mAddonsBtn.Pressed)
+            await UpdatePaginatedListing(_plmAddons);
+        else
+            await UpdatePaginatedListing(_plmTemplates);
     }
 }

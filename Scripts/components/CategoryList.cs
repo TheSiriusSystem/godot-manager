@@ -148,7 +148,7 @@ public class CategoryList : VBoxContainer
 			return;
 		if (!iemb.Pressed)
 			return;
-		if ((ButtonList)iemb.ButtonIndex != ButtonList.Left)
+		if (iemb.ButtonIndex != (int)ButtonList.Left)
 			return;
 		
 		_toggleIcon.FlipV = !_toggleIcon.FlipV;
@@ -166,7 +166,7 @@ public class CategoryList : VBoxContainer
 			return;
 		if (!iemb.Pressed)
 			return;
-		if ((ButtonList)iemb.ButtonIndex != ButtonList.Left)
+		if (iemb.ButtonIndex != (int)ButtonList.Left)
 			return;
 
 		Pinned = !Pinned;

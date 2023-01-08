@@ -65,7 +65,7 @@ public class EditCustomGodot : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_EditBtn))]
 	async Task OnEditPressed() {
-		if (_Tag.Text == "" || _Location.Text == "") {
+		if (string.IsNullOrEmpty(_Tag.Text) || string.IsNullOrEmpty(_Location.Text)) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
 			Tr("You need to provide a tag and a location for this editor version."));
 			return;

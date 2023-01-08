@@ -194,7 +194,7 @@ public class NewsPanel : Panel
 			{
 				if (err != Error.FileEof)
 				{
-					GD.PrintErr($"Error reading XML. Error Code: {error}");
+					GD.PrintErr($"Error reading XML contents. Error Code: {error}");
 				}
 				break;
 			}

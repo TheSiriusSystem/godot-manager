@@ -1,80 +1,68 @@
 using Godot;
 using Newtonsoft.Json;
 using System.Linq;
+using Environment = System.Environment;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class GithubVersion : Object
 {
 	[JsonProperty] public string Name;	// Github.Release.Name
-	[JsonProperty] public string Page;	// Github.Release.HtmlUrl
-	[JsonProperty] public string Notes; // Github.Release.Body
-	[JsonProperty] public string Author; // Github.Release.Author.Login
-	[JsonProperty] public string Tarball; // Github.Release.TarballUrl
-	[JsonProperty] public string Zip; // Github.Release.ZipUrl
 	[JsonProperty] public VersionUrls Standard; // See VersionUrls
 	[JsonProperty] public VersionUrls Mono; // See VersionUrls
 
 	public string PlatformDownloadURL {
 		get {
-			switch (Platform.OperatingSystem) {
-				case "Windows":
-				case "UWP (Windows 10)":
-					return (Platform.Bits == "32") ? Standard.Win32 : Standard.Win64;
-				case "Linux (or BSD)":
-					return (Platform.Bits == "32") ? Standard.Linux32 : Standard.Linux64;
-				case "macOS":
-					return Standard.OSX;
-				default:
-					return "";
-			}
+#if GODOT_WINDOWS || GODOT_UWP
+			return !Environment.Is64BitProcess ? Standard.Win32 : Standard.Win64;
+#elif GODOT_LINUXBSD || GODOT_X11
+			return !Environment.Is64BitProcess ? Standard.Linux32 : Standard.Linux64;
+#elif GODOT_MACOS || GODOT_OSX
+			return Standard.OSX;
+#else
+			return "";
+#endif
 		}
 	}
 
 	public string PlatformMonoDownloadURL {
 		get {
-			switch (Platform.OperatingSystem) {
-				case "Windows":
-				case "UWP (Windows 10)":
-					return (Platform.Bits == "32") ? Mono.Win32 : Mono.Win64;
-				case "Linux (or BSD)":
-					return (Platform.Bits == "32") ? Mono.Linux32 : Mono.Linux64;
-				case "macOS":
-					return Mono.OSX;
-				default:
-					return "";
-			}
+#if GODOT_WINDOWS || GODOT_UWP
+			return !Environment.Is64BitProcess ? Mono.Win32 : Mono.Win64;
+#elif GODOT_LINUXBSD || GODOT_X11
+			return !Environment.Is64BitProcess ? Mono.Linux32 : Mono.Linux64;
+#elif GODOT_MACOS || GODOT_OSX
+			return Mono.OSX;
+#else
+			return "";
+#endif
 		}
 	}
 
 	public int PlatformDownloadSize {
 		get {
-			switch (Platform.OperatingSystem) {
-				case "Windows":
-				case "UWP (Windows 10)":
-					return (Platform.Bits == "32") ? Standard.Win32_Size : Standard.Win64_Size;
-				case "Linux (or BSD)":
-					return (Platform.Bits == "32") ? Standard.Linux32_Size : Standard.Linux64_Size;
-				case "macOS":
-					return Standard.OSX_Size;
-				default:
-					return -1;
-			}
+#if GODOT_WINDOWS || GODOT_UWP
+			return !Environment.Is64BitProcess ? Standard.Win32_Size : Standard.Win64_Size;
+#elif GODOT_LINUXBSD || GODOT_X11
+			return !Environment.Is64BitProcess ? Standard.Linux32_Size : Standard.Linux64_Size;
+#elif GODOT_MACOS || GODOT_OSX
+			return Standard.OSX_Size;
+#else
+			return -1;
+#endif
 		}
 	}
 
 	public int PlatformMonoDownloadSize {
 		get {
-			switch (Platform.OperatingSystem) {
-				case "Windows":
-				case "UWP (Windows 10)":
-					return (Platform.Bits == "32") ? Mono.Win32_Size : Mono.Win64_Size;
-				case "Linux (or BSD)":
-					return (Platform.Bits == "32") ? Mono.Linux32_Size : Mono.Linux64_Size;
-				case "macOS":
-					return Mono.OSX_Size;
-				default:
-					return -1;
-			}
+#if GODOT_WINDOWS || GODOT_UWP
+			return !Environment.Is64BitProcess ? Mono.Win32_Size : Mono.Win64_Size;
+#elif GODOT_LINUXBSD || GODOT_X11
+			return !Environment.Is64BitProcess ? Mono.Linux32_Size : Mono.Linux64_Size;
+#elif GODOT_MACOS || GODOT_OSX
+			return Mono.OSX_Size;
+#else
+			return -1;
+#endif
 		}
 	}
 
@@ -84,7 +72,6 @@ public class GithubVersion : Object
 			"Win32", "Win64", "Linux32", "Linux64", "OSX",
 			"Templates", "Headless", "Server"
 		};
-		//Godot_v3.4-stable_x11.32.zip, Godot_v3.4-stable_x11.64.zip
 		string[] standard_match = new string[] {
 			"win32", "win64", "x11.32", "x11.64", "osx", 
 			"export_templates.tpz", "linux_headless.64", "linux_server.64"
@@ -102,7 +89,7 @@ public class GithubVersion : Object
 		VersionUrls mono = new VersionUrls();
 		for (int i = 0; i < standard_match.Length; i++) {
 			var t = from asset in release.Assets
-					where asset.Name.FindN(standard_match[i]) > -1 && asset.Name.FindN(standard_not_match[i]) == -1
+					where asset.Name.FindN(standard_match[i]) != -1 && asset.Name.FindN(standard_not_match[i]) == -1
 					select asset;
 			if (t.FirstOrDefault() is Github.Asset ghAsset) {
 				standard[fields[i]] = ghAsset.BrowserDownloadUrl;
@@ -124,11 +111,9 @@ public class GithubVersion : Object
 	public static GithubVersion FromAPI(Github.Release release) {
 		GithubVersion api = new GithubVersion();
 		api.Name = release.Name;
-		api.Page = release.HtmlUrl;
-		api.Notes = release.Body;
-		api.Author = release.Author.Login;
-		api.Tarball = release.TarballUrl;
-		api.Zip = release.ZipballUrl;
+		foreach (string str in new string[] {"_stable", "-stable"}) {
+			api.Name = api.Name.ReplaceN(str, "");
+		}
 		api.GatherUrls(release);
 		return api;
 	}

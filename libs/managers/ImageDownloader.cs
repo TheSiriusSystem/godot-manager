@@ -34,7 +34,7 @@ public class ImageDownloader : Object {
 		while (!cres.IsCompleted)
 			await this.IdleFrame();
 		
-		if (!client.SuccessConnect(cres.Result, false))
+		if (!client.SuccessConnect(cres.Result))
 			return false;
 		
 		var tresult = client.MakeRequest(uri.PathAndQuery);
@@ -64,7 +64,7 @@ public class ImageDownloader : Object {
 			fh.StoreBuffer(result.BodyRaw);
 			fh.Close();
 		} else {
-			GD.Print($"Failed to open file {sOutPath}, Error: {err}");
+			GD.PrintErr($"Failed to write to file \"{sOutPath.GetFile()}\". Error Code: {err}");
 			return false;
 		}
 

@@ -78,7 +78,7 @@ public class ActionButtons : PanelContainer
 	}
 
 	public void Icon_GuiInput(InputEvent inputEvent, ColorRect bg, int index) {
-		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && (ButtonList)iemb.ButtonIndex == ButtonList.Left)
+		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left)
 		{
 			EmitSignal("clicked", index);
 		}

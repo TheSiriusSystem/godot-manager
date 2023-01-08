@@ -122,8 +122,8 @@ public class ProjectIconEntry : ColorRect
 
         set {
             sGodotVersion = value;
-            GodotVersion gv = CentralStore.Instance.FindVersion(value);
             if (_godotVersion != null) {
+                GodotVersion gv = CentralStore.Instance.FindVersion(value);
                 if (gv != null) {
                     _godotVersion.Text = gv.GetDisplayName();
                     Vector2 size = MainWindow._plFonts["DroidSans14"].GetStringSize(gv.GetDisplayName());

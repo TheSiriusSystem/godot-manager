@@ -54,7 +54,7 @@ public class AddCustomGodot : ReferenceRect
 
 	void OnFileSelected(string file) {
 		_Tag.Text = file.GetFile();
-		foreach (string str in new string[] {"godot_", "_console", "_win32", "_win64", "_stable", "-stable", file.GetExtension()}) {
+		foreach (string str in new string[] {"godot_v", "_console", "_win32", "_win64", "_stable", "-stable", file.GetExtension()}) {
 			_Tag.Text = _Tag.Text.ReplaceN(str, "");
 		}
 		_Location.Text = file;
@@ -67,7 +67,7 @@ public class AddCustomGodot : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_AddBtn))]
 	async Task OnAddPressed() {
-		if (_Tag.Text == "" || _Location.Text == "") {
+		if (string.IsNullOrEmpty(_Tag.Text) || string.IsNullOrEmpty(_Location.Text)) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
 			Tr("You need to provide a tag and a location for this editor version."));
 			return;
@@ -80,6 +80,7 @@ public class AddCustomGodot : ReferenceRect
 		}
 
 		bool isExtensionValid = false;
+		string fileName = _Location.Text.GetFile();
 		foreach (string extension in MainWindow._customGDExtensions) {
 			if (_Location.Text.GetExtension() == extension) {
 				isExtensionValid = true;
@@ -88,7 +89,7 @@ public class AddCustomGodot : ReferenceRect
 		}
 		if (!isExtensionValid) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
-			Tr("The file's extension is invalid."));
+			string.Format(Tr("{0} is not a valid executable file."), fileName));
 			return;
 		}
 

@@ -21,7 +21,7 @@ public class AssetLibEntry : ColorRect
 	[NodePath("hc/vc/hc/License")]
 	Label _license = null;
 
-	[NodePath("hc/vc/Author")]
+	[NodePath("hc/vc/hc2/Author")]
 	Label _author = null;
 
 	[NodePath("hc2/Downloaded")]
@@ -65,7 +65,7 @@ public class AssetLibEntry : ColorRect
 		set {
 			sCategory = value;
 			if (_category != null)
-				_category.Text = Tr("Category: ") + value;
+				_category.Text = value;
 		}
 	}
 
@@ -74,7 +74,7 @@ public class AssetLibEntry : ColorRect
 		set {
 			sLicense = value;
 			if (_license != null)
-				_license.Text = Tr("License: ") + value;
+				_license.Text = value;
 		}
 	}
 
@@ -83,7 +83,7 @@ public class AssetLibEntry : ColorRect
 		set {
 			sAuthor = value;
 			if (_author != null)
-				_author.Text = Tr("Author: ") + value;
+				_author.Text = value;
 		}
 	}
 
@@ -133,45 +133,33 @@ public class AssetLibEntry : ColorRect
 
 	[SignalHandler("gui_input")]
 	async void OnGuiInput(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseButton iembEvent) {
-			if (iembEvent.Pressed && (ButtonList)iembEvent.ButtonIndex == ButtonList.Left)
-			{
-				AssetLib.Asset asset = null;
-				if (!AssetId.StartsWith("local-")) {
-					AppDialogs.BusyDialog.UpdateHeader(Tr("Loading Asset"));
-					AppDialogs.BusyDialog.UpdateByline(Tr("Fetching asset information..."));
-					AppDialogs.BusyDialog.ShowDialog();
-					Task<AssetLib.Asset> res = AssetLib.AssetLib.Instance.GetAsset(AssetId);
-					while (!res.IsCompleted)
-						await this.IdleFrame();
-					AppDialogs.BusyDialog.Visible = false;
-					AssetId = res.Result.AssetId;
-					asset = res.Result;
-				} else {
-					var res = CentralStore.Instance.GetPluginId(AssetId);
-					if (res == null) {
-						var tres = CentralStore.Instance.GetTemplateId(AssetId);
-						if (tres == null) {
-							AppDialogs.MessageDialog.ShowMessage(Tr("Error"), 
-								string.Format(Tr("Failed to fetch asset information for {0}."), AssetId));
-							return;
-						} else {
-							asset = tres.Asset;
-						}
-					} else {
-						asset = res.Asset;
-					}
-				}
-				if (asset == null) {
-					AppDialogs.MessageDialog.ShowMessage(Tr("Error"), 
-						string.Format(Tr("Failed to fetch asset information for {0}."), AssetId));
-					return;
-				}
-				AppDialogs.AssetLibPreview.ShowDialog(asset);
-				AppDialogs.AssetLibPreview.Connect("installed_addon", this, nameof(OnInstalledAddon));
-				AppDialogs.AssetLibPreview.Connect("preview_closed", this, nameof(OnPreviewClosed));
-				AppDialogs.AssetLibPreview.Connect("uninstalled_addon", this, nameof(OnUninstallAddon));
+		if (inputEvent is InputEventMouseButton iembEvent && iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
+			AssetLib.Asset asset = null;
+			if (!AssetId.StartsWith("local-")) {
+				AppDialogs.BusyDialog.UpdateHeader(Tr("Loading Asset"));
+				AppDialogs.BusyDialog.UpdateByline(Tr("Fetching asset information from Godot Asset Library..."));
+				AppDialogs.BusyDialog.ShowDialog();
+				Task<AssetLib.Asset> res = AssetLib.AssetLib.Instance.GetAsset(AssetId);
+				while (!res.IsCompleted)
+					await this.IdleFrame();
+				AppDialogs.BusyDialog.Visible = false;
+				AssetId = res.Result.AssetId;
+				asset = res.Result;
+			} else {
+				if (CentralStore.Instance.HasPluginId(AssetId))
+					asset = CentralStore.Instance.GetPluginId(AssetId).Asset;
+				else if (CentralStore.Instance.HasTemplateId(AssetId))
+					asset = CentralStore.Instance.GetTemplateId(AssetId).Asset;
 			}
+			if (asset == null) {
+				AppDialogs.MessageDialog.ShowMessage(Tr("Error"), 
+					string.Format(Tr("Unable to fetch asset information for {0}."), Title));
+				return;
+			}
+			AppDialogs.AssetLibPreview.ShowDialog(asset);
+			AppDialogs.AssetLibPreview.Connect("installed_addon", this, nameof(OnInstalledAddon));
+			AppDialogs.AssetLibPreview.Connect("preview_closed", this, nameof(OnPreviewClosed));
+			AppDialogs.AssetLibPreview.Connect("uninstalled_addon", this, nameof(OnUninstallAddon));
 		}
 	}
 
@@ -189,13 +177,13 @@ public class AssetLibEntry : ColorRect
 				}
 			}
 		}
-		_assetLibPanel.UpdateManagedLists();
+		_assetLibPanel.UpdateAssetListing();
 	}
 
 	void OnUninstallAddon() {
 		Downloaded = false;
 		UpdateAvailable = false;
-		_assetLibPanel.UpdateManagedLists();
+		_assetLibPanel.UpdateAssetListing();
 	}
 
 	void OnPreviewClosed() {

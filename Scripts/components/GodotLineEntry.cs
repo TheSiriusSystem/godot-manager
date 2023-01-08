@@ -4,6 +4,7 @@ using Godot.Sharp.Extras;
 using System.Linq;
 using DateTime = System.DateTime;
 using TimeSpan = System.TimeSpan;
+using Environment = System.Environment;
 
 public class GodotLineEntry : HBoxContainer
 {
@@ -30,10 +31,10 @@ public class GodotLineEntry : HBoxContainer
 	private TextureRect _icon = null;
 	[NodePath("vc/VersionTag")]
 	private Label _label = null;
-	[NodePath("vc/hc/Source")]
-	private Label _source = null;
-	[NodePath("vc/hc/Filesize")]
-	private Label _filesize = null;
+	[NodePath("vc/GodotSize")]
+	private HBoxContainer _filesize = null;
+	[NodePath("vc/GodotSize/Filesize")]
+	private Label _size = null;
 	[NodePath("SettingsShare")]
 	private TextureRect _settingsShare = null;
 	[NodePath("Linked")]
@@ -50,22 +51,23 @@ public class GodotLineEntry : HBoxContainer
 
 	[NodePath("vc/ETA")]
 	private HBoxContainer _eta = null;
-	[NodePath("vc/ETA/EtaRemaining")]
+	[NodePath("vc/ETA/HB/EtaRemaining")]
 	private Label _etaRemaining = null;
-	[NodePath("vc/ETA/DownloadSpeed")]
+	[NodePath("vc/ETA/HB2/DownloadSpeed")]
 	private Label _downloadSpeed = null;
 
-	[NodePath("vc/Location")]
-	private Label _loc = null;
+	[NodePath("vc/GodotLocation")]
+	private HBoxContainer _loc = null;
+	[NodePath("vc/GodotLocation/Location")]
+	private Label _location = null;
 
 	[NodePath("DownloadSpeedTimer")]
 	private Timer _downloadSpeedTimer = null;
 #endregion
 
 #region Private String Variables
-	private string sLabel = "Godot vx.x.x";
-	private string sSource = "Source: TuxFamily";
-	private string sFilesize = "Size: Unknown";
+	private string sLabel = "Godot x.x.x";
+	private string sFilesize = "Unknown";
 	private string sLocation = @"E:\Apps\GodotManager\versions\x.x.x";
 	private bool bDownloaded = false;
 	private bool bSettingsShare = false;
@@ -74,7 +76,6 @@ public class GodotLineEntry : HBoxContainer
 	private GodotVersion gvGodotVersion = null;
 	private GithubVersion gvGithubVersion = null;
 	private MirrorVersion gvMirrorVersion = null;
-	private CustomEngineDownload gvCustomEngine = null;
 
 	private int iLastByteCount = 0;
 	Array<double> adSpeedStack;
@@ -90,21 +91,22 @@ public class GodotLineEntry : HBoxContainer
 			if (value != null) {
 				Mono = value.IsMono;
 				Label = value.Tag;
-				Source = value.Url;
 				Location = value.GetExecutablePath();
 				File file = new File();
 				if (file.Open(Location, File.ModeFlags.Read) == Error.Ok) {
 					Filesize = Util.FormatSize(file.GetLen());
 					file.Close();
 				} else {
-					if (value.GithubVersion != null)
-						Filesize = Util.FormatSize(value.GithubVersion.PlatformDownloadSize);
-					else if (value.MirrorVersion != null)
+					if (value.GithubVersion != null) {
+						if (!value.IsMono)
+							Filesize = Util.FormatSize(value.GithubVersion.PlatformDownloadSize);
+						else
+							Filesize = Util.FormatSize(value.GithubVersion.PlatformMonoDownloadSize);
+					} else if (value.MirrorVersion != null) {
 						Filesize = Util.FormatSize(value.MirrorVersion.PlatformDownloadSize);
-					else if (value.CustomEngine != null)
-						Filesize = Util.FormatSize(value.CustomEngine.DownloadSize);
+					}
 				}
-				if (_loc != null)
+				if (_loc != null && _location != null)
 					_loc.Visible = true;
 			}
 		}
@@ -127,64 +129,36 @@ public class GodotLineEntry : HBoxContainer
 			gvGithubVersion = value;
 			if (value == null)
 				return;
-			Label = value.Name;
-			if (_loc != null)
+			if (_loc != null && _location != null)
 				_loc.Visible = false;
-			switch (Platform.OperatingSystem) {
-				case "Windows":
-				case "UWP (Windows 10)":
-					if (Mono) {
-						if (Platform.Bits == "32") {
-							Source = value.Mono.Win32;
-							Filesize = Util.FormatSize(value.Mono.Win32_Size);
-						} else if (Platform.Bits == "64") {
-							Source = value.Mono.Win64;
-							Filesize = Util.FormatSize(value.Mono.Win64_Size);                    
-						}
-					} else {
-						if (Platform.Bits == "32") {
-							Source = value.Standard.Win32;
-							Filesize = Util.FormatSize(value.Standard.Win32_Size);
-						} else if (Platform.Bits == "64") {
-							Source = value.Standard.Win64;
-							Filesize = Util.FormatSize(value.Standard.Win64_Size);                    
-						}
-					}
-					break;
-
-				case "Linux (or BSD)":
-					if (Mono) {
-						if (Platform.Bits == "32") {
-							Source = value.Mono.Linux32;
-							Filesize = Util.FormatSize(value.Mono.Linux32_Size);
-						} else if (Platform.Bits == "64") {
-							Source = value.Mono.Linux64;
-							Filesize = Util.FormatSize(value.Mono.Linux64_Size);
-						}
-					} else {
-						if (Platform.Bits == "32") {
-							Source = value.Standard.Linux32;
-							Filesize = Util.FormatSize(value.Standard.Linux32_Size);
-						} else if (Platform.Bits == "64") {
-							Source = value.Standard.Linux64;
-							Filesize = Util.FormatSize(value.Standard.Linux64_Size);
-						}
-					}
-					break;
-
-				case "macOS":
-					if (Mono) {
-						Source = value.Mono.OSX;
-						Filesize = Util.FormatSize(value.Mono.OSX_Size);
-					} else {
-						Source = value.Standard.OSX;
-						Filesize = Util.FormatSize(value.Standard.OSX_Size);
-					}
-					break;
-				
-				default:
-					break;
+#if GODOT_WINDOWS || GODOT_UWP
+			if (!Mono) {
+				Label = value.Name;
+				Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Standard.Win32_Size : value.Standard.Win64_Size);
+			} else {
+				Label = value.Name + "-mono";
+				Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Mono.Win32_Size : value.Mono.Win64_Size);
 			}
+#elif GODOT_LINUXBSD || GODOT_X11
+			if (!Mono) {
+				Label = value.Name;
+				Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Standard.Linux32_Size : value.Standard.Linux64_Size);
+			} else {
+				Label = value.Name + "-mono";
+				Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Mono.Linux32_Size : value.Mono.Linux64_Size);
+			}
+#elif GODOT_MACOS || GODOT_OSX
+			if (!Mono) {
+				Label = value.Name;
+				Filesize = Util.FormatSize(value.Standard.OSX_Size);
+			} else {
+				Label = value.Name + "-mono";
+				Filesize = Util.FormatSize(value.Mono.OSX_Size);
+			}
+#else
+			Label = value.Name;
+			Filesize = Util.FormatSize(0.0);
+#endif
 		}
 	}
 
@@ -196,44 +170,17 @@ public class GodotLineEntry : HBoxContainer
 			if (value == null)
 				return;
 			Label = value.Version;
-			if (_loc != null)
+			if (_loc != null && _location != null)
 				_loc.Visible = false;
-			Source = value.PlatformDownloadURL;
-			switch (Platform.OperatingSystem) {
-				case "Windows":
-				case "UWP (Windows 10)":
-					if (Platform.Bits == "32")
-					{
-						Filesize = Util.FormatSize(value.Win32_Size);
-					} else {
-						Filesize = Util.FormatSize(value.Win64_Size);
-					}
-					break;
-				case "Linux (or BSD)":
-					if (Platform.Bits == "32") {
-						Filesize = Util.FormatSize(value.Linux32_Size);
-					} else {
-						Filesize = Util.FormatSize(value.Linux64_Size);
-					}
-					break;
-				case "macOS":
-					Filesize = Util.FormatSize(value.OSX64_Size);
-					break;
-			}
-		}
-	}
-
-	public CustomEngineDownload CustomEngine
-	{
-		get => gvCustomEngine;
-		set
-		{
-			gvCustomEngine = value;
-			if (value == null)
-				return;
-			Label = value.TagName;
-			Source = value.Url;
-			Filesize = value.DownloadSize == 0 ? "Unknown" : Util.FormatSize(value.DownloadSize);
+#if GODOT_WINDOWS || GODOT_UWP
+			Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Win32_Size : value.Win64_Size);
+#elif GODOT_LINUXBSD || GODOT_X11
+			Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Linux32_Size : value.Linux64_Size);
+#elif GODOT_MACOS || GODOT_OSX
+			Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.OSX32_Size : value.OSX64_Size);
+#else
+			Filesize = Util.FormatSize(0.0);
+#endif
 		}
 	}
 
@@ -246,22 +193,12 @@ public class GodotLineEntry : HBoxContainer
 		}
 	}
 
-	public string Source {
-		get => sSource;
-
-		set {
-			sSource = value;
-			if (_source != null)
-				_source.Text = string.Format(Tr("Source: {0}"),value);
-		}
-	}
-
 	public string Filesize {
 		get => sFilesize;
 		set {
 			sFilesize = value;
-			if (_filesize != null)
-				_filesize.Text = string.Format(Tr("Size: {0}"),value);
+			if (_filesize != null && _size != null)
+				_size.Text = value;
 		}
 	}
 
@@ -271,9 +208,9 @@ public class GodotLineEntry : HBoxContainer
 		set
 		{
 			sLocation = value;
-			if (_loc != null) {
+			if (_loc != null && _location != null) {
 				string path = sLocation.GetBaseDir().NormalizePath();
-				_loc.Text = string.Format(Tr("Location: {0}"), path);
+				_location.Text = path;
 				_loc.Visible = true;
 			}
 		}
@@ -324,7 +261,6 @@ public class GodotLineEntry : HBoxContainer
 
 		GithubVersion = gvGithubVersion;
 		MirrorVersion = gvMirrorVersion;
-		CustomEngine = gvCustomEngine;
 		GodotVersion = gvGodotVersion;
 		SettingsShared = bSettingsShare;
 		SettingsLinked = bSettingsLinked;
@@ -353,6 +289,7 @@ public class GodotLineEntry : HBoxContainer
 	}
 
 	public void ToggleDownloadProgress(bool value) {
+		_filesize.Visible = !value;
 		_downloadProgress.Visible = value;
 		_eta.Visible = value;
 	}
@@ -362,6 +299,7 @@ public class GodotLineEntry : HBoxContainer
 		TotalSize = totalSize;
 		_progressBar.MinValue = 0;
 		_progressBar.MaxValue = totalSize;
+		_fileSize.Text = $"{Util.FormatSize(0)}/{Util.FormatSize(TotalSize)}";
 		_downloadSpeedTimer.Start();
 	}
 
@@ -399,8 +337,7 @@ public class GodotLineEntry : HBoxContainer
 	[SignalHandler("gui_input")]
 	void OnGuiInput(InputEvent inputEvent)
 	{
-		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed &&
-			(ButtonList)iemb.ButtonIndex == ButtonList.Right)
+		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Right)
 		{
 			EmitSignal("right_clicked", this);
 		}
@@ -408,19 +345,23 @@ public class GodotLineEntry : HBoxContainer
 
 	[SignalHandler("gui_input", nameof(_download))]
 	void OnDownload_GuiInput(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && (ButtonList)iemb.ButtonIndex == ButtonList.Left) {
-			if (_download.Texture == MainWindow._plTextures["DownloadIcon"])
-				EmitSignal("install_clicked", this);
-			else
+		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left) {
+			if (bDownloaded) {
 				EmitSignal("uninstall_clicked", this);
-			ToggleDownloadUninstall((_download.Texture == MainWindow._plTextures["DownloadIcon"]));
+			} else {
+				if (_download.Texture == MainWindow._plTextures["DownloadIcon"])
+					EmitSignal("install_clicked", this);
+				else
+					EmitSignal("uninstall_clicked", this);
+				ToggleDownloadUninstall(_downloadProgress.Visible);
+			}
 		}
 	}
 
 	[SignalHandler("gui_input", nameof(_linked))]
 	void OnLinked_GuiInput(InputEvent inputEvent)
 	{
-		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && (ButtonList)iemb.ButtonIndex == ButtonList.Left)
+		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left)
 		{
 			EmitSignal("link_settings_clicked", this);
 		}
@@ -429,7 +370,7 @@ public class GodotLineEntry : HBoxContainer
 	[SignalHandler("gui_input", nameof(_settingsShare))]
 	void OnSettingsShare_GuiInput(InputEvent inputEvent)
 	{
-		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && (ButtonList)iemb.ButtonIndex == ButtonList.Left)
+		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left)
 		{
 			EmitSignal("settings_shared_clicked", this);
 		}
@@ -444,12 +385,9 @@ public class GodotLineEntry : HBoxContainer
 		var speed = tb - lbc;
 		adSpeedStack.Add(speed);
 		var avgSpeed = adSpeedStack.Sum() / adSpeedStack.Count;
-		_downloadSpeed.Text = string.Format(Tr("Speed: {0}/s"),Util.FormatSize(avgSpeed));
+		_downloadSpeed.Text = $"{Util.FormatSize(avgSpeed)}/s";
 		TimeSpan elapsedTime = DateTime.Now - dtStartTime;
-		if (tb == 0)
-			return;
-		TimeSpan estTime = TimeSpan.FromSeconds( (TotalSize - tb) / ((double)tb / elapsedTime.TotalSeconds));
-		_etaRemaining.Text = Tr("ETA: ") + estTime.ToString("hh':'mm':'ss");
+		_etaRemaining.Text = elapsedTime.ToString("hh':'mm':'ss");
 		iLastByteCount = (int)_progressBar.Value;
 		mutex.Unlock();
 	}

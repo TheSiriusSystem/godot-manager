@@ -4,7 +4,7 @@
 [ext_resource path="res://Resources/Fonts/droid-regular-14.tres" type="DynamicFont" id=2]
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=3]
 [ext_resource path="res://Scripts/components/AddonLineEntry.cs" type="Script" id=4]
-[ext_resource path="res://Assets/Icons/missing_icon.svg" type="Texture" id=5]
+[ext_resource path="res://Assets/Icons/default_project_icon_v3.png" type="Texture" id=5]
 
 [node name="AddonLineEntry" type="ColorRect"]
 self_modulate = Color( 1, 1, 1, 0 )
@@ -48,7 +48,7 @@ mouse_default_cursor_shape = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 3 )
-text = "Addon Name"
+text = "My Custom Node"
 valign = 1
 clip_text = true
 
@@ -60,7 +60,7 @@ mouse_filter = 1
 mouse_default_cursor_shape = 2
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 2 )
-text = "Version: x.x.x"
+text = "Version: 1.0.0"
 align = 1
 valign = 1
 

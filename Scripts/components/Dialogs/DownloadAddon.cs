@@ -11,7 +11,10 @@ public class DownloadAddon : ReferenceRect
 {
 #region Signals
 	[Signal]
-	public delegate void download_complete(AssetLib.Asset asset, AssetProject ap, AssetPlugin apl);
+	public delegate void download_completed(AssetLib.Asset asset, AssetProject ap, AssetPlugin apl);
+
+	[Signal]
+	public delegate void download_failed(string errDesc);
 #endregion
 
 #region Node Paths
@@ -21,20 +24,11 @@ public class DownloadAddon : ReferenceRect
 	[NodePath("PC/CC/P/VB/MCContent/VB/GridContainer/FileName")]
 	Label _FileName = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/VB/GridContainer/Location")]
-	Label _Location = null;
-
-	[NodePath("PC/CC/P/VB/MCContent/VB/GridContainer/FSLabel")]
-	Label _FSLabel = null;
-
 	[NodePath("PC/CC/P/VB/MCContent/VB/GridContainer/FileSize")]
 	Label _FileSize = null;
 
 	[NodePath("PC/CC/P/VB/MCContent/VB/GridContainer/Speed")]
 	Label _Speed = null;
-
-	[NodePath("PC/CC/P/VB/MCContent/VB/GridContainer/ETALabel")]
-	Label _ETALabel = null;
 
 	[NodePath("PC/CC/P/VB/MCContent/VB/GridContainer/Eta")]
 	Label _Eta = null;
@@ -80,10 +74,12 @@ public class DownloadAddon : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_CancelButton))]
 	void OnCancelPressed() {
-		client.Cancel();
+		if (client != null)
+			client.Cancel();
+		_DownloadSpeedTimer.Stop();
+		Visible = false;
 	}
 
-	
 	void OnChunkReceived(int bytes) {
 		iTotalBytes += bytes;
 		if (iFileSize >= 0) {
@@ -102,18 +98,9 @@ public class DownloadAddon : ReferenceRect
 		adSpeedStack.Add(speed);
 		var avgSpeed = adSpeedStack.Sum() / adSpeedStack.Count;
 		_Speed.Text = $"{Util.FormatSize(avgSpeed)}/s";
-		if (iFileSize <= 0) {
-			_FileSize.Text = Util.FormatSize(tb);
-			TimeSpan elapsedTime = DateTime.Now - dtStartTime;
-			_Eta.Text = elapsedTime.ToString("hh':'mm':'ss");
-		} else {
-			_FileSize.Text = Util.FormatSize(tb) + "/" + Util.FormatSize(iFileSize);
-			TimeSpan elapsedTime = DateTime.Now - dtStartTime;
-			if (tb == 0)
-				return;
-			TimeSpan estTime = TimeSpan.FromSeconds( (iFileSize - tb) / ((double)tb / elapsedTime.TotalSeconds));
-			_Eta.Text = estTime.ToString("hh':'mm':'ss");
-		}
+		_FileSize.Text = Util.FormatSize(tb);
+		TimeSpan elapsedTime = DateTime.Now - dtStartTime;
+		_Eta.Text = elapsedTime.ToString("hh':'mm':'ss");
 		iLastByteCount = iTotalBytes;
 		mutex.Unlock();
 	}
@@ -122,7 +109,6 @@ public class DownloadAddon : ReferenceRect
 		_ProgressBar.RectRotation = 0;
 		_ProgressBar.RectPivotOffset = new Vector2(_ProgressBar.RectSize.x/2,_ProgressBar.RectSize.y/2);
 		_ProgressBar.Value = 0;
-		_ProgressBar.PercentVisible = false;
 		while (bDownloading) {
 			_IndeterminateProgress.InterpolateProperty(_ProgressBar, "value", 0, 100, 0.5f, Tween.TransitionType.Linear, Tween.EaseType.InOut);
 			_IndeterminateProgress.Start();
@@ -139,7 +125,6 @@ public class DownloadAddon : ReferenceRect
 			_IndeterminateProgress.StopAll();
 		_ProgressBar.RectRotation = 0;
 		_ProgressBar.Value = 0;
-		_ProgressBar.PercentVisible = true;
 	}
 
 	public async Task<bool> StartNetwork()
@@ -155,7 +140,8 @@ public class DownloadAddon : ReferenceRect
 
 		if (!client.SuccessConnect(cres.Result))
 		{
-			Visible = false;
+			EmitSignal("download_failed", "Unable to connect to Godot Asset Library.");
+			CleanupClient();
 			return false;
 		}
 
@@ -168,6 +154,12 @@ public class DownloadAddon : ReferenceRect
 		client.Close();
 
 		HTTPResponse result = tresult.Result;
+		if (result == null || result.Cancelled) {
+			EmitSignal("download_failed", "");
+			CleanupClient();
+			return false;
+		}
+
 		Array<int> redirect_codes = new Array<int> { 301, 302, 303, 307, 308 };
 
 		if (redirect_codes.IndexOf(result.ResponseCode) >= 0)
@@ -181,8 +173,8 @@ public class DownloadAddon : ReferenceRect
 
 		if (result.ResponseCode != 200)
 		{
+			EmitSignal("download_failed", "Unable to connect to Godot Asset Library.");
 			CleanupClient();
-			Visible = false;
 			return false;
 		}
 
@@ -194,14 +186,14 @@ public class DownloadAddon : ReferenceRect
 
 		if (!client.SuccessConnect(cres.Result))
 		{
+			EmitSignal("download_failed", "Unable to connect to Godot Asset Library.");
 			CleanupClient();
-			Visible = false;
 			return false;
 		}
 
 		// Begin Actual Network download of addon/project/demo....
 		dtStartTime = DateTime.Now;
-		_DownloadSpeedTimer.Start(1);
+		_DownloadSpeedTimer.Start();
 		tresult = client.MakeRequest(dlUri.PathAndQuery, true);
 
 		while (!tresult.IsCompleted)
@@ -211,37 +203,35 @@ public class DownloadAddon : ReferenceRect
 				break;
 		}
 
-
 		client.Close();
 		bDownloading = false;
 		if (tresult.IsCanceled)
 		{
+			EmitSignal("download_failed", "");
 			CleanupClient();
-			Visible = false;
 			return false;
 		}
 
 		result = tresult.Result;
 
-		if (result.Cancelled)
+		if (result == null || result.Cancelled)
 		{
+			EmitSignal("download_failed", "");
 			CleanupClient();
-			Visible = false;
 			return false;
 		}
 
+		string zipName = $"{Asset.Type}-{Asset.AssetId}-{Asset.Title}.zip".NormalizeFileName();
+		string sPath = $"{CentralStore.Settings.CachePath}/downloads/{zipName}";
 
-		string sPath = $"{CentralStore.Settings.CachePath}/downloads/assets/{Asset.AssetId}-{dlUri.AbsolutePath.GetFile()}";
-		if (!sPath.EndsWith(".zip"))
-			sPath += ".zip";
-		
 		File fh = new File();
 		Error err = fh.Open(sPath, File.ModeFlags.Write);
 		if (err != Error.Ok) {
-			GD.Print($"Failed to open file {sPath}, Error: {err}");
+			EmitSignal("download_failed", $"Failed to write to file \"{sPath.GetFile()}\".");
+			CleanupClient();
 			return false;
 		}
-		
+
 		fh.StoreBuffer(result.BodyRaw);
 		fh.Close();
 
@@ -270,7 +260,8 @@ public class DownloadAddon : ReferenceRect
 		}
 		CentralStore.Instance.SaveDatabase();
 
-		EmitSignal("download_complete", Asset, ap, apl);
+		EmitSignal("download_completed", Asset, ap, apl);
+		_DownloadSpeedTimer.Stop();
 
 		return true;
 	}
@@ -288,9 +279,7 @@ public class DownloadAddon : ReferenceRect
 			else
 			{
 				iFileSize = -1;
-				_FSLabel.Text = Tr("Downloaded:");
-				_FileSize.Text = "0 bytes";
-				_ETALabel.Text = Tr("Elapsed:");
+				_FileSize.Text = "0 B";
 				_Eta.Text = "00:00:00";
 				_ProgressBar.Value = 0;
 				_ProgressBar.MaxValue = 100;
@@ -303,9 +292,7 @@ public class DownloadAddon : ReferenceRect
 			iFileSize = -1;
 			_ProgressBar.Value = 0;
 			_ProgressBar.MaxValue = 100;
-			_FSLabel.Text = Tr("Downloaded:");
-			_FileSize.Text = "0 bytes";
-			_ETALabel.Text = Tr("Elapsed:");
+			_FileSize.Text = "0 B";
 			_Eta.Text = "00:00:00";
 			Task task = StartIndeterminateTween();
 		}
@@ -327,14 +314,10 @@ public class DownloadAddon : ReferenceRect
 	}
 
 	public void LoadInformation() {
-		_Title.Text = string.Format(Tr("Downloading {0}"),Asset.Type.Capitalize());
 		_FileName.Text = Asset.Title;
-		_Location.Text = Asset.DownloadProvider;
-		_FSLabel.Text = Tr("File Size:");
-		_FileSize.Text = Tr("Unknown");
-		_Speed.Text = Tr("Unknown");
-		_ETALabel.Text = Tr("ETA:");
-		_Eta.Text = Tr("Unknown");
+		_FileSize.Text = "0 B";
+		_Speed.Text = "0 B/s";
+		_Eta.Text = "00:00:00";
 		_ProgressBar.Value = 0;
 		_ProgressBar.MaxValue = 100;
 		iTotalBytes = 0;

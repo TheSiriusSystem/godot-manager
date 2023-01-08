@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using File = System.IO.File;
 using StreamReader = System.IO.StreamReader;
 using StreamWriter = System.IO.StreamWriter;
 
@@ -83,9 +84,12 @@ public class ProjectConfig : Object {
 	}
 
 	public Error Load(string fname = "") { 
-		if (fname != "")
+		if (!string.IsNullOrEmpty(fname))
 			fileName = fname;
-		
+
+		if (!File.Exists(fileName))
+			return Error.Failed;
+
 		sections = new Dictionary<string, Dictionary<string, string>>();
 
 		sections["header"] = new Dictionary<string, string>();
@@ -128,9 +132,9 @@ public class ProjectConfig : Object {
 	}
 
 	public Error Save(string fname = "") {
-		if (fname != "")
+		if (!string.IsNullOrEmpty(fname))
 			fileName = fname;
-		
+
 		using (StreamWriter writer = new StreamWriter(fileName)) {
 			writer.WriteLine(HEADER);
 
@@ -155,80 +159,6 @@ public class ProjectConfig : Object {
 
 				writer.WriteLine("");
 			}
-		}
-		return Error.Ok;
-	}
-
-	public Error OldLoad(string fname = "") {
-		if (fname != "")
-			fileName = fname;
-		
-		using (File fh = new File()) {
-			Error ret = fh.Open(fileName, File.ModeFlags.Read);
-			if (ret == Error.Ok) {
-				buffer = fh.GetAsText();
-			} else {
-				return ret;
-			}
-			fh.Close();
-		}
-		sections["header"] = new Dictionary<string, string>();
-		string current_section = "header";
-		string last_key = "";
-		foreach (string line in buffer.Split("\n")) {
-			var nline = line.StripEdges();
-			if (nline.BeginsWith(";")) // Comment, ignore.
-				continue;
-			if (nline.BeginsWith("[")) { // Section Header
-				current_section = nline.Substring(1,nline.Length-2);
-				sections[current_section] = new Dictionary<string, string>();
-				continue;
-			}
-			if (nline.IndexOf("=") != -1) { // Key-Value Pair
-				string[] parts = nline.Split("=");
-				string key = parts[0];
-				last_key = key;
-				string value = parts[1];
-				sections[current_section][key] = value;
-				continue;
-			}
-			if (!string.IsNullOrEmpty(nline)) { // Godot3 stores Dictionaries, and possibly arrays across multiple lines
-				sections[current_section][last_key] += "\n" + nline;
-			}
-		}
-		return Error.Ok;
-	}
-
-	public Error OldSave(string fname = "") {
-		if (fname != "")
-			fileName = fname;
-
-		using (File fh = new File()) {
-			Error ret = fh.Open(fileName, File.ModeFlags.Write);
-			if (ret != Error.Ok) {
-				return ret;
-			}
-			fh.StoreBuffer(HEADER.ToUTF8());
-
-			foreach (string key in sections["header"].Keys) {
-				fh.StoreLine($"{key}={sections["header"][key]}");
-			}
-
-			fh.StoreLine(" ");
-
-			foreach (string section in sections.Keys) {
-				if (section == "header")
-					continue;
-				
-				fh.StoreLine($"[{section}]");
-				fh.StoreLine(" ");
-				foreach (string key in sections[section].Keys) {
-					fh.StoreLine($"{key}={sections[section][key]}");
-				}
-				fh.StoreLine(" ");
-			}
-
-			fh.Close();
 		}
 		return Error.Ok;
 	}

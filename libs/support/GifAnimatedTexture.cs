@@ -19,7 +19,7 @@ public class GifAnimatedTexture {
 		Texture.Fps = 24.0f;
 
 		for (int i = 0; i < Texture.Frames; i++) {
-			using(MemoryStream ms = new MemoryStream()) {
+			using (MemoryStream ms = new MemoryStream()) {
 				GifFrameMetadata gifMeta = gif.Frames[i].Metadata.GetGifMetadata();
 				Image iframe = gif.Frames.CloneFrame(i);
 				iframe.SaveAsPng(ms);

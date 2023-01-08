@@ -1,6 +1,5 @@
 using Godot;
 using Newtonsoft.Json;
-using DateTime = System.DateTime;
 using Guid = System.Guid;
 
 [JsonObject(MemberSerialization.OptIn)]
@@ -12,11 +11,9 @@ public class GodotVersion : Object {
 	[JsonProperty] public string ExecutableName; // Name of the Final Executable
 	[JsonProperty] public string CacheLocation; // Location of where the cache file is.
 	[JsonProperty] public string Url;	// URL downloaded from (Will match Location for Custom)
-	[JsonProperty] public DateTime DownloadedDate; // Date Downloaded (Added for Godot)
 	[JsonProperty] public bool HideConsole;	// If we should hide the console for Godot Editor.
 	[JsonProperty] public GithubVersion GithubVersion;
 	[JsonProperty] public MirrorVersion MirrorVersion;
-	[JsonProperty] public CustomEngineDownload CustomEngine;
 	[JsonProperty] public string SharedSettings;
 
 	public GodotVersion() {
@@ -24,9 +21,8 @@ public class GodotVersion : Object {
 		Tag = "";
 		Location = "";
 		Url = "";
-		DownloadedDate = DateTime.MinValue;
 		HideConsole = false;
-		SharedSettings = string.Empty;
+		SharedSettings = "";
 	}
 
 	public int GetMajorVersion() {

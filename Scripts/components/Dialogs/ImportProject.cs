@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Sharp.Extras;
+using File = System.IO.File;
 
 public class ImportProject : ReferenceRect
 {
@@ -57,20 +58,28 @@ public class ImportProject : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_addBtn))]
 	void OnAddBtnPressed() {
-		if (_locationValue.Text == "") {
+		if (string.IsNullOrEmpty(_locationValue.Text)) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
-				Tr("You need to select a project before it can be added."));
+				Tr("You need to select a project file."));
 			return;
 		}
-		if (_godotVersions.Selected == -1) {
+
+		if (!File.Exists(_locationValue.Text.NormalizePath())) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
-				Tr("You need to select an editor version to associate with this project."));
+				Tr("The file doesn't exist."));
 			return;
 		}
-		GodotVersion gdVers = CentralStore.Instance.FindVersion(_godotVersions.GetSelectedMetadata() as string);
-		ProjectFile pf = ProjectFile.ReadFromFile(_locationValue.Text, gdVers.GetMajorVersion());
-		if (gdVers != null && gdVers.Id != null)
-			pf.GodotId = gdVers.Id;
+
+		GodotVersion gdVers = CentralStore.Instance.GetVersion(_godotVersions.GetSelectedMetadata() as string);
+		int gdMajorVers = gdVers.GetMajorVersion();
+		if ((gdMajorVers <= 2 && !_locationValue.Text.EndsWith("engine.cfg")) || (gdMajorVers >= 3 && !_locationValue.Text.EndsWith("project.godot"))) {
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
+				string.Format(Tr("{0} is not a valid project file."), _locationValue.Text.GetFile()));
+			return;
+		}
+
+		ProjectFile pf = ProjectFile.ReadFromFile(_locationValue.Text, gdMajorVers);
+		pf.GodotId = gdVers.Id;
 		CentralStore.Projects.Add(pf);
 		CentralStore.Instance.SaveDatabase();
 		EmitSignal("update_projects");
@@ -84,7 +93,12 @@ public class ImportProject : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_locationBrowse))]
 	void OnLocationBrowsePressed() {
-		AppDialogs.ImportFileDialog.Filters = new string[] {"project.godot", "engine.cfg"};
+		int gdMajorVers = CentralStore.Instance.GetVersion(_godotVersions.GetSelectedMetadata() as string).GetMajorVersion();
+		if (gdMajorVers <= 2) {
+			AppDialogs.ImportFileDialog.Filters = new string[] {"engine.cfg"};
+		} else {
+			AppDialogs.ImportFileDialog.Filters = new string[] {"project.godot"};
+		}
 		AppDialogs.ImportFileDialog.CurrentFile = "";
 		AppDialogs.ImportFileDialog.CurrentPath = (CentralStore.Settings.ProjectPath + "/").NormalizePath();
 		AppDialogs.ImportFileDialog.PopupCentered();

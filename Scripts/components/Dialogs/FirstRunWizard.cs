@@ -209,10 +209,9 @@ public class FirstRunWizard : ReferenceRect
 				if (Wizard.CurrentTab == 2 && !loaded_engines)
 				{
 					CentralStore.GHVersions.Clear();
-					foreach (int id in CentralStore.MRVersions.Keys)
-						CentralStore.MRVersions[id].Clear();
+					CentralStore.TFVersions.Clear();
 					await GodotPanel.GatherReleases();
-					await GodotPanel.PopulateList();
+					await GodotPanel.PopulateList(0);
 					loaded_engines = true;
 				}
 			}

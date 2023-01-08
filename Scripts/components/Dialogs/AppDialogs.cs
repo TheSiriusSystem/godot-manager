@@ -24,8 +24,6 @@ public class AppDialogs : Control
     public DownloadAddon DownloadAddon_ = null;
     public AddonInstaller AddonInstaller_ = null;
     public FileConflictDialog FileConflictDialog_ = null;
-    public AddonMirror AddonMirror_ = null;
-    public ManageCustomDownloads ManageCustomDownloads_ = null;
     public ListSelectDialog ListSelectDialog_ = null;
 #endregion
 
@@ -50,8 +48,6 @@ public class AppDialogs : Control
     public static DownloadAddon DownloadAddon => Instance.DownloadAddon_;
     public static AddonInstaller AddonInstaller => Instance.AddonInstaller_;
     public static FileConflictDialog FileConflictDialog => Instance.FileConflictDialog_;
-    public static AddonMirror AddonMirror => Instance.AddonMirror_;
-    public static ManageCustomDownloads ManageCustomDownloads => Instance.ManageCustomDownloads_;
     public static ListSelectDialog ListSelectDialog => Instance.ListSelectDialog_;
 
     #endregion
@@ -88,8 +84,6 @@ public class AppDialogs : Control
         DownloadAddon_ = GD.Load<PackedScene>("res://components/Dialogs/DownloadAddon.tscn").Instance<DownloadAddon>();
         AddonInstaller_ = GD.Load<PackedScene>("res://components/Dialogs/AddonInstaller.tscn").Instance<AddonInstaller>();
         FileConflictDialog_ = GD.Load<PackedScene>("res://components/Dialogs/FileConflictDialog.tscn").Instance<FileConflictDialog>();
-        AddonMirror_ = GD.Load<PackedScene>("res://components/Dialogs/AddonMirror.tscn").Instance<AddonMirror>();
-        ManageCustomDownloads_ = GD.Load<PackedScene>("res://components/Dialogs/ManageCustomDownloads.tscn").Instance<ManageCustomDownloads>();
         ListSelectDialog_ = GD.Load<PackedScene>("res://components/Dialogs/ListSelectDialog.tscn").Instance<ListSelectDialog>();
 
         ImageFileDialog_ = new FileDialog();
@@ -97,7 +91,7 @@ public class AppDialogs : Control
         ImageFileDialog_.Mode = FileDialog.ModeEnum.OpenFile;
         ImageFileDialog_.Access = FileDialog.AccessEnum.Filesystem;
         ImageFileDialog_.WindowTitle = Tr("Open a File");
-        ImageFileDialog_.Filters = new string[] {"*.png", "*.webp", "*.svg", "*.svgz"};
+        ImageFileDialog_.Filters = new string[] {"*.png", "*.webp", "*.svg"};
         ImageFileDialog_.RectMinSize = new Vector2(510, 390);
         ImageFileDialog_.Theme = GD.Load<Theme>("res://Resources/DefaultTheme.tres");
 
@@ -107,7 +101,7 @@ public class AppDialogs : Control
         ImportFileDialog_.Mode = FileDialog.ModeEnum.OpenFile;
         ImportFileDialog_.Access = FileDialog.AccessEnum.Filesystem;
         ImportFileDialog_.WindowTitle = Tr("Open a File");
-        ImportFileDialog_.Filters = new string[] {"project.godot", "engine.cfg"};
+        ImportFileDialog_.Filters = new string[] {"engine.cfg", "project.godot"};
         ImportFileDialog_.RectMinSize = new Vector2(510, 390);
         ImportFileDialog_.Theme = GD.Load<Theme>("res://Resources/DefaultTheme.tres");
 
@@ -145,8 +139,6 @@ public class AppDialogs : Control
             CreateProject_, ImportProject_,     // Create Project / Import Project
             EditProject_,                       // Edit Project
             AssetLibPreview_, DownloadAddon_,   // Asset Library Preview / Download Addon/Project
-            ManageCustomDownloads_,             // Custom Godot Editor Downloads
-            AddonMirror_,                       // Adding Addon Mirror to list
             CreateCategory_,                    // Create a Category
             RemoveCategory_,                    // Remove a Category
             AddonInstaller_,                    // Installer Dialog for Addon/Plugins

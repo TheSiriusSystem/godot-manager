@@ -105,7 +105,7 @@ Button _CancelBtn = null;
 		}
 
 		ProjectFile = pf;
-		int gdmv = CentralStore.Instance.FindVersion(pf.GodotId).GetMajorVersion();
+		int gdmv = CentralStore.Instance.GetVersion(pf.GodotId).GetMajorVersion();
 		var texture = Util.LoadImage(ProjectFile.Location.GetResourceBase(IconPath));
 		_Panel.RectMinSize = new Vector2(_Panel.RectMinSize.x, gdmv <= 2 ? 210 : 410);
 		if (texture == null)
@@ -115,7 +115,7 @@ Button _CancelBtn = null;
 		_ProjectName.Text = ProjectName;
 		_ProjectDescriptionHeader.Visible = (gdmv >= 3);
 		_ProjectDescription.Visible = (gdmv >= 3);
-		if (CentralStore.Instance.FindVersion(pf.GodotId).GetMajorVersion() >= 3)
+		if (CentralStore.Instance.GetVersion(pf.GodotId).GetMajorVersion() >= 3)
 			_ProjectDescription.Text = Description;
 		_GodotVersion.Clear();
 		foreach (GodotVersion gdver in CentralStore.Versions) {
@@ -136,7 +136,7 @@ Button _CancelBtn = null;
 #region Event Handlers
 	[SignalHandler("pressed", nameof(_SaveBtn))]
 	void OnSaveBtnPressed() {
-		int gdmv = CentralStore.Instance.FindVersion(GodotId).GetMajorVersion();
+		int gdmv = CentralStore.Instance.GetVersion(GodotId).GetMajorVersion();
 		if ((gdmv <= 2 && _pf.Location.EndsWith("project.godot")) || (gdmv >= 3 && _pf.Location.EndsWith("engine.cfg")))
 		{
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The project cannot be associated with this editor version."));
@@ -170,7 +170,7 @@ Button _CancelBtn = null;
 	}
 
 	void OnFileSelected(string path) {
-		if (path == "")
+		if (string.IsNullOrEmpty(path))
 			return;
 		string pfPath = ProjectFile.Location.GetBaseDir().Replace(@"\", "/");
 		string fPath;
@@ -181,7 +181,7 @@ Button _CancelBtn = null;
 			if (SFile.Exists(fPath)) {
 				string backupPath = fPath.BaseName() + "_" + Guid.NewGuid().ToString() + fPath.GetExtension();
 				SFile.Move(fPath, backupPath);
-				AppDialogs.MessageDialog.ShowMessage(Tr("Previous Icon Renamed"), Tr($"A icon of the same name was found in your project's root. It has been renamed to \"{backupPath.GetFile().RStrip(".png")}\"."));
+				AppDialogs.MessageDialog.ShowMessage(Tr("Previous Icon Renamed"), Tr($"A icon of the same name was found in your project's root. It has been renamed to {backupPath.GetFile().BaseName()}."));
 			}
 			SFile.Copy(path, fPath);
 		}

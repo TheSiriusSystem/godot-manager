@@ -2,7 +2,6 @@ using Godot;
 using Godot.Sharp.Extras;
 using Godot.Collections;
 using ActionStack = System.Collections.Generic.Stack<System.Action>;
-using Uri = System.Uri;
 using System.Text.RegularExpressions;
 
 public class SettingsPanel : Panel
@@ -61,9 +60,6 @@ public class SettingsPanel : Panel
 
 	[NodePath("VB/MC/TC/General/GC/HBLO/EditorProfiles")]
 	CheckBox _editorProfiles = null;
-
-	[NodePath("VB/MC/TC/General/GC/MirrorTabs/Asset Library")]
-	ItemListWithButtons _assetMirror = null;
 	#endregion
 
 	#region Projects Page
@@ -145,7 +141,7 @@ public class SettingsPanel : Panel
 	{
 		this.OnReady();
 
-		_builtWith.BbcodeText = BuildVersionInfo(); //VERSION_INFORMATION;
+		_builtWith.BbcodeText = BuildVersionInfo();
 		_undoActions = new ActionStack();
 		_views = new Array<string>();
 
@@ -158,7 +154,7 @@ public class SettingsPanel : Panel
 		updateActionButtons();
 
 		GetParent<TabContainer>().Connect("tab_changed", this, "OnPageChanged");
-		_versionInfo.Text = $"Version {VERSION.GodotManager}-{VERSION.Channel}";
+		_versionInfo.Text = $"Version {VERSION.GodotManager}" + (!string.IsNullOrEmpty(VERSION.Channel) ? $"-{VERSION.Channel}" : "");
 	}
 
 	void updateActionButtons() {
@@ -166,22 +162,22 @@ public class SettingsPanel : Panel
 	}
 
 	string BuildVersionInfo() {
-		return "[table=3][cell][color=green]" + Tr("Project Name") +
-		"[/color][/cell][cell][color=green]" + Tr("Version") +
-		"[/color]     [/cell][cell][color=green]Website[/color][/cell]" +
-		"[cell][color=aqua]Godot Engine (Mono Edition)      [/color][/cell][cell][color=white]v" +
+		return "[table=3][cell][color=lime]" + Tr("Tool") +
+		"                                   [/color][/cell][cell][color=lime]" + Tr("Version") +
+		"                                   [/color][/cell][cell][color=lime]Website[/color][/cell]" +
+		"[cell][color=aqua]Godot (Mono Version)[/color][/cell][cell][color=white]" +
 		Engine.GetVersionInfo()["string"] +
-		"     [/color][/cell][cell][color=yellow][url]https://godotengine.org[/url][/color][/cell]" +
-		"[cell][color=aqua]GodotSharpExtras[/color][/cell][cell][color=white]v" +
+		"[/color][/cell][cell][color=yellow][url]https://godotengine.org[/url][/color][/cell]" +
+		"[cell][color=aqua]GodotSharpExtras[/color][/cell][cell][color=white]" +
 		VERSION.GodotSharpExtras +
 		"[/color][/cell][cell][color=yellow][url]https://github.com/eumario/GodotSharpExtras[/url][/color][/cell]" +
-		"[cell][color=aqua]NewtonSoft JSON[/color][/cell][cell][color=white]v" + 
+		"[cell][color=aqua]Json.NET[/color][/cell][cell][color=white]" + 
 		VERSION.NewtonsoftJSON +
 		"[/color][/cell][cell][color=yellow][url]https://www.newtonsoft.com/json[/url][/color][/cell]" +
-		"[cell][color=aqua]SixLabors ImageSharp[/color][/cell][cell][color=white]v" +
+		"[cell][color=aqua]ImageSharp[/color][/cell][cell][color=white]" +
 		VERSION.ImageSharp +
 		"[/color][/cell][cell][color=yellow][url]https://sixlabors.com/products/imagesharp/[/url][/color][/cell]" +
-		"[cell][color=aqua]System.IO.Compression[/color][/cell][cell][color=white]v" +
+		"[cell][color=aqua]System.IO.Compression[/color][/cell][cell][color=white]" +
 		VERSION.SystemIOCompression +
 		"[/color][/cell][cell][color=yellow][url]https://www.nuget.org/packages/System.IO.Compression/[/url][/color][/cell][/table]";
 	}
@@ -198,24 +194,6 @@ public class SettingsPanel : Panel
 		_editorProfiles.Pressed = CentralStore.Settings.SelfContainedEditors;
 		_noConsole.Pressed = CentralStore.Settings.NoConsole;
 
-		_assetMirror.Clear();
-		foreach (string meta in _assetMirror.GetMetaList())
-			_assetMirror.RemoveMeta(meta);
-		
-		foreach (Dictionary<string, string> mirror in CentralStore.Settings.AssetMirrors) {
-			_assetMirror.AddItem(mirror["name"]);
-			_assetMirror.SetMeta(mirror["name"], mirror["url"]);
-		}
-		
-		// _godotMirror.Clear();
-		// foreach (string meta in _godotMirror.GetMetaList())
-		// 	_godotMirror.RemoveMeta(meta);
-		
-		// foreach (Dictionary<string, string> mirror in CentralStore.Settings.EngineMirrors) {
-		// 	_godotMirror.AddItem(mirror["name"]);
-		// 	_godotMirror.SetMeta(mirror["name"], mirror["url"]);
-		// }
-
 		// Project Page
 		_defaultProjectLocation.Text = CentralStore.Settings.ProjectPath.NormalizePath();
 		_directoryScan.Clear();
@@ -223,6 +201,8 @@ public class SettingsPanel : Panel
 			_directoryScan.AddItem(dir.NormalizePath());
 		}
 		bPInternal = false;
+
+		UpdateEditorSCMode();
 	}
 
 	void UpdateSettings() {
@@ -234,29 +214,8 @@ public class SettingsPanel : Panel
 		CentralStore.Settings.UseLastMirror = _useLastMirror.Pressed;
 		CentralStore.Settings.SelfContainedEditors = _editorProfiles.Pressed;
 		GetTree().Root.GetNode<MainWindow>("MainWindow").UpdateWindow();
-
-		foreach (GodotVersion version in CentralStore.Versions) {
-			if (_editorProfiles.Pressed) {
-				File fh = new File();
-				fh.Open($"{version.Location}/._sc_".GetOSDir().NormalizePath(), File.ModeFlags.Write);
-				fh.StoreString(" ");
-				fh.Close();
-			} else {
-				Directory dh = new Directory();
-				dh.Open($"{version.Location}".GetOSDir().NormalizePath());
-				dh.Remove($"{version.Location}/._sc_".GetOSDir().NormalizePath());
-			}
-		}
-
+		UpdateEditorSCMode();
 		CentralStore.Settings.NoConsole = _noConsole.Pressed;
-		CentralStore.Settings.AssetMirrors.Clear();
-		for (int i = 0; i < _assetMirror.GetItemCount(); i++) {
-			Dictionary<string, string> data = new Dictionary<string, string>();
-			data["name"] = _assetMirror.GetItemText(i);
-			data["url"] = (string)_assetMirror.GetMeta(data["name"]);
-			CentralStore.Settings.AssetMirrors.Add(data);
-		}
-		
 		CentralStore.Settings.ProjectPath = _defaultProjectLocation.Text.GetOSDir().NormalizePath();
 		CentralStore.Settings.ScanDirs.Clear();
 		for (int i = 0; i < _directoryScan.GetItemCount(); i++) {
@@ -265,6 +224,23 @@ public class SettingsPanel : Panel
 		CentralStore.Instance.SaveDatabase();
 		_undoActions.Clear();
 		updateActionButtons(); 
+	}
+
+	void UpdateEditorSCMode() {
+		foreach (GodotVersion version in CentralStore.Versions) {
+			if (_editorProfiles.Pressed && version.GetMajorVersion() >= 2) {
+				File fh = new File();
+				if (fh.Open($"{version.Location}/._sc_".GetOSDir().NormalizePath(), File.ModeFlags.Write) == Error.Ok) {
+					fh.StoreString("");
+					fh.Close();
+				}
+			} else {
+				Directory dh = new Directory();
+				if (dh.Open($"{version.Location}".GetOSDir().NormalizePath()) == Error.Ok) {
+					dh.Remove($"{version.Location}/._sc_".GetOSDir().NormalizePath());
+				}
+			}
+		}
 	}
 #endregion
 
@@ -470,106 +446,6 @@ public class SettingsPanel : Panel
 		}
 		CentralStore.Settings.SelfContainedEditors = toggle;
 	}
-
-	#region Asset Mirror Actions
-	[SignalHandler("add_requested", nameof(_assetMirror))]
-	void OnAssetMirror_Add() {
-		AppDialogs.AddonMirror.Connect("asset_add_mirror", this, "OnAssetAddMirror");
-		AppDialogs.AddonMirror.ShowDialog();
-	}
-
-	void OnAssetAddMirror(string protocol, string domainName, string pathTo) {
-		string url = $"{protocol}://{domainName}{pathTo}";
-
-		int indx = _assetMirror.GetItemCount();
-		_undoActions.Push(() => {
-			_assetMirror.RemoveItem(indx);
-			_assetMirror.RemoveMeta(domainName);
-		});
-		updateActionButtons();
-
-		_assetMirror.AddItem(domainName);
-		_assetMirror.SetMeta(domainName, url);
-		
-		AppDialogs.AddonMirror.Disconnect("asset_add_mirror", this, "OnAssetAddMirror");
-	}
-
-	[SignalHandler("edit_requested", nameof(_assetMirror))]
-	void OnAssetMirror_Edit() {
-		int indx = _assetMirror.GetSelected();
-		if (indx == -1)
-			return;
-
-		var url = (string)_assetMirror.GetMeta(_assetMirror.GetItemText(indx));
-		var uri = new Uri(url);
-
-		AppDialogs.AddonMirror.Connect("asset_add_mirror", this, "OnAssetEditMirror");
-		AppDialogs.AddonMirror.ShowDialog(uri.Scheme, uri.Host, uri.AbsolutePath, true);
-	}
-
-	void OnAssetEditMirror(string protocol, string domainName, string pathTo) {
-		string url = $"{protocol}://{domainName}{pathTo}";
-		int indx = _assetMirror.GetSelected();
-
-		var oldName = _assetMirror.GetItemText(indx);
-		var oldUrl = (string)_assetMirror.GetMeta(oldName);
-		
-		if (oldName != domainName)
-			_assetMirror.RemoveMeta(oldName);
-		
-		_assetMirror.SetItemText(indx, domainName);
-		_assetMirror.SetMeta(domainName, url);
-
-		_undoActions.Push(() => {
-			if (oldName != domainName)
-				_assetMirror.RemoveMeta(domainName);
-			
-			_assetMirror.SetMeta(oldName, oldUrl);
-			_assetMirror.SetItemText(indx, oldName);
-		});
-		updateActionButtons();
-
-		AppDialogs.AddonMirror.Disconnect("asset_add_mirror", this, "OnAssetEditMirror");
-	}
-
-	[SignalHandler("remove_requested", nameof(_assetMirror))]
-	void OnAssetMirror_Remove() {
-		int indx = _assetMirror.GetSelected();
-		if (indx == -1)
-			return;
-		
-		var oldName = _assetMirror.GetItemText(indx);
-		var oldUrl = _assetMirror.GetMeta(oldName);
-
-		_undoActions.Push(() => {
-			var nindx = _assetMirror.GetItemCount();
-			_assetMirror.AddItem(oldName);
-			_assetMirror.SetMeta(oldName, oldUrl);
-			_assetMirror.MoveItem(nindx, indx);
-		});
-		updateActionButtons();
-
-		_assetMirror.RemoveItem(indx);
-		_assetMirror.RemoveMeta(oldName);
-	}
-	#endregion
-
-	// #region Godot Mirror Actions
-	// [SignalHandler("add_requested", nameof(_godotMirror))]
-	// void OnGodotMirror_Add() {
-
-	// }
-
-	// [SignalHandler("edit_requested", nameof(_godotMirror))]
-	// void OnGodotMirror_Edit() {
-
-	// }
-
-	// [SignalHandler("remove_requested", nameof(_godotMirror))]
-	// void OnGodotMirror_Remove() {
-
-	// }
-	// #endregion
 #endregion
 
 #region Event Handlers for Projects Page
@@ -713,37 +589,29 @@ public class SettingsPanel : Panel
 
 	[SignalHandler("gui_input", nameof(_buyMe))]
 	void OnBuyMe_GuiInput(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseButton iembEvent) {
-			if (iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
-				OS.ShellOpen("https://www.buymeacoffee.com/eumario");
-			}
+		if (inputEvent is InputEventMouseButton iembEvent && iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
+			OS.ShellOpen("https://www.buymeacoffee.com/eumario");
 		}
 	}
 
 	[SignalHandler("gui_input", nameof(_itchIo))]
 	void OnItchIo_GuiInput(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseButton iembEvent) {
-			if (iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
-				OS.ShellOpen("https://eumario.itch.io/godot-manager");
-			}
+		if (inputEvent is InputEventMouseButton iembEvent && iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
+			OS.ShellOpen("https://eumario.itch.io/godot-manager");
 		}
 	}
 
 	[SignalHandler("gui_input", nameof(_github))]
 	void OnGithub_GuiInput(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseButton iembEvent) {
-			if (iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
-				OS.ShellOpen("https://github.com/eumario/godot-manager");
-			}
+		if (inputEvent is InputEventMouseButton iembEvent && iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
+			OS.ShellOpen("https://github.com/eumario/godot-manager");
 		}
 	}
 
 	[SignalHandler("gui_input", nameof(_discord))]
 	void OnDiscord_GuiInput(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseButton iembEvent) {
-			if (iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
-				OS.ShellOpen("https://discord.gg/ESkwAMN2Tt");
-			}
+		if (inputEvent is InputEventMouseButton iembEvent && iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
+			OS.ShellOpen("https://discord.gg/ESkwAMN2Tt");
 		}
 	}
 #endregion

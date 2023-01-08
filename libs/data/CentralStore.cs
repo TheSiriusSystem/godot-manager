@@ -29,13 +29,11 @@ public class CentralStore {
 	public static Array<ProjectFile> Projects { get => Instance._data.Projects; }
 	public static Array<GodotVersion> Versions { get => Instance._data.Versions; }
 	public static Array<GithubVersion> GHVersions { get => Instance._data.GHVersions; }
-	public static Array<MirrorSite> Mirrors { get => Instance._data.Mirrors; }
-	public static Dictionary<int, Array<MirrorVersion>> MRVersions { get => Instance._data.MRVersions; }
+	public static Array<MirrorVersion> TFVersions { get => Instance._data.TFVersions; }
 	public static Array<Category> Categories { get => Instance._data.Categories; }
 	public static Array<int> PinnedCategories { get => Instance._data.PinnedCategories; }
 	public static Array<AssetPlugin> Plugins { get => Instance._data.Plugins; }
 	public static Array<AssetProject> Templates { get => Instance._data.Templates; }
-	public static Array<CustomEngineDownload> CustomEngines { get => Instance._data.CustomEngines; }
 #endregion
 
 #region Instance Methods
@@ -60,7 +58,6 @@ public class CentralStore {
 			var data = JsonConvert.SerializeObject(_data);
 			db.StoreString(data);
 			db.Close();
-			return;
 		}
 	}
 
@@ -146,6 +143,20 @@ public class CentralStore {
 		return query.First<GodotVersion>();
 	}
 
+	public GithubVersion FindGithubVersion(string name) {
+		var query = from gv in GHVersions
+					where gv.Name == name
+					select gv;
+		return query.FirstOrDefault<GithubVersion>();
+	}
+
+	public MirrorVersion FindTuxfamilyVersion(int id) {
+		var query = from gv in TFVersions
+					where gv.Id == id
+					select gv;
+		return query.FirstOrDefault<MirrorVersion>();
+	}
+
 	public bool HasCategory(string name) {
 		var res = from c in Categories
 					where c.Name.ToLower() == name.ToLower()
@@ -211,14 +222,6 @@ public class CentralStore {
 		}
 
 		return unpinned;
-	}
-
-	public bool HasCustomEngineId(int id)
-	{
-		var res = from e in CustomEngines
-			where e.Id == id
-			select e;
-		return res.FirstOrDefault() != null;
 	}
 #endregion
 

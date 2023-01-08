@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.IO.Compression;
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
+using File = System.IO.File;
 using Directory = System.IO.Directory;
 
 public class CreateProject : ReferenceRect
@@ -109,6 +111,37 @@ public class CreateProject : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_createBtn))]
 	async void OnCreatePressed() {
+		GodotVersion gdVers = _godotVersion.GetSelectedMetadata() as GodotVersion;
+		int gdMajorVers = gdVers.GetMajorVersion();
+		string pfName = gdMajorVers <= 2 ? "engine.cfg" : "project.godot";
+
+		AssetProject template = _templateProject.Selected <= 0 ? null : _templateProject.GetSelectedMetadata() as AssetProject;
+		if (template != null) {
+			string templatePath = template.Location.NormalizePath();
+			if (!File.Exists(templatePath)) {
+				AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The template project archive was not found."));
+				return;
+			}
+
+			bool foundPF = false;
+			using (ZipArchive za = ZipFile.OpenRead(templatePath)) {
+				foreach (ZipArchiveEntry zae in za.Entries) {
+					if (!zae.FullName.EndsWith("/")) {
+						int pp = zae.FullName.Find("/") + 1;
+						string fpath = zae.FullName.Substr(pp, zae.FullName.Length);
+						if (zae.Name == pfName && _projectLocation.Text.PlusFile(fpath).NormalizePath() == _projectLocation.Text.PlusFile(fpath.GetFile()).NormalizePath()) {
+							foundPF = true;
+							break;
+						}
+					}
+				}
+			}
+			if (!foundPF) {
+				AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("{0} was not found in the template project archive's root."), pfName));
+				return;
+			}
+		}
+
 		if (!_projectLocation.Text.IsDirEmpty())
 		{
 			bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Warning"),
@@ -116,10 +149,7 @@ public class CreateProject : ReferenceRect
 			if (!res) return;
 		}
 
-		GodotVersion gdVers = _godotVersion.GetSelectedMetadata() as GodotVersion;
-		int gdMajorVers = gdVers.GetMajorVersion();
 		Dictionary modifiedKeys = new Dictionary();
-
 		if (_renderers.Visible) {
 			IEnumerable<RendererOption> options = _rendererOptions.GetChildren().OfType<RendererOption>();
 			foreach (RendererOption option in options) {
@@ -134,14 +164,13 @@ public class CreateProject : ReferenceRect
 			ProjectName = _projectName.Text,
 			ProjectLocation = _projectLocation.Text,
 			VersionControlSystem = _vcMetadata.Selected,
+			Template = template,
 			GodotId = gdVers.Id,
 			GodotMajorVersion = gdMajorVers,
 			GodotMinorVersion = gdVers.GetMinorVersion(),
 			Plugins = new Array<AssetPlugin>(),
-			ModifiedKeys = modifiedKeys.Duplicate()
+			ModifiedKeys = modifiedKeys.Duplicate(true)
 		};
-		if (_templateProject.Selected > 0)
-			prj.Template = _templateProject.GetSelectedMetadata() as AssetProject;
 
 		foreach (AddonLineEntry ale in _pluginList.GetChildren()) {
 			if (ale.Installed) {
@@ -150,7 +179,7 @@ public class CreateProject : ReferenceRect
 		}
 
 		prj.CreateProject();
-		ProjectFile pf = ProjectFile.ReadFromFile(prj.ProjectLocation.PlusFile(gdMajorVers <= 2 ? "engine.cfg" : "project.godot").NormalizePath(), gdMajorVers);
+		ProjectFile pf = ProjectFile.ReadFromFile(prj.ProjectLocation.PlusFile(pfName).NormalizePath(), gdMajorVers);
 		pf.GodotId = prj.GodotId;
 		pf.Assets = new Array<string>();
 
@@ -245,7 +274,7 @@ public class CreateProject : ReferenceRect
 			foreach (AssetPlugin plgn in CentralStore.Plugins)
 			{
 				string imgLoc =
-					$"{CentralStore.Settings.CachePath}/images/assets/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
+					$"{CentralStore.Settings.CachePath}/images/{plgn.Asset.AssetId}{plgn.Asset.IconUrl.GetExtension()}"
 						.NormalizePath();
 				AddonLineEntry ale = MainWindow._plScenes["AddonLineEntry"].Instance<AddonLineEntry>();
 

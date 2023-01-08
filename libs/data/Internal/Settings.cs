@@ -18,13 +18,9 @@ public class Settings : Object {
 	[JsonProperty] public bool FavoritesToggled;
 	[JsonProperty] public bool UncategorizedToggled;
 	[JsonProperty] public Array<string> ScanDirs;
-	[JsonProperty] public Array<Dictionary<string, string>> AssetMirrors;
 	[JsonProperty] public Array<string> SettingsShare;
 
-	[JsonProperty] public Dictionary<string, string> CurrentAssetMirror;
 	[JsonProperty] public int LastEngineMirror;
-
-	[JsonProperty] public int LocalAddonCount;
 
 	public bool FirstTimeRun = false;
 
@@ -42,29 +38,14 @@ public class Settings : Object {
 		UseSystemTitlebar = false;
 		UseLastMirror = false;
 		ScanDirs = new Array<string>();
-		AssetMirrors = new Array<Dictionary<string, string>>();
-		CurrentAssetMirror = new Dictionary<string, string>();
 		LastEngineMirror = 0;
-		LocalAddonCount = 0;
 		SettingsShare = new Array<string>();
 	}
 
 	public void SetupDefaultValues() {
 		FirstTimeRun = true;
-		Dictionary<string, string> data = new Dictionary<string, string>();
 
 		// Scan Directories (Default Project path added)
 		ScanDirs.Add(ProjectPath);
-
-		// Asset Library Mirrors
-		data["name"] = "godotengine.org";
-		data["url"] = "https://godotengine.org/asset-library/api/";
-		AssetMirrors.Add(data.Duplicate());
-		CurrentAssetMirror = data.Duplicate();
-		data.Clear();
-		data["name"] = "localhost";
-		data["url"] = "http://localhost/asset-library/api/";
-		AssetMirrors.Add(data.Duplicate());
-		data.Clear();
 	}
 }

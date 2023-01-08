@@ -37,7 +37,7 @@ public class RemoveCategory : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_removeBtn))]
 	async void OnPressedRemoveBtn() {
-		if (selectedItem == "") {
+		if (string.IsNullOrEmpty(selectedItem)) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Remove Category"), Tr("You must select a category before it can be removed."));
 			return;
 		}

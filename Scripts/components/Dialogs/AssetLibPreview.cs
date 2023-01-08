@@ -24,25 +24,19 @@ public class AssetLibPreview : ReferenceRect
 	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/Icon")]
 	TextureRect _Icon = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/PluginName")]
-	Label _PluginName = null;
-
-	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC/Category")]
+	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/Category")]
 	Label _Category = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC/Author")]
+	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/Author")]
 	Label _Author = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC/License")]
+	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/License")]
 	Label _License = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC/Version")]
+	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/Version")]
 	Label _Version = null;
-	
-	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC/AddonId")]
-	Label _AddonId = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GC/GodotVersion")]
+	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/HBoxContainer/PluginInfo/GodotVersion")]
 	private Label _GodotVersion = null;
 
 	[NodePath("PC/CC/P/VB/MCContent/HSC/InfoPanel/PC/SC/Description")]
@@ -111,12 +105,13 @@ public class AssetLibPreview : ReferenceRect
 
 		AppDialogs.DownloadAddon.Asset = _asset;
 		AppDialogs.DownloadAddon.LoadInformation();
-		AppDialogs.DownloadAddon.Connect("download_complete", this, "OnDownloadAddonCompleted");
+		AppDialogs.DownloadAddon.Connect("download_completed", this, "OnDownloadAddonCompleted", null, (uint)ConnectFlags.Oneshot);
+		AppDialogs.DownloadAddon.Connect("download_failed", this, "OnDownloadAddonFailed", null, (uint)ConnectFlags.Oneshot);
 		await AppDialogs.DownloadAddon.StartDownload();
 	}
 
 	async void OnDownloadAddonCompleted(AssetLib.Asset asset, AssetProject ap, AssetPlugin apl) {
-		AppDialogs.DownloadAddon.Disconnect("download_complete", this, "OnDownloadAddonCompleted");
+		AppDialogs.DownloadAddon.Disconnect("download_failed", this, "OnDownloadAddonCompleted");
 		if (apl != null) {
 			AppDialogs.AddonInstaller.ShowDialog(apl);
 		}
@@ -124,8 +119,16 @@ public class AssetLibPreview : ReferenceRect
 			await this.IdleFrame();
 		EmitSignal("installed_addon", (_Download.Text != "Download"));
 		Visible = false;
-		AppDialogs.MessageDialog.ShowMessage(Tr("Asset Downloaded"), 
-			string.Format(Tr("{0} has finished downloading. You can find it in the Downloaded {1} tab."),asset.Title,apl != null ? "Addons" : "Templates"));
+		AppDialogs.MessageDialog.ShowMessage(Tr("Asset Added"), 
+			string.Format(Tr("{0} has finished downloading. You can find it in the Downloaded {1} tab."), asset.Title, apl != null ? "Addons" : "Templates"));
+	}
+
+	void OnDownloadAddonFailed(string errDesc = "") {
+		if (AppDialogs.DownloadAddon.IsConnected("download_completed", this, "OnDownloadAddonCompleted"))
+			AppDialogs.DownloadAddon.Disconnect("download_completed", this, "OnDownloadAddonCompleted");
+		AppDialogs.DownloadAddon.Visible = false;
+		if (!string.IsNullOrEmpty(errDesc))
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr(errDesc));
 	}
 
 	[SignalHandler("hide")]
@@ -134,27 +137,30 @@ public class AssetLibPreview : ReferenceRect
 	}
 
 	public void ShowDialog(AssetLib.Asset asset) {
-		_DialogTitle.Text = asset.Title;
-		_PluginName.Text = asset.Title;
-		_Author.Text = asset.Author;
-		_Category.Text = asset.Category;
-		_Version.Text = asset.VersionString;
-		_AddonId.Text = asset.AssetId;
-		_GodotVersion.Text = "v" + asset.GodotVersion;
-		_License.Text = asset.Cost;
-		_Description.BbcodeText = "[table=1][cell][color=lime]" + 
-		Tr("Support") + $"[/color][/cell][cell][color=aqua][url={asset.BrowseUrl}]" + 
-		Tr("Homepage") + $"[/url][/color][/cell][cell][color=aqua][url={asset.IssuesUrl}]" +
-		Tr("Issue/Support Page") + $"[/url][/color][/cell][/table]\n\n{asset.Description.Replace("\r","")}";
-		_Description.ScrollToLine(0);
 		_asset = asset;
-		
-		if (asset.IconUrl == null || asset.IconUrl == "") {
-			sIconPath = MainWindow._plTextures["MissingIcon"].ResourcePath;
+		_DialogTitle.Text = asset.Title;
+		_Category.Text = asset.Category;
+		_Author.Text = asset.Author;
+		_License.Text = asset.Cost;
+		_Version.Text = asset.VersionString;
+		_GodotVersion.Text = asset.GodotVersion;
+		if (!asset.AssetId.StartsWith("local-")) {
+			_Description.BbcodeText = $"[table=1][cell][color=lime][url={$"https://godotengine.org/asset-library/asset/{asset.AssetId}"}]" +
+			Tr("Asset Page") + $"[/url][/color][/cell][cell][color=aqua][url={asset.BrowseUrl}]" + 
+			Tr("Repository") + $"[/url][/color][/cell][cell][color=aqua][url={asset.IssuesUrl}]" +
+			Tr("Issues") + $"[/url][/color][/cell][/table]\n{asset.Description.Replace("\r", "")}";
+			if (string.IsNullOrEmpty(asset.IconUrl)) {
+				sIconPath = MainWindow._plTextures["MissingIcon"].ResourcePath;
+			} else {
+				Uri uri = new Uri(asset.IconUrl);
+				sIconPath = $"{CentralStore.Settings.CachePath}/images/{asset.AssetId}{uri.AbsolutePath.GetExtension()}";
+			}
 		} else {
-			Uri uri = new Uri(asset.IconUrl);
-			sIconPath = $"{CentralStore.Settings.CachePath}/images/{asset.AssetId}{uri.AbsolutePath.GetExtension()}";
+			_Description.BbcodeText = $"[table=1][cell][color=aqua][url={asset.BrowseUrl}]" +
+			Tr("Repository") + $"[/url][/color][/cell][/table]\n{asset.Description.Replace("\r", "")}";
+			sIconPath = MainWindow._plTextures["DefaultIconV3"].ResourcePath;
 		}
+		_Description.ScrollToLine(0);
 		
 		if (!File.Exists(sIconPath.GetOSDir().NormalizePath())) {
 			dldIcon = new ImageDownloader(asset.IconUrl, sIconPath);
@@ -210,94 +216,63 @@ public class AssetLibPreview : ReferenceRect
 			preview.SetMeta("url",asset.Previews[i].Link);
 		}
 		
-		if (_Thumbnails.GetChildCount() > 0) {
-			if (_Thumbnails.GetChild(0) is TextureRect fp && fp.Texture != null) {
-				if (fp.Texture.ResourcePath != MainWindow._plTextures["WaitThumbnail"].ResourcePath) {
-					UpdatePreview(fp);
-				}
-			}
+		if (_Thumbnails.GetChildCount() > 0 && _Thumbnails.GetChild(0) is TextureRect fp && fp.Texture != null && fp.Texture.ResourcePath != MainWindow._plTextures["WaitThumbnail"].ResourcePath) {
+			UpdatePreview(fp);
 		} else {
 			_Preview.Texture = null;
 			_MissingThumbnails.Visible = true;
 		}
 
-		if (Templates.IndexOf(asset.Category) != -1) {
-			if (CentralStore.Instance.HasTemplateId(asset.AssetId)) {
-				_Uninstall.Visible = true;
-				_Sep3.Visible = true;
-				AssetProject tasset = CentralStore.Instance.GetTemplateId(asset.AssetId);
-				if (tasset.Asset.VersionString != asset.VersionString ||
-					tasset.Asset.Version != asset.Version ||
-					tasset.Asset.ModifyDate != asset.ModifyDate) {
-					_Download.Disabled = false;
-					_Download.Text = Tr("Update Template");
-				} else {
-					_Download.Disabled = true;
-					_Download.Text = Tr("Download");
-				}
+		if (CentralStore.Instance.HasPluginId(asset.AssetId) || CentralStore.Instance.HasTemplateId(asset.AssetId)) {
+			_Uninstall.Visible = true;
+			_Sep3.Visible = true;
+			_Download.Visible = true;
+			AssetLib.Asset assetInfo;
+			if (Templates.IndexOf(asset.Category) == -1) {
+				assetInfo = CentralStore.Instance.GetPluginId(asset.AssetId).Asset;
 			} else {
-				_Uninstall.Visible = false;
-				_Sep3.Visible = false;
-				_Download.Disabled = false;
-				_Download.Text = Tr("Download");
+				assetInfo = CentralStore.Instance.GetTemplateId(asset.AssetId).Asset;
 			}
+			if (assetInfo.VersionString != asset.VersionString ||
+				assetInfo.Version != asset.Version ||
+				assetInfo.ModifyDate != asset.ModifyDate) {
+				_Download.Disabled = false;
+			} else {
+				_Download.Disabled = true;
+			}
+			_Download.Text = Tr("Update");
 		} else {
-			if (CentralStore.Instance.HasPluginId(asset.AssetId)) {
-				_Uninstall.Visible = true;
-				_Sep3.Visible = true;
-				AssetPlugin passet = CentralStore.Instance.GetPluginId(asset.AssetId);
-				if (passet.Asset.VersionString != asset.VersionString ||
-					passet.Asset.Version != asset.Version ||
-					passet.Asset.ModifyDate != asset.ModifyDate) {
-					_Download.Disabled = false;
-					_Download.Text = Tr("Update Plugin");
-				} else {
-					_Download.Disabled = true;
-					_Download.Text = Tr("Download");
-				}
-			} else {
-				_Uninstall.Visible = false;
-				_Sep3.Visible = false;
-				_Download.Disabled = false;
-				_Download.Text = Tr("Download");
-			}
+			_Uninstall.Visible = false;
+			_Sep3.Visible = false;
+			_Download.Visible = true;
+			_Download.Disabled = false;
+			_Download.Text = Tr("Download");
 		}
-		
+
 		dlq.StartDownload();
 		Visible = true;
-	}
-
-	[SignalHandler("gui_input", nameof(_AddonId))]
-	void OnGuiInput_AddonId(InputEvent @event)
-	{
-		if (@event is InputEventMouseButton iemb && iemb.ButtonIndex == (int)ButtonList.Left)
-		{
-			OS.ShellOpen($"https://godotengine.org/asset-library/asset/{_AddonId.Text}");
-		}
 	}
 
 	[SignalHandler("pressed", nameof(_Uninstall))]
 	async void OnPressed_Uninstall() {
 		bool res = await AppDialogs.YesNoDialog.ShowDialog(Tr("Please Confirm..."),
-					string.Format(Tr("Remove {0} from the list?\nThe project folders' contents won't be modified."), _asset.Title),
+					string.Format(Tr("Remove {0} from the list?\nYour project folders' contents won't be modified."), _asset.Title),
 					Tr("Remove"), Tr("Cancel"));
 		if (!res) return;
 
 		if (CentralStore.Instance.HasPluginId(_asset.AssetId)) {
 			// Handle Addon Uninstall
 			AssetPlugin plg = CentralStore.Instance.GetPluginId(_asset.AssetId);
-			if (plg == null) {
-				AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"), string.Format(Tr("{0} was not found."), _asset.Title));
-				return;
-			}
+			string plgPath = plg.Location.NormalizePath();
+			if (File.Exists(plgPath))
+				File.Delete(plgPath);
 			CentralStore.Plugins.Remove(plg);
 		} else if (CentralStore.Instance.HasTemplateId(_asset.AssetId)) {
 			// Handle Template Uninstall
 			AssetProject prj = CentralStore.Instance.GetTemplateId(_asset.AssetId);
-			if (prj == null) {
-				AppDialogs.MessageDialog.ShowMessage(Tr("Asset Library"), string.Format(Tr("{0} was not found."), _asset.Title));
-				return;
-			}
+			string prjPath = prj.Location.NormalizePath();
+			if (File.Exists(prjPath))
+				File.Delete(prjPath);
 			CentralStore.Templates.Remove(prj);
 		}
 		EmitSignal("uninstalled_addon");
@@ -306,20 +281,15 @@ public class AssetLibPreview : ReferenceRect
 
 	[SignalHandler("gui_input", nameof(_PlayButton))]
 	void OnGuiInput_PlayButton(InputEvent inputEvent) {
-		if (inputEvent is InputEventMouseButton iembEvent) {
-			if (iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
-				string url = _Preview.GetMeta("url") as string;
-				OS.ShellOpen(url);
-			}
+		if (inputEvent is InputEventMouseButton iembEvent && iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
+			string url = _Preview.GetMeta("url") as string;
+			OS.ShellOpen(url);
 		}
 	}
 
 	void OnGuiInput_Preview(InputEvent inputEvent, TextureRect rect) {
-		if (inputEvent is InputEventMouseButton iembEvent) {
-			if (iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left)
-			{
-				UpdatePreview(rect);
-			}
+		if (inputEvent is InputEventMouseButton iembEvent && iembEvent.Pressed && iembEvent.ButtonIndex == (int)ButtonList.Left) {
+			UpdatePreview(rect);
 		}
 	}
 
@@ -375,7 +345,7 @@ public class AssetLibPreview : ReferenceRect
 		if (!preview.HasMeta("iconPath"))
 			return;
 		object iconMeta = preview.GetMeta("iconPath");
-		if (iconMeta is null)
+		if (iconMeta == null)
 			return;
 		string iconPath = iconMeta as string;
 		if (File.Exists(iconPath.GetOSDir().NormalizePath()))

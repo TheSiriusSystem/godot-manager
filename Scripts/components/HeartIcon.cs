@@ -29,13 +29,9 @@ public class HeartIcon : TextureRect
 
     [SignalHandler("gui_input")]
     void OnGuiInput(InputEvent inputEvent) {
-        if (inputEvent is InputEventMouseButton iemb) {
-            if (iemb.Pressed) {
-                if (iemb.ButtonIndex == (int)ButtonList.Left) {
-                    SetCheck(!IsChecked());
-                    EmitSignal("clicked");
-                }
-            }
+        if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left) {
+            SetCheck(!IsChecked());
+            EmitSignal("clicked");
         }
     }
 }

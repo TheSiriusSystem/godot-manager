@@ -2,7 +2,6 @@ using Godot;
 using Godot.Collections;
 using Guid = System.Guid;
 using Uri = System.Uri;
-using DateTime = System.DateTime;
 using FPath = System.IO.Path;
 using SFile = System.IO.File;
 using SDirectory = System.IO.Directory;
@@ -16,8 +15,8 @@ public class GodotInstaller : Object {
 	[Signal] public delegate void download_failed(GodotInstaller self, HTTPClient.Status error);
 
 	GDCSHTTPClient _client = null;
-
 	GodotVersion _version = null;
+	public bool _cancelled = false;
 
 	public GodotVersion GodotVersion {
 		get {
@@ -27,14 +26,12 @@ public class GodotInstaller : Object {
 
 	public int DownloadSize {
 		get {
-			if (_version.GithubVersion == null && _version.CustomEngine == null)
+			if (_version.GithubVersion == null)
 				return _version.MirrorVersion.PlatformDownloadSize;
-			
-			if (_version.CustomEngine == null && _version.MirrorVersion == null)
+			else
 				return _version.IsMono ? 
 						_version.GithubVersion.PlatformMonoDownloadSize : 
 						_version.GithubVersion.PlatformDownloadSize;
-			return _version.CustomEngine.DownloadSize;
 		}
 	}
 
@@ -42,23 +39,17 @@ public class GodotInstaller : Object {
 		_version = version;
 		_client = new GDCSHTTPClient();
 		_client.Connect("chunk_received", this, "OnChunkReceived");
-		_client.Connect("headers_received", this, "OnHeadersReceived");
 	}
 
 	public static GodotInstaller FromGithub(GithubVersion gh, bool is_mono = false) {
-		string gdFile = is_mono ? gh.PlatformMonoDownloadURL : gh.PlatformDownloadURL;
-		gdFile = new Uri(gdFile).AbsolutePath.GetFile();
+		string gvTag = gh.Name + (!is_mono ? "" : "-mono");
+		string fName = $"editor-{gvTag}.zip".NormalizeFileName();
 		GodotVersion gv = new GodotVersion() {
 			Id = Guid.NewGuid().ToString(),
-			Tag = gh.Name,
+			Tag = gvTag,
 			Url = is_mono ? gh.PlatformMonoDownloadURL : gh.PlatformDownloadURL,
-#if GODOT_MACOS || GODOT_OSX
-			Location = $"{CentralStore.Settings.EnginePath}/{gh.Name + (is_mono ? "_mono" : "") }",
-#else
-			Location = $"{CentralStore.Settings.EnginePath}/{(is_mono ? gdFile.ReplaceN(".zip","") : gh.Name)}",
-#endif
-			CacheLocation = $"{CentralStore.Settings.CachePath}/downloads/editors/{gdFile}".GetOSDir().NormalizePath(),
-			DownloadedDate = DateTime.UtcNow,
+			Location = $"{CentralStore.Settings.EnginePath}/{gvTag.NormalizeFileName()}",
+			CacheLocation = $"{CentralStore.Settings.CachePath}/downloads/{fName}",
 			GithubVersion = gh,
 			IsMono = is_mono
 		};
@@ -68,54 +59,19 @@ public class GodotInstaller : Object {
 	}
 
 	public static GodotInstaller FromMirror(MirrorVersion mv, bool is_mono = false) {
+		string fName = $"editor-{mv.Version}.zip".NormalizeFileName();
 		GodotVersion gv = new GodotVersion() {
 			Id = Guid.NewGuid().ToString(),
 			Tag = mv.Version,
 			Url = mv.PlatformDownloadURL,
-#if GODOT_MACOS || GODOT_OSX
-			Location = $"{CentralStore.Settings.EnginePath}/{mv.Version + (is_mono ? "_mono" : "") }",
-#else
-			Location = $"{CentralStore.Settings.EnginePath}/{(is_mono ? mv.PlatformZipFile.ReplaceN(".zip","") : mv.Version)}",
-#endif
-			CacheLocation = $"{CentralStore.Settings.CachePath}/downloads/editors/{mv.PlatformZipFile}".GetOSDir().NormalizePath(),
-			DownloadedDate = DateTime.UtcNow,
+			Location = $"{CentralStore.Settings.EnginePath}/{mv.Version.NormalizeFileName()}",
+			CacheLocation = $"{CentralStore.Settings.CachePath}/downloads/{fName}",
 			MirrorVersion = mv,
 			IsMono = is_mono
 		};
 
 		GodotInstaller installer = new GodotInstaller(gv);
 		return installer;
-	}
-
-	public static GodotInstaller FromCustomEngineDownload(CustomEngineDownload ced)
-	{
-		GodotVersion gv = new GodotVersion()
-		{
-			Id = Guid.NewGuid().ToString(),
-			Tag = ced.TagName,
-			Url = ced.Url,
-			Location = $"{CentralStore.Settings.EnginePath}/{ced.TagName}",
-			CacheLocation = $"{CentralStore.Settings.CachePath}/downloads/editors/{ced.Url.GetFile()}",
-			DownloadedDate = DateTime.Now,
-			CustomEngine = ced
-		};
-
-		GodotInstaller installer = new GodotInstaller(gv);
-		return installer;
-	}
-
-	void OnHeadersReceived(Dictionary headers)
-	{
-		if (DownloadSize == 0)
-		{
-			if (headers.Contains("Transfer-Encoding")) // ContainsKey("Transfer-Encoding"))
-				return;
-			int size = 0;
-			if (int.TryParse((string)headers["Content-Length"], out size))
-			{
-				_version.CustomEngine.DownloadSize = size;
-			}
-		}
 	}
 
 	public static GodotInstaller FromVersion(GodotVersion vers) {
@@ -128,7 +84,7 @@ public class GodotInstaller : Object {
 
 	public async Task<HTTPResponse> FollowRedirect(string url = "") {
 		Uri dlUri;
-		if (url == "")
+		if (string.IsNullOrEmpty(url))
 			dlUri = new Uri(_version.Url);
 		else
 			dlUri = new Uri(url);
@@ -156,10 +112,10 @@ public class GodotInstaller : Object {
 		Uri dlUri = new Uri(_version.Url);
 		var resp = FollowRedirect();
 
-		while (!resp.IsCompleted)
+		while (!_cancelled && !resp.IsCompleted)
 			await this.IdleFrame();
 		
-		if (resp.Result == null) {
+		if (_cancelled || resp.Result == null) {
 			EmitSignal("download_failed", this, HTTPClient.Status.Requesting);
 			return;
 		}
@@ -179,15 +135,19 @@ public class GodotInstaller : Object {
 	}
 
 	public void Install() {
-		string instDir = _version.Location;
+		Uninstall(false);
 #if GODOT_WINDOWS || GODOT_UWP || GODOT_LINUXBSD || GODOT_X11
-		if (_version.IsMono)
-			instDir = instDir.GetBaseDir();
+		if (!_version.IsMono) {
+			ZipFile.ExtractToDirectory(_version.CacheLocation, _version.Location);
+		} else {
+			Util.ExtractFromZipFolderTo(_version.CacheLocation, _version.Location);
+		}
+#else
+		ZipFile.ExtractToDirectory(_version.CacheLocation, _version.Location);
 #endif
-		ZipFile.ExtractToDirectory(_version.CacheLocation,instDir);
 
 		Array<string> fileList = new Array<string>();
-		using (ZipArchive za = ZipFile.OpenRead(_version.CacheLocation.GetOSDir().NormalizePath())) {
+		using (ZipArchive za = ZipFile.OpenRead(_version.CacheLocation.NormalizePath())) {
 			foreach (ZipArchiveEntry zae in za.Entries) {
 				fileList.Add(zae.Name);
 			}
@@ -195,44 +155,36 @@ public class GodotInstaller : Object {
 
 #if GODOT_WINDOWS || GODOT_UWP
 		foreach (string fname in fileList) {
-			if (fname.EndsWith(".exe") && fname.StartsWith("Godot")) {
+			if (fname.EndsWith(".exe")) {
 				_version.ExecutableName = fname;
 				break;
 			}
 		}
 #elif GODOT_LINUXBSD || GODOT_X11
 		foreach (string fname in fileList) {
-			if (System.Environment.Is64BitProcess) {
-				if (fname.EndsWith(".64") && fname.StartsWith("Godot")) {
-					_version.ExecutableName = fname;
-					break;
-				} else if (fname.EndsWith(".x86_64") && fname.StartsWith("Godot")) {
+			if (!System.Environment.Is64BitProcess) {
+				if (fname.EndsWith(".x86") || fname.EndsWith(".32")) {
 					_version.ExecutableName = fname;
 					break;
 				}
 			} else {
-				if (fname.EndsWith(".32") && fname.StartsWith("Godot")) {
-					_version.ExecutableName = fname;
-					break;
-				} else if (fname.EndsWith(".x86_32") && fname.StartsWith("Godot")) {
+				if (fname.EndsWith(".x86_64") || fname.EndsWith(".64")) {
 					_version.ExecutableName = fname;
 					break;
 				}
 			}
 		}
-
 		Util.Chmod(_version.GetExecutablePath(), 0755);
 #elif GODOT_MACOS || GODOT_OSX
-
 		_version.ExecutableName = "Godot";
 		Util.Chmod(_version.GetExecutablePath(), 0755);
-
 #endif
-		if (CentralStore.Settings.SelfContainedEditors) {
+		if (CentralStore.Settings.SelfContainedEditors && _version.GetMajorVersion() >= 2) {
 			File fh = new File();
-			fh.Open($"{_version.Location}/._sc_".GetOSDir().NormalizePath(), File.ModeFlags.Write);
-			fh.StoreString(" ");
-			fh.Close();
+			if (fh.Open($"{_version.Location}/._sc_".GetOSDir().NormalizePath(), File.ModeFlags.Write) == Error.Ok) {
+				fh.StoreString("");
+				fh.Close();
+			}
 		}
 	}
 
@@ -254,14 +206,16 @@ public class GodotInstaller : Object {
 		return files;
 	}
 
-	public void Uninstall() {
-		foreach (string file in RecurseDirectory(_version.Location)) {
-			if (SDirectory.Exists(file))
-				SDirectory.Delete(file);
-			else if (SFile.Exists(file))
-				SFile.Delete(file);
+	public void Uninstall(bool deleteCache = true) {
+		if (SDirectory.Exists(_version.Location)) {
+			foreach (string file in RecurseDirectory(_version.Location)) {
+				if (SDirectory.Exists(file))
+					SDirectory.Delete(file);
+				else if (SFile.Exists(file))
+					SFile.Delete(file);
+			}
 		}
-		if (SFile.Exists(_version.CacheLocation)) {
+		if (deleteCache && SFile.Exists(_version.CacheLocation)) {
 			SFile.Delete(_version.CacheLocation);
 		}
 	}

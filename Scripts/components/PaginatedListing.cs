@@ -63,7 +63,7 @@ public class PaginatedListing : ScrollContainer
             ale.UpdateAvailable = false;
             ale.Downloaded = false;
             _listing.AddChild(ale);
-            if (plgn.Asset.IconUrl == null || plgn.Asset.IconUrl == "") {
+            if (string.IsNullOrEmpty(plgn.Asset.IconUrl)) {
                 ale.Icon = MainWindow._plTextures["DefaultIconV3"];
             } else {
                 if (plgn.Asset.IconUrl.StartsWith("res://")) {
@@ -116,7 +116,7 @@ public class PaginatedListing : ScrollContainer
             ale.UpdateAvailable = false;
             ale.Downloaded = false;
             _listing.AddChild(ale);
-            if (prj.Asset.IconUrl == null || prj.Asset.IconUrl == "") {
+            if (string.IsNullOrEmpty(prj.Asset.IconUrl)) {
                 ale.Icon = MainWindow._plTextures["MissingIcon"];
             } else {
                 string iconPath;
@@ -126,13 +126,14 @@ public class PaginatedListing : ScrollContainer
                     if (!File.Exists(iconPath)) {
                         using (ZipArchive za = ZipFile.Open(prj.Location,ZipArchiveMode.Read)) {
                             zipPath = FindFile(za, zipPath);
-                            if (zipPath != "") {
+                            if (!string.IsNullOrEmpty(zipPath)) {
                                 ZipArchiveEntry zae = za.GetEntry(FindFile(za, zipPath));
                                 byte[] buffer = zae.ReadBuffer();
                                 var fh = new Godot.File();
-                                fh.Open(iconPath,Godot.File.ModeFlags.Write);
-                                fh.StoreBuffer(buffer);
-                                fh.Close();
+                                if (fh.Open(iconPath,Godot.File.ModeFlags.Write) == Error.Ok) {
+                                    fh.StoreBuffer(buffer);
+                                    fh.Close();
+                                }
                             }
                         }
                     }
@@ -163,16 +164,9 @@ public class PaginatedListing : ScrollContainer
         foreach (AssetLibEntry ale in _listing.GetChildren()) {
             ale.QueueFree();
         }
-        if (alqrLastResult != null) {
-            if (alqrLastResult.Pages != result.Pages) {
-                _topPageCount.UpdateConfig(result.Pages);
-                _bottomPageCount.UpdateConfig(result.Pages);
-            }
-        } else {
-            _topPageCount.UpdateConfig(result.Pages);
-            _bottomPageCount.UpdateConfig(result.Pages);
-        }
         alqrLastResult = result;
+        _topPageCount.UpdateConfig(result.Pages);
+        _bottomPageCount.UpdateConfig(result.Pages);
         _topPageCount.SetPage(result.Page);
         _bottomPageCount.SetPage(result.Page);
         ScrollVertical = 0;
@@ -227,20 +221,18 @@ public class PaginatedListing : ScrollContainer
     [SignalHandler("download_completed", nameof(dlq))]
     void OnImageDownloaded(ImageDownloader dld) {
         foreach (AssetLibEntry ale in _listing.GetChildren()) {
-            if (ale.HasMeta("dld")) {
-                if ((ale.GetMeta("dld") as ImageDownloader) == dld) {
-                    ale.RemoveMeta("dld");
-                    string iconPath = ale.GetMeta("iconPath") as string;
-                    if (File.Exists(iconPath.GetOSDir().NormalizePath())) {
-                        Texture icon = Util.LoadImage(iconPath);
-                        if (icon == null)
-                            icon = MainWindow._plTextures["MissingIcon"];
-                        ale.Icon = icon;
-                    } else {
-                        ale.Icon = MainWindow._plTextures["MissingIcon"];
-                    }
-                    return;
+            if (ale.HasMeta("dld") && (ale.GetMeta("dld") as ImageDownloader) == dld) {
+                ale.RemoveMeta("dld");
+                string iconPath = ale.GetMeta("iconPath") as string;
+                if (File.Exists(iconPath.GetOSDir().NormalizePath())) {
+                    Texture icon = Util.LoadImage(iconPath);
+                    if (icon == null)
+                        icon = MainWindow._plTextures["MissingIcon"];
+                    ale.Icon = icon;
+                } else {
+                    ale.Icon = MainWindow._plTextures["MissingIcon"];
                 }
+                return;
             }
         }
     }

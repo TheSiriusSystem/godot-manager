@@ -77,11 +77,11 @@ public class HeaderButton : PanelContainer
 
     [SignalHandler("gui_input")]
     void OnGuiInput_Header(InputEvent @event) {
-        if (@event is InputEventMouseButton @iemb) {
-            if (@iemb.Doubleclick && @iemb.ButtonIndex == (int)ButtonList.Left) {
+        if (@event is InputEventMouseButton @iemb && @iemb.ButtonIndex == (int)ButtonList.Left) {
+            if (@iemb.Doubleclick) {
                 Direction = SortDirection.Indeterminate;
                 EmitSignal("direction_changed", Direction);
-            } else if (@iemb.Pressed && @iemb.ButtonIndex == (int)ButtonList.Left) {
+            } else if (@iemb.Pressed) {
                 Direction = (Direction == SortDirection.Down) ? SortDirection.Up : SortDirection.Down;
                 EmitSignal("direction_changed", Direction);
             }

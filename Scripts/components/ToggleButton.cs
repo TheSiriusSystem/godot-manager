@@ -19,7 +19,7 @@ public class ToggleButton : ColorRect
         if (!iemb.Pressed)
             return;
 		
-		if ((ButtonList)iemb.ButtonIndex != ButtonList.Left)
+		if (iemb.ButtonIndex != (int)ButtonList.Left)
 			return;
 
 		if (GetNode<ColorRect>("../..").RectMinSize.x == 70)	{

@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using DateTime = System.DateTime;
 
 [JsonObject(MemberSerialization.OptIn)]
-public class ProjectFile : Godot.Object {
+public class ProjectFile : Object {
 	[JsonProperty] public string Icon;
 	[JsonProperty] public string Name;
 	[JsonProperty] public string Description;
@@ -21,14 +21,14 @@ public class ProjectFile : Godot.Object {
 		var ret = project.Load(filePath);
 		if (ret == Error.Ok) {
 			if (!project.HasSection("application")) {
-				GD.PrintErr($"Section \"application\" does not exist in \"{filePath}\".");
+				GD.PrintErr($"Section \"application\" doesn't exist in \"{filePath}\".");
 				return projectFile;
 			}
 
 			filePath = filePath.NormalizePath();
 			if (gdMajorVers <= 2) {
 				if (!project.HasSectionKey("application", "name")) {
-					GD.PrintErr($"Key \"name\" does not exist in \"{filePath}\".");
+					GD.PrintErr($"Key \"name\" doesn't exist in \"{filePath}\".");
 					return projectFile;
 				}
 
@@ -39,15 +39,15 @@ public class ProjectFile : Godot.Object {
 				projectFile.Icon = project.GetValue("application", "icon", "res://icon.png");
 			} else if (gdMajorVers >= 3) {
 				if (!project.HasSection("header")) {
-					GD.PrintErr($"Section \"header\" does not exist in \"{filePath}\".");
+					GD.PrintErr($"Section \"header\" doesn't exist in \"{filePath}\".");
 					return projectFile;
 				}
 				if (!project.HasSectionKey("header", "config_version")) {
-					GD.PrintErr($"Key \"config_version\" does not exist in \"{filePath}\".");
+					GD.PrintErr($"Key \"config_version\" doesn't exist in \"{filePath}\".");
 					return projectFile;
 				}
 				if (!project.HasSectionKey("application", "config/name")) {
-					GD.PrintErr($"Key \"config/name\" does not exist in \"{filePath}\".");
+					GD.PrintErr($"Key \"config/name\" doesn't exist in \"{filePath}\".");
 					return projectFile;
 				}
 
@@ -58,7 +58,7 @@ public class ProjectFile : Godot.Object {
 				projectFile.Icon = project.GetValue("application", "config/icon", "res://icon.png");
 			}
 		} else {
-			GD.PrintErr($"Failed to load \"{filePath}\". Error Code: {ret}");
+			GD.PrintErr($"Failed to load \"{filePath.GetFile()}\". Error Code: {ret}");
 		}
 		return projectFile;
 	}
@@ -111,7 +111,7 @@ public class ProjectFile : Godot.Object {
 		ProjectConfig pf = new ProjectConfig();
 		var ret = pf.Load(Location);
 		if (ret == Error.Ok) {
-			if (CentralStore.Instance.FindVersion(GodotId).GetMajorVersion() <= 2) {
+			if (CentralStore.Instance.GetVersion(GodotId).GetMajorVersion() <= 2) {
 				pf.SetValue("application", "name", $"\"{this.Name}\"");
 				pf.SetValue("application", "icon", $"\"{this.Icon}\"");
 			} else {

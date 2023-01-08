@@ -29,7 +29,7 @@ public class CreateCategory : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_createBtn))]
 	void OnPressedCreateBtn() {
-		if (_categoryName.Text == "") {
+		if (string.IsNullOrEmpty(_categoryName.Text)) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to provide a name for this category."));
 			return;
 		}

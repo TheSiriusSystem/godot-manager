@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Assets/Icons/default_project_icon_v3.png" type="Texture" id=1]
 [ext_resource path="res://Scripts/components/AssetLibEntry.cs" type="Script" id=2]
 [ext_resource path="res://Resources/Fonts/droid-bold-14.tres" type="DynamicFont" id=3]
 [ext_resource path="res://Resources/Fonts/droid-regular-13.tres" type="DynamicFont" id=4]
 [ext_resource path="res://Assets/Icons/download.svg" type="Texture" id=5]
+[ext_resource path="res://Resources/Fonts/droid-bold-13.tres" type="DynamicFont" id=6]
 
 [node name="AssetLibEntry" type="ColorRect"]
 anchor_right = 1.0
@@ -48,46 +49,80 @@ margin_bottom = 17.0
 rect_clip_content = true
 mouse_filter = 1
 custom_fonts/font = ExtResource( 3 )
-text = "Godot Super Scaling"
+text = "My Custom Node"
 clip_text = true
 
 [node name="hc" type="HBoxContainer" parent="hc/vc"]
 margin_top = 21.0
-margin_right = 325.0
+margin_right = 265.0
 margin_bottom = 38.0
 rect_clip_content = true
 size_flags_horizontal = 0
 
-[node name="Category" type="Label" parent="hc/vc/hc"]
-margin_right = 250.0
+[node name="Label" type="Label" parent="hc/vc/hc"]
+margin_right = 60.0
 margin_bottom = 17.0
-rect_min_size = Vector2( 250, 0 )
+rect_clip_content = true
+mouse_filter = 1
+size_flags_horizontal = 0
+custom_fonts/font = ExtResource( 6 )
+text = "Category:"
+
+[node name="Category" type="Label" parent="hc/vc/hc"]
+margin_left = 64.0
+margin_right = 174.0
+margin_bottom = 17.0
+rect_min_size = Vector2( 110, 0 )
 rect_clip_content = true
 mouse_filter = 1
 size_flags_horizontal = 0
 custom_fonts/font = ExtResource( 4 )
-text = "Category: Shaders"
+text = "Local"
 clip_text = true
 
+[node name="Label2" type="Label" parent="hc/vc/hc"]
+margin_left = 178.0
+margin_right = 229.0
+margin_bottom = 17.0
+rect_clip_content = true
+mouse_filter = 1
+size_flags_horizontal = 0
+custom_fonts/font = ExtResource( 6 )
+text = "License:"
+
 [node name="License" type="Label" parent="hc/vc/hc"]
-margin_left = 254.0
-margin_right = 325.0
+margin_left = 233.0
+margin_right = 265.0
 margin_bottom = 17.0
 rect_clip_content = true
 mouse_filter = 1
 custom_fonts/font = ExtResource( 4 )
-text = "License: MIT"
+text = "None"
 
-[node name="Author" type="Label" parent="hc/vc"]
+[node name="hc2" type="HBoxContainer" parent="hc/vc"]
 margin_top = 42.0
-margin_right = 320.0
+margin_right = 928.0
 margin_bottom = 59.0
-rect_min_size = Vector2( 320, 0 )
+
+[node name="Label" type="Label" parent="hc/vc/hc2"]
+margin_right = 47.0
+margin_bottom = 17.0
+rect_clip_content = true
+mouse_filter = 1
+size_flags_horizontal = 0
+custom_fonts/font = ExtResource( 6 )
+text = "Author:"
+
+[node name="Author" type="Label" parent="hc/vc/hc2"]
+margin_left = 51.0
+margin_right = 316.0
+margin_bottom = 17.0
+rect_min_size = Vector2( 265, 0 )
 rect_clip_content = true
 mouse_filter = 1
 size_flags_horizontal = 0
 custom_fonts/font = ExtResource( 4 )
-text = "Author: cybereality"
+text = "Godette"
 clip_text = true
 
 [node name="Spacer2" type="Control" parent="hc"]

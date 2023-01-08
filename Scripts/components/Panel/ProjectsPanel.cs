@@ -260,7 +260,7 @@ public class ProjectsPanel : Panel
 	Array<string> ScanDirectories(Array<string> scanDirs) {
 		Array<string> projects = new Array<string>();
 
-		foreach (string pfExt in new string[] {"project.godot", "engine.cfg"}) {
+		foreach (string pfExt in new string[] {"engine.cfg", "project.godot"}) {
 			foreach (string dir in scanDirs) {
 				foreach (string proj in Dir.EnumerateFiles(dir, pfExt, SearchOption.AllDirectories)) {
 					projects.Add(proj);
@@ -290,7 +290,7 @@ public class ProjectsPanel : Panel
 	public async void ScanForProjects(bool autoscan = false) {
 		if (CentralStore.Versions.Count <= 0)
 		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can scan projects."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can scan for projects."));
 			return;
 		}
 
@@ -355,7 +355,6 @@ public class ProjectsPanel : Panel
 	// executed at a faster pace, then previous method of Freeing all, and Re-creating. )
 	public void PopulateListing()
 	{
-		GD.Print("Test PopulateListing()");
 		// Initialize if not initialized
 		if (pleCache == null)
 			pleCache = new Dictionary<ProjectFile, ProjectLineEntry>();
@@ -762,16 +761,15 @@ public class ProjectsPanel : Panel
 		string folder = "";
 		if (pc.HasSectionKey("application", "config/use_custom_user_dir"))
 		{
-			if (pc.GetValue("application", "config/use_custom_user_dir") == "true")
-			{
-				folder = OS.GetDataDir().Join(pc.GetValue("application","config/custom_user_dir_name"));
+			if (pc.GetValue("application", "config/use_custom_user_dir") == "true") {
+				folder = OS.GetDataDir().Join(pc.GetValue("application", "config/custom_user_dir_name"));
 			} else {
-				folder = OS.GetDataDir().Join("godot","app_userdata",pf.Name);
+				folder = OS.GetDataDir().Join("Godot", "app_userdata", pf.Name);
 			}
 		}
 		else
 		{
-			folder = OS.GetDataDir().Join("Godot","app_userdata",pf.Name);
+			folder = OS.GetDataDir().Join("Godot", "app_userdata", pf.Name);
 		}
 		return folder.NormalizePath();
 	}
@@ -787,13 +785,12 @@ public class ProjectsPanel : Panel
 
 		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
 		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} does not exist!"), gv.GetDisplayName()));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} doesn't exist."), gv.GetDisplayName()));
 			return;
 		}
 
 		ProcessStartInfo psi = new ProcessStartInfo();
 		psi.FileName = gv.GetExecutablePath().GetOSDir();
-		psi.Arguments = $"--path \"{pf.Location.GetBaseDir()}\"";
 		psi.WorkingDirectory = pf.Location.GetBaseDir().GetOSDir().NormalizePath();
 		psi.UseShellExecute = !CentralStore.Settings.NoConsole;
 		psi.CreateNoWindow = CentralStore.Settings.NoConsole;
@@ -819,39 +816,46 @@ public class ProjectsPanel : Panel
 
 		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
 		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} does not exist!"), gv.GetDisplayName()));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} doesn't exist."), gv.GetDisplayName()));
 			return;
 		}
 
 		if (!string.IsNullOrEmpty(gv.SharedSettings))
 		{
-			var ssgv = CentralStore.Instance.FindVersion(gv.SharedSettings);
-			if (ssgv is null)
+			GodotVersion ssgv = CentralStore.Instance.FindVersion(gv.SharedSettings);
+			if (ssgv == null)
 			{
-				gv.SharedSettings = string.Empty;
-				AppDialogs.MessageDialog.ShowMessage("Shared Settings Invalid", "The instance of Shared Settings that was setup for this editor version no longer exists and has been removed.");
+				gv.SharedSettings = "";
+				AppDialogs.MessageDialog.ShowMessage(Tr("Warning"), "The instance of Shared Settings that was setup for this editor version no longer exists and has been removed.");
 				CentralStore.Instance.SaveDatabase();
 			}
 			else
 			{
-				var fromPath = ssgv.Location.Join("editor_data");
-				var toPath = gv.Location.Join("editor_data");
-				var copies = new Array<string>()
-				{
-					fromPath.Join("feature_profiles"),
-					fromPath.Join("script_templates"),
-					fromPath.Join("text_editor_themes"),
-					(gv.GetMajorVersion() >= 4 && ssgv.GetMajorVersion() >= 4) ? fromPath.Join("editor_settings-4.tres") :
-						fromPath.Join("editor_settings-3.tres")
-				};
-				foreach (var path in copies)
+				int gmv = gv.GetMajorVersion();
+				string fromPath = ssgv.Location.Join("editor_data");
+				string toPath = gv.Location.Join("editor_data");
+				Array<string> copies = new Array<string>();
+				string es = "editor_settings";
+				if (gmv <= 1) {
+					es = es + ".xml";
+				} else if (gmv == 2) {
+					es = es + ".tres";
+					copies.Add(fromPath.Join("text_editor_themes"));
+				} else {
+					es = es + $"-{(gmv == 3 ? "3" : "4")}.tres";
+					copies.Add(fromPath.Join("feature_profiles"));
+					copies.Add(fromPath.Join("script_templates"));
+					copies.Add(fromPath.Join("text_editor_themes"));
+				}
+				copies.Add(fromPath.Join(es));
+				foreach (string path in copies)
 					CopyRecursive(path, toPath);
 			}
 		}
 
 		ProcessStartInfo psi = new ProcessStartInfo();
 		psi.FileName = gv.GetExecutablePath().GetOSDir();
-		psi.Arguments = $"--path \"{pf.Location.GetBaseDir()}\" -e";
+		psi.Arguments = "-e";
 		psi.WorkingDirectory = pf.Location.GetBaseDir().GetOSDir().NormalizePath();
 		psi.UseShellExecute = !CentralStore.Settings.NoConsole;
 		psi.CreateNoWindow = CentralStore.Settings.NoConsole;
@@ -887,23 +891,24 @@ public class ProjectsPanel : Panel
 		}
 	}
 
-	Array<string> BuildSharedSettingsFiles(GodotVersion gv)
+	Array<string> BuildSharedSettingsFiles(GodotVersion gv, string fromPath)
 	{
 		Array<string> files = new Array<string>();
 
 		int gmv = gv.GetMajorVersion();
 		string es = "editor_settings";
 		if (gmv <= 1) {
-			es = es.Join(".xml");
+			es = es + ".xml";
 		} else if (gmv == 2) {
-			es = es.Join(".tres");
-		} else if (gmv == 3) {
-			es = es.Join("-3.tres");
+			es = es + ".tres";
+			files.Add(fromPath.Join("text_editor_themes"));
 		} else {
-			es = es.Join("-4.tres");
+			es = es + $"-{(gmv == 3 ? "3" : "4")}.tres";
+			files.Add(fromPath.Join("feature_profiles"));
+			files.Add(fromPath.Join("script_templates"));
+			files.Add(fromPath.Join("text_editor_themes"));
 		}
-		GD.Print(es);
-		files.Add(es);
+		files.Add(fromPath.Join(es));
 		return files;
 	}
 
@@ -1005,7 +1010,7 @@ public class ProjectsPanel : Panel
 		if (dir.Open(path) == Error.Ok) {
 			dir.ListDirBegin(true, false);
 			var filename = dir.GetNext();
-			while (filename != "") {
+			while (!string.IsNullOrEmpty(filename)) {
 				if (dir.CurrentIsDir()) {
 					RemoveFolders(path.PlusFile(filename).NormalizePath());
 				}
@@ -1014,8 +1019,9 @@ public class ProjectsPanel : Panel
 			}
 			dir.ListDirEnd();
 		}
-		dir.Open(path.GetBaseDir());
-		dir.Remove(path.GetFile());
+		if (dir.Open(path.GetBaseDir()) == Error.Ok) {
+			dir.Remove(path.GetFile());
+		}
 	}
 
 	[SignalHandler("Clicked", nameof(_viewSelector))]

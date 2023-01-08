@@ -28,15 +28,10 @@ public class GDCSHTTPClient : Node {
 		}
 	}
 
-	public static string GetUserAgent() {
-		return $"User-Agent: Godot-Manager/{VERSION.GodotManager}-{VERSION.Channel} ({Platform.OperatingSystem})";
-	}
-
 	private string[] GetRequestHeaders() {
 		return new string[] {
-			//"Accept: application/vnd.github.v3+json",
 			"Accept: */*",
-			GetUserAgent()
+			$"User-Agent: Godot-Manager/{VERSION.GodotManager}-{VERSION.Channel}"
 		};
 	}
 
@@ -48,18 +43,6 @@ public class GDCSHTTPClient : Node {
 		bCancelled = true;
 	}
 	public bool IsCancelled() => bCancelled;
-
-	public void SetProxy(string host, int port, bool ssl = false) {
-		if (ssl)
-			client.SetHttpsProxy(host, port);
-		else
-			client.SetHttpProxy(host, port);
-	}
-
-	public void ClearProxy() {
-		client.SetHttpsProxy("",0);
-		client.SetHttpProxy("",0);
-	}
 
 	public async Task<HTTPClient.Status> StartClient(string host, bool use_ssl = false) {
 		client.BlockingModeEnabled = false;
@@ -175,23 +158,19 @@ public class GDCSHTTPClient : Node {
 		return resp;
 	}
 
-	public bool SuccessConnect(HTTPClient.Status result, bool dialogErrors = false, bool printErrors = true) {
+	public bool SuccessConnect(HTTPClient.Status result) {
 		switch (result) {
 			case HTTPClient.Status.CantResolve:
-				if (printErrors) GD.PrintErr(string.Format(Tr("Unable to resolve {0}"),sHost));
-				if (dialogErrors) OS.Alert(string.Format(Tr("Unable to resolve {0}"),sHost), string.Format(Tr("{0} Failure"),sProperName));
+				GD.PrintErr(string.Format(Tr("Unable to resolve {0}."),sHost));
 				return false;
 			case HTTPClient.Status.CantConnect:
-				if (printErrors) GD.PrintErr(string.Format(Tr("Unable to resolve {0}:{1}"),sHost,bUseSSL ? 443 : 80));
-				if (dialogErrors) OS.Alert(string.Format(Tr("Unable to resolve {0}:{1}"),sHost,bUseSSL ? 443 : 80), string.Format(Tr("{0} Failure"),sProperName));
+				GD.PrintErr(string.Format(Tr("Unable to resolve {0}:{1}."),sHost,bUseSSL ? 443 : 80));
 				return false;
 			case HTTPClient.Status.ConnectionError:
-				if (printErrors) GD.PrintErr(string.Format(Tr("Connection error with {0}:{1}"),sHost,bUseSSL ? 443 : 80));
-				if (dialogErrors) OS.Alert(string.Format(Tr("Connection error with {0}:{1}"),sHost,bUseSSL ? 443 : 80), string.Format(Tr("{0} Failure"),sProperName));
+				GD.PrintErr(string.Format(Tr("Connection error with {0}:{1}."),sHost,bUseSSL ? 443 : 80));
 				return false;
 			case HTTPClient.Status.SslHandshakeError:
-				if (printErrors) GD.PrintErr(string.Format(Tr("Failed to negotiate SSL Connection with {0}:{1}"),sHost,bUseSSL ? 443 : 80));
-				if (dialogErrors) OS.Alert(string.Format(Tr("Failed to negotiate SSL Connection with {0}:{1}"),sHost,bUseSSL ? 443 : 80), string.Format(Tr("{0} Failure"),sProperName));
+				GD.PrintErr(string.Format(Tr("Failed to negotiate SSL connection with {0}:{1}."),sHost,bUseSSL ? 443 : 80));
 				return false;
 			case HTTPClient.Status.Connected:
 				return true;

@@ -70,6 +70,6 @@ margin_bottom = 130.0
 size_flags_horizontal = 3
 size_flags_vertical = 1
 custom_fonts/font = ExtResource( 5 )
-text = "Godot vx.x.x"
+text = "Godot x.x.x"
 align = 1
 clip_text = true

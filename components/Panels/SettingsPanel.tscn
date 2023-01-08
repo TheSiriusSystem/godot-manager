@@ -232,6 +232,7 @@ size_flags_vertical = 3
 tabs_visible = false
 
 [node name="General" type="MarginContainer" parent="VB/MC/TC"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_constants/margin_right = 5
@@ -252,6 +253,7 @@ columns = 2
 margin_top = 1.0
 margin_right = 179.0
 margin_bottom = 20.0
+hint_tooltip = "Choose a location for downloaded editor versions."
 mouse_filter = 1
 custom_fonts/font = ExtResource( 4 )
 text = "Editor Location:"
@@ -279,6 +281,7 @@ text = "Browse"
 margin_top = 32.0
 margin_right = 179.0
 margin_bottom = 51.0
+hint_tooltip = "Choose a location for cached images and downloads."
 mouse_filter = 1
 custom_fonts/font = ExtResource( 4 )
 text = "Cache Location:"
@@ -342,7 +345,7 @@ margin_top = 122.0
 margin_right = 179.0
 margin_bottom = 141.0
 custom_fonts/font = ExtResource( 4 )
-text = "Mirror Control:"
+text = " Mirror Control:"
 align = 2
 
 [node name="UseLastMirror" type="CheckBox" parent="VB/MC/TC/General/GC"]
@@ -381,31 +384,6 @@ margin_bottom = 19.0
 custom_fonts/font = ExtResource( 13 )
 text = "Separate Editor Profiles"
 
-[node name="Label7" type="Label" parent="VB/MC/TC/General/GC"]
-margin_top = 180.0
-margin_right = 179.0
-margin_bottom = 625.0
-mouse_filter = 1
-size_flags_vertical = 5
-custom_fonts/font = ExtResource( 4 )
-text = "Mirrors:"
-align = 2
-
-[node name="MirrorTabs" type="TabContainer" parent="VB/MC/TC/General/GC"]
-margin_left = 189.0
-margin_top = 180.0
-margin_right = 994.0
-margin_bottom = 625.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-custom_styles/panel = ExtResource( 8 )
-
-[node name="Asset Library" parent="VB/MC/TC/General/GC/MirrorTabs" instance=ExtResource( 17 )]
-margin_left = 8.0
-margin_top = 28.0
-margin_right = -1.0
-margin_bottom = -1.0
-
 [node name="Projects" type="MarginContainer" parent="VB/MC/TC"]
 visible = false
 anchor_right = 1.0
@@ -425,8 +403,9 @@ custom_constants/hseparation = 10
 columns = 2
 
 [node name="Label" type="Label" parent="VB/MC/TC/Projects/GC"]
-margin_right = 145.0
+margin_right = 133.0
 margin_bottom = 21.0
+hint_tooltip = "Choose a location for new projects."
 mouse_filter = 1
 size_flags_vertical = 5
 custom_fonts/font = ExtResource( 4 )
@@ -434,34 +413,34 @@ text = "Project Location:"
 align = 2
 
 [node name="HBPL" type="HBoxContainer" parent="VB/MC/TC/Projects/GC"]
-margin_left = 155.0
+margin_left = 143.0
 margin_right = 994.0
 margin_bottom = 21.0
 size_flags_horizontal = 3
 custom_constants/separation = 20
 
 [node name="DefaultProjectLocation" type="LineEdit" parent="VB/MC/TC/Projects/GC/HBPL"]
-margin_right = 768.0
+margin_right = 780.0
 margin_bottom = 21.0
 size_flags_horizontal = 3
 
 [node name="BrowseProjectLocation" type="Button" parent="VB/MC/TC/Projects/GC/HBPL"]
-margin_left = 788.0
-margin_right = 839.0
+margin_left = 800.0
+margin_right = 851.0
 margin_bottom = 21.0
 text = "Browse"
 
 [node name="Label2" type="Label" parent="VB/MC/TC/Projects/GC"]
 margin_top = 31.0
-margin_right = 145.0
+margin_right = 133.0
 margin_bottom = 50.0
 mouse_filter = 1
 custom_fonts/font = ExtResource( 4 )
-text = "Autoscan Projects:"
+text = "Enable Autoscan:"
 align = 2
 
 [node name="AutoScanProjects" type="CheckBox" parent="VB/MC/TC/Projects/GC"]
-margin_left = 155.0
+margin_left = 143.0
 margin_top = 31.0
 margin_right = 994.0
 margin_bottom = 50.0
@@ -470,7 +449,7 @@ text = "Scan each time Godot Manager is launched"
 
 [node name="Label3" type="Label" parent="VB/MC/TC/Projects/GC"]
 margin_top = 60.0
-margin_right = 145.0
+margin_right = 133.0
 margin_bottom = 625.0
 mouse_filter = 1
 size_flags_vertical = 7
@@ -481,13 +460,12 @@ align = 2
 [node name="DirectoryScan" parent="VB/MC/TC/Projects/GC" instance=ExtResource( 17 )]
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 155.0
+margin_left = 143.0
 margin_top = 60.0
 margin_right = 994.0
 margin_bottom = 625.0
 
 [node name="About" type="VBoxContainer" parent="VB/MC/TC"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 
@@ -592,12 +570,8 @@ margin_right = 964.0
 margin_bottom = 150.0
 custom_fonts/normal_font = SubResource( 13 )
 bbcode_enabled = true
-bbcode_text = "[table=3][cell][color=green]Project Name[/color][/cell][cell][color=green]Version[/color]     [/cell][cell][color=green]Website[/color][/cell]
-[cell][color=aqua]Godot Engine (Mono Edition)      [/color][/cell][cell][color=white]vx.x.x[/color][/cell][cell][color=yellow][url]https://godotengine.org[/url][/color][/cell]
-[cell][color=aqua]GodotSharpExtras[/color][/cell][cell][color=white]vx.x.x[/color][/cell][cell][color=yellow][url]https://github.com/eumario/GodotSharpExtras[/url][/color][/cell]
-[cell][color=aqua]NewtonSoft JSON[/color][/cell][cell][color=white]vx.x.x[/color][/cell][cell][color=yellow][url]https://www.newtonsoft.com/json[/url][/color][/cell]
-[cell][color=aqua]SixLabors ImageSharp[/color][/cell][cell][color=white]vx.x.x[/color][/cell][cell][color=yellow][url]https://sixlabors.com/products/imagesharp/[/url][/color][/cell][/table]"
-text = "Project NameVersion     WebsiteGodot Engine (Mono Edition)      vx.x.xhttps://godotengine.orgGodotSharpExtrasvx.x.xhttps://github.com/eumario/GodotSharpExtrasNewtonSoft JSONvx.x.xhttps://www.newtonsoft.com/jsonSixLabors ImageSharpvx.x.xhttps://sixlabors.com/products/imagesharp/"
+bbcode_text = "[table=3][cell][color=lime]Tool                                   [/color][/cell][cell][color=lime]Version                                    [/color][/cell][cell][color=lime]Website[/color][/cell][cell][color=aqua]Godot (Mono Version)[/color][/cell][cell][color=white]x.x.x[/color][/cell][cell][color=yellow][url]https://godotengine.org[/url][/color][/cell][cell][color=aqua]GodotSharpExtras[/color][/cell][cell][color=white]x.x.x[/color][/cell][cell][color=yellow][url]https://github.com/eumario/GodotSharpExtras[/url][/color][/cell][cell][color=aqua]Json.NET[/color][/cell][cell][color=white]x.x.x[/color][/cell][cell][color=yellow][url]https://www.newtonsoft.com/json[/url][/color][/cell][cell][color=aqua]ImageSharp[/color][/cell][cell][color=white]x.x.x[/color][/cell][cell][color=yellow][url]https://sixlabors.com/products/imagesharp/[/url][/color][/cell][cell][color=aqua]System.IO.Compression[/color][/cell][cell][color=white]x.x.x[/color][/cell][cell][color=yellow][url]https://www.nuget.org/packages/System.IO.Compression/[/url][/color][/cell][/table]"
+text = "Tool                                   Version                                    WebsiteGodot (Mono Version)x.x.xhttps://godotengine.orgGodotSharpExtrasx.x.xhttps://github.com/eumario/GodotSharpExtrasJson.NETx.x.xhttps://www.newtonsoft.com/jsonImageSharpx.x.xhttps://sixlabors.com/products/imagesharp/System.IO.Compressionx.x.xhttps://www.nuget.org/packages/System.IO.Compression/"
 scroll_active = false
 
 [node name="HSeparator3" type="TextureRect" parent="VB/MC/TC/About/MC/VB"]

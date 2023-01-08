@@ -1,6 +1,7 @@
 using Godot;
 using Godot.Collections;
 using Godot.Sharp.Extras;
+using SFile = System.IO.File;
 
 public class AddonInstaller : ReferenceRect
 {
@@ -16,13 +17,11 @@ public class AddonInstaller : ReferenceRect
 #endregion
 
 #region Private Variables
+	private readonly string[] imageExts = new string[] {".bmp",".dds",".exr",".hdr",".jpg",".jpeg",".png",".svg",".tga",".webp"};
 	private PluginInstaller _installer;
 	private TreeItem _root;
 	private bool _updating = false;
 	private Dictionary<string, TreeItem> _statusMap;
-#endregion
-
-#region Public Variables
 #endregion
 
 #region Icon Registry
@@ -39,7 +38,7 @@ public class AddonInstaller : ReferenceRect
 	void InitRegistry() {
 		IconRegistry = new Dictionary<string, Texture>();
 		// Image Formats
-		AddRegistry(new string[] {".bmp",".dds",".exr",".hdr",".jpg",".jpeg",".png",".svg",".svgz",".tga",".webp"}, MainWindow._plTextures["FT_Image"]);
+		AddRegistry(imageExts, MainWindow._plTextures["FT_Image"]);
 		// Audio Formats
 		AddRegistry(new string[] {".wav",".mp3",".ogg"}, MainWindow._plTextures["FT_Audio"]);
 		// Packed Scene Formats
@@ -67,38 +66,23 @@ public class AddonInstaller : ReferenceRect
 
 	void InitIgnoreFiles() {
 		IgnoreFiles = new Array<string>();
-		IgnoreFiles.Add("res://icon.png");
-		IgnoreFiles.Add("res://icon.png.flags");
-		IgnoreFiles.Add("res://icon.png.import");
+		foreach (string ext in imageExts) {
+			IgnoreFiles.Add($"res://icon{ext}");
+			IgnoreFiles.Add($"res://icon{ext}.flags");
+			IgnoreFiles.Add($"res://icon{ext}.import");
+		}
 		IgnoreFiles.Add("res://engine.cfg");
 		IgnoreFiles.Add("res://project.godot");
 		IgnoreFiles.Add("res://default_env.tres");
+		IgnoreFiles.Add("res://.fscache");
 		IgnoreFiles.Add("res://.gitignore");
 		IgnoreFiles.Add("res://.gitattributes");
-		IgnoreFiles.Add("res://README");
-		IgnoreFiles.Add("res://README.txt");
-		IgnoreFiles.Add("res://README.md");
-		IgnoreFiles.Add("res://LICENSE");
-		IgnoreFiles.Add("res://LICENSE.txt");
-		IgnoreFiles.Add("res://LICENSE.md");
-		IgnoreFiles.Add("res://LICENCE");
-		IgnoreFiles.Add("res://LICENCE.txt");
-		IgnoreFiles.Add("res://LICENCE.md");
-		IgnoreFiles.Add("res://CODE_OF_CONDUCT");
-		IgnoreFiles.Add("res://CODE_OF_CONDUCT.txt");
-		IgnoreFiles.Add("res://CODE_OF_CONDUCT.md");
-		IgnoreFiles.Add("res://CONTRIBUTING");
-		IgnoreFiles.Add("res://CONTRIBUTING.txt");
-		IgnoreFiles.Add("res://CONTRIBUTING.md");
-		IgnoreFiles.Add("res://SECURITY");
-		IgnoreFiles.Add("res://SECURITY.txt");
-		IgnoreFiles.Add("res://SECURITY.md");
-		IgnoreFiles.Add("res://CREDITS");
-		IgnoreFiles.Add("res://CREDITS.txt");
-		IgnoreFiles.Add("res://CREDITS.md");
-		IgnoreFiles.Add("res://CHANGELOG");
-		IgnoreFiles.Add("res://CHANGELOG.txt");
-		IgnoreFiles.Add("res://CHANGELOG.md");
+		foreach (string fileName in new string[] {"README", "READ_ME", "LICENSE", "LICENCE", "CODE_OF_CONDUCT", "CODEOF_CONDUCT", "CODE_OFCONDUCT", "CODEOFCONDUCT", "CONTRIBUTE", "CONTRIBUTED", "CONTRIBUTING", "CONTRIBUTOR", "CONTRIBUTORS", "SECURITY", "CREDITS", "TODO", "TODO_LIST", "CHANGES", "CHANGELOG", "CHANGE_LOG", "UPDATELOG", "UPDATE_LOG"}) {
+			IgnoreFiles.Add($"res://{fileName}");
+			IgnoreFiles.Add($"res://{fileName}.txt");
+			IgnoreFiles.Add($"res://{fileName}.md");
+			IgnoreFiles.Add($"res://{fileName}.rst");
+		}
 	}
 
 	public override void _Ready()
@@ -111,7 +95,7 @@ public class AddonInstaller : ReferenceRect
 
 	public void ShowDialog(AssetPlugin asset) {
 		_installer = new PluginInstaller(asset);
-		_detailLabel.Text = string.Format(Tr("Contents of asset \"{0}\"\nSelect the files to install for new projects:"), asset.Asset.Title);
+		_detailLabel.Text = string.Format(Tr("Contents of asset \"{0}\"\nSelect the files to install during project creation:"), asset.Asset.Title);
 		PopulateTree();
 		Visible = true;
 	}
@@ -162,12 +146,12 @@ public class AddonInstaller : ReferenceRect
 
 		int selectedFiles = 0;
 		foreach (TreeItem value in _statusMap.Values) {
-			if (value.GetIcon(0) != IconRegistry["::folder::"] && value.IsChecked(0)) {
+			if (value != null && value.IsChecked(0)) {
 				selectedFiles++;
 			}
 		}
 		if (selectedFiles <= 0) {
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("No files are selected."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to select an addon file."));
 			return;
 		}
 
@@ -190,7 +174,7 @@ public class AddonInstaller : ReferenceRect
 
 		string path = item.GetMetadata(0) as string;
 
-		if (path == string.Empty || item == _root) {
+		if (path == "" || item == _root) {
 			UpdateSubitems(item, item.IsChecked(0), true);
 		}
 
@@ -207,6 +191,11 @@ public class AddonInstaller : ReferenceRect
 
 
 	void PopulateTree() {
+		if (!SFile.Exists(_installer.AssetPlugin.Location)) {
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The addon archive doesn't exist."));
+			return;
+		}
+
 		// Original code inspired by editor_asset_installer.cpp
 		_updating = true;
 		_addonTree.Clear();
@@ -233,7 +222,7 @@ public class AddonInstaller : ReferenceRect
 				isdir = true;
 			}
 
-			if (path == "")
+			if (string.IsNullOrEmpty(path))
 				continue;
 
 			int pp = path.FindLast("/");
@@ -263,7 +252,7 @@ public class AddonInstaller : ReferenceRect
 				string ext = file.GetExtension().ToLower();
 				if (IconRegistry.ContainsKey(ext)) {
 					ti.SetIcon(0, IconRegistry[ext]);
-				} else if (ext == string.Empty) {
+				} else if (ext == "") {
 					ti.SetIcon(0, IconRegistry["::noext::"]);
 				} else {
 					ti.SetIcon(0, IconRegistry["::unknown::"]);

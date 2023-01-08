@@ -126,8 +126,7 @@ namespace AssetLib {
 				return ret;
 			}
 
-			if (result.ResponseCode == 200) {
-				if (!result.Cancelled && result.Body != "")
+			if (result.ResponseCode == 200 && !result.Cancelled && !string.IsNullOrEmpty(result.Body)) {
 					ret = JsonConvert.DeserializeObject<QueryResult>(result.Body, Github.DefaultSettings.defaultJsonSettings);
 			}
 			
@@ -155,7 +154,7 @@ namespace AssetLib {
 			if (sort_by % 2 == 1)
 				args += $"&reverse=true";
 			
-			if (filter != "")
+			if (!string.IsNullOrEmpty(filter))
 				args += $"&filter={Uri.EscapeDataString(filter)}";
 			
 			if (page > 0)

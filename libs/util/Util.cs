@@ -12,8 +12,6 @@ using System.IO.Compression;
 
 public static class Util
 {
-
-	private static Godot.Object dummy = new Godot.Object();
 	public static string GetResourceBase(this string path, string file) {
 		return Path.Combine(path.GetBaseDir(), file.Replace("res://", "")).Replace(@"\","/");
 	}
@@ -30,8 +28,8 @@ public static class Util
 		return Path.GetExtension(path);
 	}
 
-	static string[] ByteSizes = new string[5] { "B", "KB", "MB", "GB", "TB"};
-
+	static string[] ByteSizes = new string[] {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "RB", "QB"};
+	static string[] InvalidChars = new string[] {@"\", "/", ":", "*", "?", "\"", "<", ">", "|"};
 
 	public static string FormatSize(double bytes) {
 		double len = bytes;
@@ -45,9 +43,16 @@ public static class Util
 
 	public static string NormalizePath(this string path) {
 		if (path.StartsWith("res://") || path.StartsWith("user://"))
-			return Path.GetFullPath(ProjectSettings.GlobalizePath(path)); //path.Replace(@"\", "/");
+			return Path.GetFullPath(ProjectSettings.GlobalizePath(path));
 		else
-			return Path.GetFullPath(path); //path.Replace("/",@"\");
+			return Path.GetFullPath(path);
+	}
+
+	public static string NormalizeFileName(this string text) {
+		foreach (string invalidChar in InvalidChars) {
+			text = text.Replace(invalidChar, "");
+		}
+		return text;
 	}
 
 	public static string Join(this string path, params string[] addTo) {
@@ -81,7 +86,7 @@ public static class Util
 		}
 		return parts.Length == 0 ? path : path.Join(parts);
 	}
-	
+
 	public static string GetDatabaseFile()
 	{	
 		string path = GetUserFolder("central_store.json");
@@ -126,6 +131,21 @@ public static class Util
 		file.CopyTo(destFile);
 	}
 
+	public static void ExtractFromZipFolderTo(string sourceArchiveFileName, string destinationDirectoryName) {
+		using (ZipArchive za = ZipFile.OpenRead(sourceArchiveFileName.NormalizePath())) {
+			foreach (ZipArchiveEntry zae in za.Entries) {
+				int pp = zae.FullName.Find("/") + 1;
+				string path = destinationDirectoryName.PlusFile(zae.FullName.Substr(pp, zae.FullName.Length)).NormalizePath();
+				if (zae.FullName.EndsWith("/")) {
+					// Is folder, we need to ensure to make the folder in the destination.
+					Dir.CreateDirectory(path);
+				} else {
+					zae.ExtractToFile(path);
+				}
+			}
+		}
+	}
+
 	public static SignalAwaiter IdleFrame(this Godot.Object obj) {
 		return obj.ToSignal(Engine.GetMainLoop(), "idle_frame");
 	}
@@ -168,65 +188,24 @@ public static class Util
 		return texture;
 	}
 
-	public static string Which(string cmd)
-	{
-		Array output = new Array();
-		#if GODOT_X11 || GODOT_LINUXBSD || GODOT_OSX || GODOT_MACOS
-		string which = "which";
-		#elif GODOT_WINDOWS || GODOT_UWP
-		string which = "where";
-		#endif
-		int exit_code = OS.Execute(which, new string[] { cmd }, true, output);
-		if (exit_code != 0)
-			return null;
-		else
-			return (output[0] as string).StripEdges();
-	}
-	
-	public static string FindChmod()
-	{
-		return Which("chmod");
-	}
-
-	public static string FindXAttr()
-	{
-		return Which("xattr");
-	}
-
+#if GODOT_LINUXBSD || GODOT_X11 || GODOT_MACOS || GODOT_OSX
 	public static bool Chmod(string path, int perms) {
-		string chmod_cmd = FindChmod();
-		if (chmod_cmd == "")
+		string chmod_cmd = "";
+		Array output = new Array();
+		int exit_code = OS.Execute("which", new string[] { "chmod" }, true, output);
+		if (exit_code == 0)
+			chmod_cmd = (output[0] as string).StripEdges();
+
+		if (string.IsNullOrEmpty(chmod_cmd))
 			return false;
-		
-		int exit_code = OS.Execute(chmod_cmd, new string[] { perms.ToString(), path.GetOSDir() }, true);
+
+		exit_code = OS.Execute(chmod_cmd, new string[] { perms.ToString(), path.GetOSDir() }, true);
 		if (exit_code != 0) 
 			return false;
-		
+
 		return true;
 	}
-
-	public static bool XAttr(string path, string flags) {
-		string xattr_cmd = FindXAttr();
-		if (xattr_cmd == "")
-			return false;
-		
-		int exit_code = OS.Execute(xattr_cmd, new string[] { flags, path.GetOSDir() }, true);
-		if (exit_code != 0)
-			return false;
-		
-		return true;
-	}
-
-	public static string GetUpdateFolder() {
-		string path = OS.GetExecutablePath();
-		string base_path = "";
-#if GODOT_WINDOWS || GODOT_UWP || GODOT_LINUXBSD || GODOT_X11
-		base_path = path.GetBaseDir().NormalizePath();
-#elif GODOT_MACOS || GODOT_OSX
-		base_path = path.GetParentFolder().GetBaseDir().NormalizePath();
 #endif
-		return base_path.Join("update").NormalizePath();
-	}
 
 	public static string ReadFile(this ZipArchiveEntry zae) {
 		byte[] buffer = new byte[zae.Length];
@@ -255,94 +234,4 @@ public static class Util
 	public static void UpdateTr(this MenuButton self, int indx, string text) {
 		self.GetPopup().SetItemText(indx, text);
 	}
-	
-	#if GODOT_X11 || GODOT_LINUXBSD
-	private static string FindPkExec()
-	{
-		if (Which("pkexec") != null)
-			return Which("pkexec");
-		if (Which("gksu") != null)
-			return Which("gksu");
-		if (Which("gksudo") != null)
-			return Which("gksudo");
-		if (Which("kdesudo") != null)
-			return Which("kdesudo");
-		return Which("sudo");
-	}
-	public static int PkExec(string command, string shortDesc, string longDesc)
-	{
-		string pkexec = FindPkExec();
-		if (pkexec == null)
-		{
-			GD.Print("Failed to find suitable Set-User command!");
-			return 127;
-		}
-
-		Array<string> args = new Array<string>();
-		
-		if (pkexec.Contains("pkexec"))
-		{
-			args.Add("--disable-internal-agent");
-		}
-
-		if (pkexec.Contains("gksu") || pkexec.Contains("gksudo"))
-		{
-			args.Add("--preserve-env");
-			args.Add("--sudo-mode");
-			args.Add($"--description '{shortDesc}'");
-		}
-
-		if (pkexec.Contains("kdesudo"))
-		{
-			args.Add($"--comment '{longDesc}'");
-		}
-
-		if (pkexec.Contains("sudo") && !(pkexec.Contains("gksudo") || pkexec.Contains("kdesudo")))
-		{
-			return OS.Execute("bash", new string[] { pkexec, "-e", command }, true, null, false, true);
-		}
-
-		args.Add(command);
-		return OS.Execute(pkexec, args.ToArray(), true);
-	}
-
-	public static int XdgDesktopInstall(string desktopFile)
-	{
-		string xdg_desktop_menu = Which("xdg-desktop-menu");
-		if (xdg_desktop_menu == null)
-		{
-			GD.Print("Failed to find XDG Desktop Menu command, unable to install Desktop entry.");
-			return -127;
-		}
-
-		return OS.Execute(xdg_desktop_menu,
-			new string[] { "install", "--mode", "user", desktopFile }, true);
-	}
-
-	public static int XdgDesktopUninstall(string desktopFile)
-	{
-		string xdg_desktop_menu = Which("xdg-desktop-menu");
-		if (xdg_desktop_menu == null)
-		{
-			GD.Print("Failed to find XDG Desktop Menu Command, unable to uninstall Desktop entry.");
-			return -127;
-		}
-
-		return OS.Execute(xdg_desktop_menu,
-			new string[] { "uninstall", "--mode", "user", desktopFile }, true);
-	}
-
-	public static int XdgDesktopUpdate()
-	{
-		string xdg_desktop_menu = Which("xdg-desktop-menu");
-		if (xdg_desktop_menu == null)
-		{
-			GD.Print("Failed to find XDG Desktop Menu command, unable to install Desktop entry.");
-			return -127;
-		}
-
-		return OS.Execute(xdg_desktop_menu,
-			new string[] { "forceupdate", "--mode", "user" });
-	}
-#endif
 }

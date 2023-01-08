@@ -1,6 +1,7 @@
 using Godot;
 using Godot.Sharp.Extras;
 using Godot.Collections;
+using File = System.IO.File;
 using Directory = System.IO.Directory;
 
 public class MainWindow : Control
@@ -112,15 +113,9 @@ public class MainWindow : Control
 
 		var res = CleanupCarriageReturns();
 
-		if (CentralStore.Settings.UseSystemTitlebar) {
-			OS.WindowBorderless = false;
-			GetTree().Root.GetNode<Titlebar>("MainWindow/bg/Shell/VC/TitleBar").Visible = false;
-			GetTree().Root.GetNode<Control>("MainWindow/bg/Shell/VC/VisibleSpacer").Visible = true;
-		} else {
-			OS.WindowBorderless = true;
-			GetTree().Root.GetNode<Titlebar>("MainWindow/bg/Shell/VC/TitleBar").Visible = true;
-			GetTree().Root.GetNode<Control>("MainWindow/bg/Shell/VC/VisibleSpacer").Visible = false;
-		}
+		OS.WindowBorderless = !CentralStore.Settings.UseSystemTitlebar;
+		GetTree().Root.GetNode<Titlebar>("MainWindow/bg/Shell/VC/TitleBar").Visible = !CentralStore.Settings.UseSystemTitlebar;
+		GetTree().Root.GetNode<Control>("MainWindow/bg/Shell/VC/VisibleSpacer").Visible = CentralStore.Settings.UseSystemTitlebar;
 
 		if (CentralStore.Settings.FirstTimeRun)
 		{
@@ -131,6 +126,8 @@ public class MainWindow : Control
 		{
 			_projectsPanel.ScanForProjects(true);
 		}
+
+		RemoveMissingAssets();
 	}
 
 	private Array<int> CleanupCarriageReturns(Node node = null)
@@ -168,8 +165,7 @@ public class MainWindow : Control
 	public void EnsureDirStructure() {
 		string[] paths = new string[] {
 			CentralStore.Settings.CachePath.GetOSDir(),
-			CentralStore.Settings.CachePath.Join("downloads", "editors").GetOSDir(),
-			CentralStore.Settings.CachePath.Join("downloads", "assets").GetOSDir(),
+			CentralStore.Settings.CachePath.Join("downloads").GetOSDir(),
 			CentralStore.Settings.CachePath.Join("images").GetOSDir(),
 			CentralStore.Settings.EnginePath.GetOSDir()
 		};
@@ -178,6 +174,24 @@ public class MainWindow : Control
 			if (!Directory.Exists(path))
 				Directory.CreateDirectory(path);
 		}
+	}
+
+	public void RemoveMissingAssets() {
+		int missingAssets = 0;
+        for (int i = 0; i < CentralStore.Plugins.Count; i++) {
+            if (CentralStore.Plugins[i] == null || !File.Exists(CentralStore.Plugins[i].Location.NormalizePath())) {
+                CentralStore.Plugins.Remove(CentralStore.Plugins[i]);
+                missingAssets++;
+            }
+        }
+        for (int i = 0; i < CentralStore.Templates.Count; i++) {
+            if (CentralStore.Templates[i] == null || !File.Exists(CentralStore.Templates[i].Location.NormalizePath())) {
+                CentralStore.Templates.Remove(CentralStore.Templates[i]);
+                missingAssets++;
+            }
+        }
+        if (missingAssets > 0)
+            CentralStore.Instance.SaveDatabase();
 	}
 
 	public void UpdateWindow() {

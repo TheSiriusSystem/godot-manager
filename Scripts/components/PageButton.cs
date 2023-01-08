@@ -79,7 +79,7 @@ public class PageButton : ColorRect
             return;
         
         var iemb = inputEvent as InputEventMouseButton;
-        if (!iemb.Pressed && (ButtonList)iemb.ButtonIndex != ButtonList.Left)
+        if (!iemb.Pressed && iemb.ButtonIndex != (int)ButtonList.Left)
             return;
 
         Activate();

@@ -30,40 +30,9 @@ namespace Mirrors {
 			client = new GDCSHTTPClient();
 		}
 
-		public async Task<Array<MirrorSite>> GetMirrors() {
-			Array<MirrorSite> mirrors = new Array<MirrorSite>();
-			Uri uri = new Uri("https://gmm.cdwgames.com/mirrors");
-			Task<HTTPClient.Status> cres = client.StartClient(uri.Host, uri.Port, true);
-
-			while (!cres.IsCompleted)
-				await this.IdleFrame();
-			
-			if (!client.SuccessConnect(cres.Result))
-				return mirrors;
-			
-			string path = uri.AbsolutePath;
-			var tresult = client.MakeRequest(path);
-			while (!tresult.IsCompleted)
-				await this.IdleFrame();
-			
-			Mutex mutex = new Mutex();
-			mutex.Lock();
-			HTTPResponse result = tresult.Result;
-
-			client.Close();
-
-			if (result.ResponseCode != 200)
-				return mirrors;
-			else
-				mirrors = JsonConvert.DeserializeObject<Array<MirrorSite>>(result.Body, DefaultSettings.defaultJsonSettings);
-			mutex.Unlock();
-
-			return mirrors;
-		}
-
-		public async Task<Array<MirrorVersion>> GetEngineLinks(int mirrorId) {
+		public async Task<Array<MirrorVersion>> GetEngineLinks() {
 			Array<MirrorVersion> versions = new Array<MirrorVersion>();
-			Uri uri = new Uri($"https://gmm.cdwgames.com/listings/{mirrorId}");
+			Uri uri = new Uri("https://gmm.cdwgames.com/listings/1");
 			Task<HTTPClient.Status> cres = client.StartClient(uri.Host, uri.Port, true);
 
 			while (!cres.IsCompleted)

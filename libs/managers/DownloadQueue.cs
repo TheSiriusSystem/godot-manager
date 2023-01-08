@@ -48,7 +48,7 @@ public class DownloadQueue : Node {
 		active.Add(dld);
 		var task = dld.StartDownload();
 		if (task.IsFaulted)
-			GD.Print($"Exception Occurred: {task.Exception}");
+			GD.PrintErr($"An exception occurred. Error Code: {task.Exception}");
 		dld.ActiveTask = task;
 	}
 
@@ -74,12 +74,6 @@ public class DownloadQueue : Node {
 		if (active.Count == 0) {
 			EmitSignal("queue_finished");
 			checkActive.Stop();
-		}
-	}
-
-	public void PrintQueue() {
-		foreach (ImageDownloader dld in queued) {
-			GD.Print($"Queued: {dld.Url}");
 		}
 	}
 }

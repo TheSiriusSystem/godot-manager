@@ -82,7 +82,7 @@ public class PluginInstaller : Object
 			
 			foreach (string file in files) {
 				string path = file.Substr(file.IndexOf("/")+1,file.Length);
-				if (subFolder != "")
+				if (string.IsNullOrEmpty(subFolder))
 					path = "addons/".Join(subFolder,path);
 				else
 					path = "addons/".Join(path);
@@ -112,11 +112,11 @@ public class PluginInstaller : Object
 				if (path.IndexOf("/") >= 0)
 					path = path.Substr(path.IndexOf("/")+1,path.Length);
 				
-				if (path == "")
+				if (string.IsNullOrEmpty(path))
 					continue;
 
 				if (needAddonsFolder) {
-					if (subFolder != "")
+					if (string.IsNullOrEmpty(subFolder))
 						path = "addons/".Join(subFolder,path);
 					else
 						path = "addons/".Join(path);
@@ -145,7 +145,7 @@ public class PluginInstaller : Object
 									try {
 										zae.ExtractToFile(instLocation.Join(path).NormalizePath(), true);
 									} catch (System.Exception ex) {
-										GD.PrintErr($"Failed to write to file: {zae.Name} Reason: {ex.Message}");
+										GD.PrintErr($"Failed to write to file \"{zae.Name}\". Error Code: {ex.Message}");
 									}
 									break;
 								case FileConflictDialog.ConflictAction.Abort:
@@ -155,7 +155,7 @@ public class PluginInstaller : Object
 							try {
 								zae.ExtractToFile(instLocation.Join(path).NormalizePath());
 							} catch(System.Exception ex) {
-								GD.PrintErr($"Failed to write file: {zae.Name} Reason: {ex.Message}");
+								GD.PrintErr($"Failed to write to file \"{zae.Name}\". Error Code: {ex.Message}");
 							}
 						}
 					}
@@ -199,7 +199,7 @@ public class PluginInstaller : Object
 			} else {
 				string path = file.Substr(file.IndexOf("/")+1,file.Length);
 				if (needAddonsFolder)
-					if (subFolder != "")
+					if (string.IsNullOrEmpty(subFolder))
 						path = "addons/".Join(subFolder,path);
 					else
 						path = "addons/".Join(path);
@@ -213,7 +213,7 @@ public class PluginInstaller : Object
 		foreach (string dir in dirs.Reverse()) {
 			string path = dir.Substr(dir.IndexOf("/")+1,dir.Length);
 			if (needAddonsFolder)
-				if (subFolder != "")
+				if (string.IsNullOrEmpty(subFolder))
 					path = "addons/".Join(subFolder,path);
 				else
 					path = "addons/".Join(path);

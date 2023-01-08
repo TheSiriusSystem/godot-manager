@@ -47,7 +47,7 @@ public class SysButton : ColorRect
             return;
         
         var iemb = inputEvent as InputEventMouseButton;
-        if (iemb.Pressed && (ButtonList)iemb.ButtonIndex == ButtonList.Left) {
+        if (iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left) {
             switch (ButtonType) {
                 case TYPES.close:
                     if (WindowHandle is MainWindow) {
