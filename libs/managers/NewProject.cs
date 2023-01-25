@@ -129,6 +129,7 @@ public class NewProject : Object {
 					writer.WriteLine("* text=auto eol=lf");
 				}
 				using (StreamWriter writer = new StreamWriter(gitignorePath)) {
+					writer.WriteLine(".vs/");
 					writer.WriteLine(".DS_Store");
 					writer.WriteLine("");
 					writer.WriteLine("# Godot 1 specific ignores");
