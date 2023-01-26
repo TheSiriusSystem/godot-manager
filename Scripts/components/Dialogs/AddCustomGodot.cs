@@ -57,6 +57,7 @@ public class AddCustomGodot : ReferenceRect
 		foreach (string str in new string[] {"godot_v", "_console", "_win32", "_win64", "_stable", "-stable", file.GetExtension()}) {
 			_Tag.Text = _Tag.Text.ReplaceN(str, "");
 		}
+		_Tag.Text = _Tag.Text.ReplaceN("_mono", "-mono");
 		_Location.Text = file;
 	}
 
