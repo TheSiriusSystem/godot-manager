@@ -10,6 +10,7 @@ public class MainWindow : Control
 	Array<PageButton> _buttons;
 	[NodePath("bg/Shell/VC/TabContainer")] TabContainer _notebook = null;
 	[NodePath("bg/Shell/VC/TabContainer/Projects")] ProjectsPanel _projectsPanel = null;
+	[NodePath("bg/Shell/VC/TabContainer/Godot")] GodotPanel _godotPanel = null;
 
 #region Public Variables
 	// CustomGodot Dialog Filter
@@ -116,6 +117,7 @@ public class MainWindow : Control
 		OS.WindowBorderless = !CentralStore.Settings.UseSystemTitlebar;
 		GetTree().Root.GetNode<Titlebar>("MainWindow/bg/Shell/VC/TitleBar").Visible = !CentralStore.Settings.UseSystemTitlebar;
 		GetTree().Root.GetNode<Control>("MainWindow/bg/Shell/VC/VisibleSpacer").Visible = CentralStore.Settings.UseSystemTitlebar;
+		_godotPanel.Connect("godot_removed", _projectsPanel, "RefreshList");
 
 		if (CentralStore.Settings.FirstTimeRun)
 		{

@@ -21,30 +21,33 @@ size_flags_vertical = 3
 margin_right = 1024.0
 
 [node name="TopPageCount" parent="VBoxContainer" instance=ExtResource( 2 )]
+visible = false
+margin_bottom = 23.0
 
 [node name="Spacer3" type="Control" parent="VBoxContainer"]
-margin_top = 28.0
+margin_top = 4.0
 margin_right = 1024.0
-margin_bottom = 48.0
+margin_bottom = 24.0
 rect_min_size = Vector2( 0, 20 )
 
 [node name="Listing" type="GridContainer" parent="VBoxContainer"]
-margin_top = 52.0
+margin_top = 28.0
 margin_right = 1024.0
-margin_bottom = 521.0
+margin_bottom = 545.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/vseparation = 30
 columns = 2
 
 [node name="Spacer4" type="Control" parent="VBoxContainer"]
-margin_top = 525.0
+margin_top = 549.0
 margin_right = 1024.0
-margin_bottom = 545.0
+margin_bottom = 569.0
 rect_min_size = Vector2( 0, 20 )
 
 [node name="BottomPageCount" parent="VBoxContainer" instance=ExtResource( 2 )]
-margin_top = 549.0
+visible = false
+margin_top = 550.0
 margin_bottom = 569.0
 
 [node name="Spacer2" type="Control" parent="VBoxContainer"]

@@ -41,6 +41,7 @@ public class ViewToggleButtons : PanelContainer
             icon.RectMinSize = new Vector2(20,20);
             icon.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
             icon.Expand = true;
+            icon.MouseDefaultCursorShape = CursorShape.PointingHand;
             icon_bg.AddChild(icon);
             _icons.Add(icon_bg);
             

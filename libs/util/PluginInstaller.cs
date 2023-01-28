@@ -1,6 +1,5 @@
 using Godot;
 using Godot.Collections;
-using System.Linq;
 using Directory = System.IO.Directory;
 using SFile = System.IO.File;
 using System.IO.Compression;
@@ -47,7 +46,7 @@ public class PluginInstaller : Object
 		
 		Array<string> files = new Array<string>();
 
-		using (ZipArchive za = ZipFile.OpenRead(ProjectSettings.GlobalizePath(_plugin.Location))) {
+		using (ZipArchive za = ZipFile.OpenRead(_plugin.Location.GetOSDir())) {
 			foreach (ZipArchiveEntry zae in za.Entries) {
 				files.Add(zae.FullName);
 			}
@@ -62,7 +61,7 @@ public class PluginInstaller : Object
 		Array<string> files = new Array<string>();
 		Array<string> ret = new Array<string>();
 
-		using (ZipArchive za = ZipFile.OpenRead(ProjectSettings.GlobalizePath(_plugin.Location))) {
+		using (ZipArchive za = ZipFile.OpenRead(_plugin.Location.GetOSDir())) {
 			bool needAddonsFolder = true;
 			foreach (ZipArchiveEntry zae in za.Entries) {
 				files.Add(zae.FullName);
@@ -103,7 +102,7 @@ public class PluginInstaller : Object
 			}
 		}
 
-		using (ZipArchive za = ZipFile.OpenRead(ProjectSettings.GlobalizePath(_plugin.Location))) {
+		using (ZipArchive za = ZipFile.OpenRead(_plugin.Location.GetOSDir())) {
 			if (needAddonsFolder)
 				GetSubFolder(za);
 			
@@ -154,7 +153,7 @@ public class PluginInstaller : Object
 						} else {
 							try {
 								zae.ExtractToFile(instLocation.Join(path).NormalizePath());
-							} catch(System.Exception ex) {
+							} catch (System.Exception ex) {
 								GD.PrintErr($"Failed to write to file \"{zae.Name}\". Error Code: {ex.Message}");
 							}
 						}
@@ -172,71 +171,6 @@ public class PluginInstaller : Object
 		foreach (string file in Directory.EnumerateFiles(path)) {
 			if (file.EndsWith(".import"))
 				SFile.Delete(file);
-		}
-	}
-
-	public void Uninstall(string instLocation, bool showDialogs=true) {
-		Array<string> files = _plugin.InstallFiles;
-		Array<string> dirs = new Array<string>();
-		bool needAddonsFolder = true;
-		bool dirtyUninstall = false;
-		foreach (string file in files) {
-			if (file.IndexOf("addons") >= 0) {
-				needAddonsFolder = false;
-				break;
-			}
-		}
-
-		if (needAddonsFolder) {
-			using (ZipArchive za = ZipFile.OpenRead(ProjectSettings.GlobalizePath(_plugin.Location))) {
-				GetSubFolder(za);
-			}
-		}
-
-		foreach (string file in files) {
-			if (file.EndsWith("/")) {
-				dirs.Add(file);
-			} else {
-				string path = file.Substr(file.IndexOf("/")+1,file.Length);
-				if (needAddonsFolder)
-					if (string.IsNullOrEmpty(subFolder))
-						path = "addons/".Join(subFolder,path);
-					else
-						path = "addons/".Join(path);
-
-				if (SFile.Exists(instLocation.Join(path).NormalizePath())) {
-					SFile.Delete(instLocation.Join(path).NormalizePath());
-				}
-			}
-		}
-
-		foreach (string dir in dirs.Reverse()) {
-			string path = dir.Substr(dir.IndexOf("/")+1,dir.Length);
-			if (needAddonsFolder)
-				if (string.IsNullOrEmpty(subFolder))
-					path = "addons/".Join(subFolder,path);
-				else
-					path = "addons/".Join(path);
-			
-			if (path == "addons/")
-				continue;
-			
-			DeleteImports(instLocation.Join(path));
-
-			if (Directory.Exists(instLocation.Join(path).NormalizePath())) {
-				if (Directory.EnumerateFileSystemEntries(instLocation.Join(path)).Count() == 0)
-					Directory.Delete(instLocation.Join(path).NormalizePath());
-				else
-					dirtyUninstall = true;
-			}
-		}
-
-		if (dirtyUninstall) {
-			if (showDialogs)
-				AppDialogs.MessageDialog.ShowMessage(
-					string.Format(Tr("Uninstall {0}"),_plugin.Asset.Title),
-					Tr("Godot Manager has uninstalled the plugin, but files may still remain, please check your Project.")
-				);
 		}
 	}
 }

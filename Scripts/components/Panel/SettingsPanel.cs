@@ -49,10 +49,10 @@ public class SettingsPanel : Panel
 	[NodePath("VB/MC/TC/General/GC/ProjectView")]
 	OptionButton _defaultProjectView = null;
 
-	[NodePath("VB/MC/TC/General/GC/TitleBar")]
+	[NodePath("VB/MC/TC/General/GC/HBSI/TitleBar")]
 	private CheckBox _useSystemTitlebar = null;
 
-	[NodePath("VB/MC/TC/General/GC/UseLastMirror")]
+	[NodePath("VB/MC/TC/General/GC/HBMC/UseLastMirror")]
 	CheckBox _useLastMirror = null;
 
 	[NodePath("VB/MC/TC/General/GC/HBLO/NoConsole")]
@@ -69,7 +69,7 @@ public class SettingsPanel : Panel
 	[NodePath("VB/MC/TC/Projects/GC/HBPL/BrowseProjectLocation")]
 	Button _browseProjectLocation = null;
 
-	[NodePath("VB/MC/TC/Projects/GC/AutoScanProjects")]
+	[NodePath("VB/MC/TC/Projects/GC/HBEA/AutoScanProjects")]
 	CheckBox _autoScanProjects = null;
 
 	[NodePath("VB/MC/TC/Projects/GC/DirectoryScan")]
@@ -250,7 +250,7 @@ public class SettingsPanel : Panel
 			LoadSettings();
 		} else {
 			if (_undoActions.Count > 0) {
-				var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Unsaved Settings"), 
+				var res = AppDialogs.YesNoDialog.ShowDialog(Tr("Please Confirm..."), 
 					Tr("You have unsaved settings, do you wish to save your settings?"));
 				await res;
 				if (res.Result)
@@ -340,16 +340,16 @@ public class SettingsPanel : Panel
 
 #region Event Handlers for General Page
 	[SignalHandler("text_changed", nameof(_godotInstallLocation))]
-	void OnGodotInstallLocation() {
-		string oldVal = CentralStore.Settings.EnginePath;
+	void OnGodotInstallLocation(string text) {
+		string oldVal = CentralStore.Settings.EnginePath.GetOSDir().NormalizePath();
 		if (!bPInternal) {
 			_undoActions.Push(() => {
 				CentralStore.Settings.EnginePath = oldVal;
-				_godotInstallLocation.Text = oldVal.GetOSDir().NormalizePath();
+				text = oldVal;
 			});
 			updateActionButtons();
 		}
-		CentralStore.Settings.EnginePath = _godotInstallLocation.Text;
+		CentralStore.Settings.EnginePath = text.GetOSDir().NormalizePath();
 	}
 
 	[SignalHandler("pressed", nameof(_godotBrowseButton))]
@@ -362,7 +362,7 @@ public class SettingsPanel : Panel
 
 	void OnBrowseGodot_DirSelected(string dir_name) {
 		_godotInstallLocation.Text = dir_name.GetOSDir().NormalizePath();
-		OnGodotInstallLocation();
+		OnGodotInstallLocation(_godotInstallLocation.Text);
 	}
 
 	void OnPopupHide()
@@ -384,15 +384,16 @@ public class SettingsPanel : Panel
 	}
 
 	[SignalHandler("text_changed", nameof(_cacheInstallLocation))]
-	void OnCacheInstallLocation() {
-		string oldVal = CentralStore.Settings.CachePath;
+	void OnCacheInstallLocation(string text) {
+		string oldVal = CentralStore.Settings.CachePath.GetOSDir().NormalizePath();
 		if (!bPInternal) {
 			_undoActions.Push(() => {
-				_cacheInstallLocation.Text = oldVal.GetOSDir().NormalizePath();
+				CentralStore.Settings.CachePath = oldVal;
+				text = oldVal;
 			});
 			updateActionButtons();
 		}
-		_cacheInstallLocation.Text = _cacheInstallLocation.Text.GetOSDir().NormalizePath();
+		CentralStore.Settings.CachePath = text.GetOSDir().NormalizePath();
 	}
 
 	[SignalHandler("pressed", nameof(_cacheBrowseButton))]
@@ -405,7 +406,7 @@ public class SettingsPanel : Panel
 
 	void OnBrowseCache_DirSelected(string dir_name) {
 		_cacheInstallLocation.Text = dir_name.GetOSDir().NormalizePath();
-		OnCacheInstallLocation();
+		OnCacheInstallLocation(_cacheInstallLocation.Text);
 	}
 
 	[SignalHandler("item_selected", nameof(_defaultProjectView))]
@@ -450,16 +451,16 @@ public class SettingsPanel : Panel
 
 #region Event Handlers for Projects Page
 	[SignalHandler("text_changed", nameof(_defaultProjectLocation))]
-	void OnDefaultProjectLocation() {
-		string oldVal = CentralStore.Settings.ProjectPath;
+	void OnDefaultProjectLocation(string text) {
+		string oldVal = CentralStore.Settings.ProjectPath.GetOSDir().NormalizePath();
 		if (!bPInternal) {
 			_undoActions.Push(() => {
 				CentralStore.Settings.ProjectPath = oldVal;
-				_defaultProjectLocation.Text = oldVal.GetOSDir().NormalizePath();
+				text = oldVal;
 			});
 			updateActionButtons();
 		}
-		CentralStore.Settings.ProjectPath = _defaultProjectLocation.Text;
+		CentralStore.Settings.ProjectPath = text.GetOSDir().NormalizePath();
 	}
 
 	[SignalHandler("pressed", nameof(_browseProjectLocation))]
@@ -473,7 +474,7 @@ public class SettingsPanel : Panel
 	void OnBrowseProjectLocation_DirSelected(string path) {
 		_defaultProjectLocation.Text = path.NormalizePath();
 		AppDialogs.BrowseFolderDialog.Visible = false;
-		OnDefaultProjectLocation();
+		OnDefaultProjectLocation(_defaultProjectLocation.Text);
 	}
 
 	[SignalHandler("toggled", nameof(_autoScanProjects))]

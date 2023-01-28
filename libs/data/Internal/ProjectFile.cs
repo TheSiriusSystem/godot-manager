@@ -15,7 +15,7 @@ public class ProjectFile : Object {
 	[JsonProperty] public DateTime LastAccessed;
 	[JsonProperty] public Array<string> Assets;
 
-	public static ProjectFile ReadFromFile(string filePath, int gdMajorVers = 3) {
+	public static ProjectFile ReadFromFile(string filePath, bool isOldPrj) {
 		ProjectFile projectFile = null;
 		ProjectConfig project = new ProjectConfig();
 		var ret = project.Load(filePath);
@@ -26,7 +26,7 @@ public class ProjectFile : Object {
 			}
 
 			filePath = filePath.NormalizePath();
-			if (gdMajorVers <= 2) {
+			if (isOldPrj) {
 				if (!project.HasSectionKey("application", "name")) {
 					GD.PrintErr($"Key \"name\" doesn't exist in \"{filePath}\".");
 					return projectFile;
@@ -37,7 +37,7 @@ public class ProjectFile : Object {
 				projectFile.Description = "";
 				projectFile.Location = filePath;
 				projectFile.Icon = project.GetValue("application", "icon", "res://icon.png");
-			} else if (gdMajorVers >= 3) {
+			} else {
 				if (!project.HasSection("header")) {
 					GD.PrintErr($"Section \"header\" doesn't exist in \"{filePath}\".");
 					return projectFile;

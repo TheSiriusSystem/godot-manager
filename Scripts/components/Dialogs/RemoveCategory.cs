@@ -75,7 +75,7 @@ public class RemoveCategory : ReferenceRect
 		foreach (Category cat in CentralStore.Categories) {
 			_categoryList.AddItem(cat.Name);
 		}
-		if (_categoryList.Items.Count <= 0) {
+		if (_categoryList.Items.Count == 0) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
 			Tr("There are no categories to remove."));
 			return;

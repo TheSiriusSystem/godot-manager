@@ -98,33 +98,36 @@ Button _CancelBtn = null;
 
 #region Public Functions
 	public void ShowDialog(ProjectFile pf) {
-		if (CentralStore.Versions.Count <= 0)
-		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can edit a project."));
+		ProjectFile = pf;
+		bool isOldPrj = pf.Location.EndsWith("engine.cfg");
+
+		_GodotVersion.Clear();
+		foreach (GodotVersion gdver in CentralStore.Versions) {
+			if ((pf.Location.EndsWith("engine.cfg") && gdver.GetMajorVersion() <= 2) || (pf.Location.EndsWith("project.godot") && gdver.GetMajorVersion() >= 3)) {
+				_GodotVersion.AddItem(gdver.GetDisplayName());
+				_GodotVersion.SetItemMetadata(_GodotVersion.GetItemCount() - 1, gdver.Id);
+				if (ProjectFile.GodotId == gdver.Id)
+					_GodotVersion.Selected = _GodotVersion.GetItemCount() - 1;
+				OnGodotVersionItemSelected(_GodotVersion.Selected);
+			}
+		}
+		if (_GodotVersion.GetItemCount() == 0) {
+			EmitSignal("hide");
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add a Godot " + (isOldPrj ? "1.x-2.x" : "3.x+") + " instance before you can edit this project."));
 			return;
 		}
 
-		ProjectFile = pf;
-		int gdmv = CentralStore.Instance.GetVersion(pf.GodotId).GetMajorVersion();
 		var texture = Util.LoadImage(ProjectFile.Location.GetResourceBase(IconPath));
-		_Panel.RectMinSize = new Vector2(_Panel.RectMinSize.x, gdmv <= 2 ? 210 : 410);
+		_Panel.RectMinSize = new Vector2(_Panel.RectMinSize.x, isOldPrj ? 210 : 410);
 		if (texture == null)
 			_Icon.Texture = MainWindow._plTextures["MissingIcon"];
 		else
 			_Icon.Texture = texture;
 		_ProjectName.Text = ProjectName;
-		_ProjectDescriptionHeader.Visible = (gdmv >= 3);
-		_ProjectDescription.Visible = (gdmv >= 3);
-		if (CentralStore.Instance.GetVersion(pf.GodotId).GetMajorVersion() >= 3)
+		_ProjectDescriptionHeader.Visible = !isOldPrj;
+		_ProjectDescription.Visible = !isOldPrj;
+		if (!isOldPrj)
 			_ProjectDescription.Text = Description;
-		_GodotVersion.Clear();
-		foreach (GodotVersion gdver in CentralStore.Versions) {
-			_GodotVersion.AddItem(gdver.GetDisplayName());
-			_GodotVersion.SetItemMetadata(_GodotVersion.GetItemCount()-1, gdver.Id);
-			if (ProjectFile.GodotId == gdver.Id)
-				_GodotVersion.Selected = _GodotVersion.GetItemCount()-1;
-			OnGodotVersionItemSelected(_GodotVersion.Selected);
-		}
 
 		if (ProjectFile.Assets == null)
 			ProjectFile.Assets = new Array<string>();
@@ -177,7 +180,7 @@ Button _CancelBtn = null;
 		if (path.StartsWith(pfPath)) {
 			fPath = path;
 		} else {
-			fPath = pfPath.PlusFile(path.GetFile());
+			fPath = pfPath.PlusFile(path.GetFile()).NormalizePath();
 			if (SFile.Exists(fPath)) {
 				string backupPath = fPath.BaseName() + "_" + Guid.NewGuid().ToString() + fPath.GetExtension();
 				SFile.Move(fPath, backupPath);
@@ -206,8 +209,8 @@ Button _CancelBtn = null;
 	}
 
 	[SignalHandler("text_changed", nameof(_ProjectDescription))]
-	void OnProjectDescriptionTextChanged() {
-		Description = _ProjectDescription.Text;
+	void OnProjectDescriptionTextChanged(string text) {
+		Description = text;
 	}
 #endregion
 

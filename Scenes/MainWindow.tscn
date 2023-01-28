@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://components/ToggleButton.tscn" type="PackedScene" id=1]
 [ext_resource path="res://components/PageButton.tscn" type="PackedScene" id=2]
@@ -17,6 +17,23 @@
 [ext_resource path="res://Assets/Icons/news.svg" type="Texture" id=15]
 [ext_resource path="res://Scripts/Scenes/MainWindow.cs" type="Script" id=16]
 [ext_resource path="res://Resources/Fonts/droid-bold-22.tres" type="DynamicFont" id=18]
+
+[sub_resource type="Animation" id=4]
+resource_name = "RESET"
+length = 0.001
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("bg/Shell/Sidebar:rect_min_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Vector2( 70, 0 ) ]
+}
 
 [sub_resource type="Animation" id=3]
 resource_name = "sidebar_anim"
@@ -43,9 +60,6 @@ script = ExtResource( 16 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color( 0.137255, 0.14902, 0.180392, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Shell" type="HBoxContainer" parent="bg"]
 anchor_right = 1.0
@@ -66,7 +80,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="ToggleButton" parent="bg/Shell/Sidebar/VC" instance=ExtResource( 1 )]
-hint_tooltip = "Show Sidebar"
+hint_tooltip = "Toggle Sidebar"
 
 [node name="Projects" parent="bg/Shell/Sidebar/VC" groups=["page_buttons"] instance=ExtResource( 2 )]
 margin_right = 70.0
@@ -140,7 +154,6 @@ margin_left = 7.0
 margin_right = 842.0
 margin_bottom = 50.0
 rect_min_size = Vector2( 0, 50 )
-mouse_filter = 1
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 18 )
 text = "Godot Manager"
@@ -181,4 +194,5 @@ visible = false
 visible = false
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/RESET = SubResource( 4 )
 anims/sidebar_anim = SubResource( 3 )

@@ -18,36 +18,10 @@ public class ItemListWithButtons : HBoxContainer
     [NodePath("SCML/PC/ItemList")] ItemList _list = null;
     #endregion
 
-    #region Private Variables
-    private bool _disabled = false;
-    #endregion
-
-    #region Public Properties
-    [Export]
-    public bool Disabled {
-        get => _disabled;
-        set {
-            _disabled = value;
-            if (_addItem != null)
-                _addItem.Disabled = value;
-            if (_editItem != null)
-                _editItem.Disabled = value;
-            if (_removeItem != null)
-                _removeItem.Disabled = value;
-            if (_list != null) {
-                for (int i = 0; i < _list.GetItemCount(); i++) {
-                    _list.SetItemDisabled(i, value);
-                }
-            }
-        }
-    }
-    #endregion
-
     #region Handlers
     public override void _Ready()
     {
         this.OnReady();
-        Disabled = _disabled;
     }
     #endregion
 

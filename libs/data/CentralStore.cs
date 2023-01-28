@@ -34,6 +34,7 @@ public class CentralStore {
 	public static Array<int> PinnedCategories { get => Instance._data.PinnedCategories; }
 	public static Array<AssetPlugin> Plugins { get => Instance._data.Plugins; }
 	public static Array<AssetProject> Templates { get => Instance._data.Templates; }
+	public static int TotalNewsPages { get => Instance._data.TotalNewsPages; set => Instance._data.TotalNewsPages = value; }
 #endregion
 
 #region Instance Methods

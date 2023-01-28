@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Scripts/components/Panel/ProjectsPanel.cs" type="Script" id=2]
@@ -13,6 +13,7 @@
 [ext_resource path="res://Assets/Icons/remove_missing.svg" type="Texture" id=11]
 [ext_resource path="res://components/HeaderButton.tscn" type="PackedScene" id=12]
 [ext_resource path="res://Resources/Fonts/droid-regular-16.tres" type="DynamicFont" id=13]
+[ext_resource path="res://Assets/Icons/check_for_updates.png" type="Texture" id=14]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.294118, 0.317647, 0.388235, 1 )
@@ -81,8 +82,8 @@ margin_left = 456.0
 margin_right = 664.0
 margin_bottom = 40.0
 size_flags_vertical = 4
-Icons = [ ExtResource( 8 ), ExtResource( 3 ), ExtResource( 7 ), ExtResource( 9 ), ExtResource( 10 ), ExtResource( 6 ), ExtResource( 11 ) ]
-HelpText = [ "New Project", "Import Project", "Scan Projects", "Add Category", "Remove Category", "Remove Project", "Remove Missing Projects" ]
+Icons = [ ExtResource( 8 ), ExtResource( 3 ), ExtResource( 7 ), ExtResource( 9 ), ExtResource( 10 ), ExtResource( 6 ), ExtResource( 11 ), ExtResource( 14 ) ]
+HelpText = [ "New Project", "Import Project", "Scan Projects", "Add Category", "Remove Category", "Remove Project", "Remove Missing Projects", "Refresh List" ]
 
 [node name="Spacer2" type="Control" parent="VC/MC/HC"]
 margin_left = 672.0
@@ -110,7 +111,6 @@ custom_constants/margin_left = 30
 margin_left = 30.0
 margin_right = 994.0
 margin_bottom = 44.0
-hint_tooltip = "Click to change order. Double Click to clear ordering."
 custom_styles/panel = SubResource( 2 )
 
 [node name="HeaderButtons" type="HBoxContainer" parent="VC/ProjectSort/PC"]
@@ -124,7 +124,8 @@ alignment = 1
 margin_left = 83.0
 margin_right = 333.0
 margin_bottom = 34.0
-hint_tooltip = "Click to change order. Double Click to clear ordering."
+hint_tooltip = "Left Click to change sorting.
+Right Click to reset sorting."
 Title = "Project Name"
 
 [node name="Spacer" type="Label" parent="VC/ProjectSort/PC/HeaderButtons"]
@@ -142,14 +143,14 @@ valign = 1
 margin_left = 621.0
 margin_right = 871.0
 margin_bottom = 34.0
-hint_tooltip = "Click to change order. Double Click to clear ordering."
+hint_tooltip = "Left Click to change sorting.
+Right Click to reset sorting."
 Title = "Editor Version"
 
 [node name="SC" type="ScrollContainer" parent="VC"]
 margin_top = 92.0
 margin_right = 1024.0
 margin_bottom = 700.0
-mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
@@ -180,8 +181,9 @@ custom_constants/separation = 15
 
 [node name="GridView" type="GridContainer" parent="VC/SC/MarginContainer/ProjectList"]
 visible = false
+margin_top = 296.0
 margin_right = 1004.0
-margin_bottom = 636.0
+margin_bottom = 588.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/vseparation = 10
@@ -190,7 +192,6 @@ columns = 3
 
 [node name="CategoryView" type="VBoxContainer" parent="VC/SC/MarginContainer/ProjectList"]
 visible = false
-margin_top = 296.0
 margin_right = 1004.0
 margin_bottom = 588.0
 size_flags_horizontal = 3

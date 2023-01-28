@@ -122,7 +122,6 @@ public class AddCustomGodot : ReferenceRect
 		GodotVersion gv = new GodotVersion();
 		gv.Id = Guid.NewGuid().ToString();
 		gv.Tag = _Tag.Text;
-		gv.Url = "Local";
 		gv.Location = _Location.Text.GetBaseDir();
 #if GODOT_MACOS || GODOT_OSX
 		gv.ExecutableName = !gv.Tag.ToLower().Contains("mono") ? "Godot" : "Godot_mono";

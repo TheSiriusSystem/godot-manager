@@ -29,7 +29,6 @@ public static class Util
 	}
 
 	static string[] ByteSizes = new string[] {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "RB", "QB"};
-	static string[] InvalidChars = new string[] {@"\", "/", ":", "*", "?", "\"", "<", ">", "|"};
 
 	public static string FormatSize(double bytes) {
 		double len = bytes;
@@ -38,19 +37,19 @@ public static class Util
 			order++;
 			len = len / 1024;
 		}
-		return string.Format("{0:0.##} {1}", len, ByteSizes[order]);
+		return string.Format("{0:F} {1}", len, ByteSizes[order]);
 	}
 
 	public static string NormalizePath(this string path) {
 		if (path.StartsWith("res://") || path.StartsWith("user://"))
-			return Path.GetFullPath(ProjectSettings.GlobalizePath(path));
+			return Path.GetFullPath(path.GetOSDir());
 		else
 			return Path.GetFullPath(path);
 	}
 
 	public static string NormalizeFileName(this string text) {
-		foreach (string invalidChar in InvalidChars) {
-			text = text.Replace(invalidChar, "");
+		foreach (char invalidChar in System.IO.Path.GetInvalidFileNameChars()) {
+			text = text.Replace(invalidChar, '\0');
 		}
 		return text;
 	}

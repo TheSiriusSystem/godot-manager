@@ -86,13 +86,23 @@ public class NewsItem : Panel
         Avatar = _sAvatar;
     }
 
+    [SignalHandler("mouse_entered")]
+	void OnMouseEntered() {
+        SelfModulate = new Color("2a2e37");
+	}
+
+	[SignalHandler("mouse_exited")]
+	void OnMouseExited() {
+        SelfModulate = new Color("002a2e37");
+	}
+
     [SignalHandler("gui_input")]
     void OnGuiInput(InputEvent @event)
     {
         if (!(@event is InputEventMouseButton iemb))
             return;
 
-        if (iemb.ButtonIndex == 1 && iemb.Pressed)
+        if (iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left)
         {
             OS.ShellOpen(Url);
         }

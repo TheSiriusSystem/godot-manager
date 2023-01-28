@@ -7,11 +7,9 @@
 margin_right = 70.0
 margin_bottom = 50.0
 rect_min_size = Vector2( 40, 50 )
+mouse_default_cursor_shape = 2
 color = Color( 0.164706, 0.180392, 0.215686, 1 )
 script = ExtResource( 2 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="TextureRect" type="TextureRect" parent="."]
 margin_left = 15.0

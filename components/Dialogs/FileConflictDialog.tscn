@@ -24,9 +24,6 @@ corner_detail = 20
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PC" type="PanelContainer" parent="."]
 anchor_right = 1.0
@@ -169,22 +166,26 @@ custom_constants/separation = 40
 margin_right = 40.0
 margin_bottom = 24.0
 rect_min_size = Vector2( 40, 24 )
+mouse_default_cursor_shape = 2
 text = "Yes"
 
 [node name="ConfirmAll" type="Button" parent="PC/CC/P/VB/MCContent/VC/CC/HC"]
 margin_left = 80.0
 margin_right = 143.0
 margin_bottom = 24.0
+mouse_default_cursor_shape = 2
 text = "Yes to All"
 
 [node name="Cancel" type="Button" parent="PC/CC/P/VB/MCContent/VC/CC/HC"]
 margin_left = 183.0
 margin_right = 205.0
 margin_bottom = 24.0
+mouse_default_cursor_shape = 2
 text = "No"
 
 [node name="Abort" type="Button" parent="PC/CC/P/VB/MCContent/VC/CC/HC"]
 margin_left = 245.0
 margin_right = 285.0
 margin_bottom = 24.0
+mouse_default_cursor_shape = 2
 text = "Abort"

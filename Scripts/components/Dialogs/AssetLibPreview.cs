@@ -48,9 +48,6 @@ public class AssetLibPreview : ReferenceRect
 	[NodePath("PC/CC/P/VB/MCContent/HSC/ScreenShots/Preview/PlayButton")]
 	TextureRect _PlayButton = null;
 
-	[NodePath("PC/CC/P/VB/MCContent/HSC/ScreenShots/Preview/MissingThumbnails")]
-	TextureRect _MissingThumbnails = null;
-
 	[NodePath("PC/CC/P/VB/MCContent/HSC/ScreenShots/PC/SC/Thumbnails")]
 	HBoxContainer _Thumbnails = null;
 
@@ -178,7 +175,6 @@ public class AssetLibPreview : ReferenceRect
 			}
 		}
 		_Preview.Texture = MainWindow._plTextures["WaitThumbnail"];
-		_MissingThumbnails.Visible = false;
 		_PlayButton.Visible = false;
 		
 		foreach (TextureRect rect in _Thumbnails.GetChildren()) {
@@ -192,6 +188,7 @@ public class AssetLibPreview : ReferenceRect
 			preview.Texture = MainWindow._plTextures["WaitThumbnail"];
 			preview.Expand = true;
 			preview.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+			preview.MouseDefaultCursorShape = CursorShape.PointingHand;
 			preview.Connect("gui_input", this, "OnGuiInput_Preview", new Array { preview });
 			_Thumbnails.AddChild(preview);
 			Uri tnUri = new Uri(asset.Previews[i].Thumbnail);
@@ -220,7 +217,6 @@ public class AssetLibPreview : ReferenceRect
 			UpdatePreview(fp);
 		} else {
 			_Preview.Texture = null;
-			_MissingThumbnails.Visible = true;
 		}
 
 		if (CentralStore.Instance.HasPluginId(asset.AssetId) || CentralStore.Instance.HasTemplateId(asset.AssetId)) {
@@ -241,12 +237,14 @@ public class AssetLibPreview : ReferenceRect
 				_Download.Disabled = true;
 			}
 			_Download.Text = Tr("Update");
+			_Download.MouseDefaultCursorShape = !_Download.Disabled ? CursorShape.PointingHand : CursorShape.Arrow;
 		} else {
 			_Uninstall.Visible = false;
 			_Sep3.Visible = false;
 			_Download.Visible = true;
 			_Download.Disabled = false;
 			_Download.Text = Tr("Download");
+			_Download.MouseDefaultCursorShape = CursorShape.PointingHand;
 		}
 
 		dlq.StartDownload();
@@ -298,7 +296,6 @@ public class AssetLibPreview : ReferenceRect
 		_Preview.Texture = rect.Texture;
 		_Preview.SetMeta("url", rect.GetMeta("url"));
 		Uri tnUri = new Uri(rect.GetMeta("url") as string);
-		_MissingThumbnails.Visible = false;
 		if (tnUri.Host.IndexOf("youtube.com") != -1)
 		{
 			_PlayButton.Visible = true;

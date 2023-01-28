@@ -6,22 +6,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Uri = System.Uri;
 using Guid = System.Guid;
-using Mirrors;
 
 [Tool]
 public class GodotPanel : Panel
 {
-	#region Nodes
-	// [NodePath("VB/MC/HC/UseMono")]
-	// CheckBox UseMono = null;
+	[Signal] public delegate void godot_removed();
 
+	#region Nodes
 	[NodePath("VB/MC/HC/PC/TagSelection")]
 	MenuButton TagSelection = null;
 
 	[NodePath("VB/MC/HC/ActionButtons")]
 	ActionButtons ActionButtons = null;
 
-	[NodePath("VB/MC/HC/DownloadSource")]
+	[NodePath("VB/MC/HC/CC/DownloadSource")]
 	OptionButton DownloadSource = null;
 
 	[NodePath("VB/SC/GodotList/Install")]
@@ -40,7 +38,7 @@ public class GodotPanel : Panel
 
 	private List<string> NoHideWizard = new List<string>()
 	{
-		"ActionButtons", "Spacer2", "PC", "Spacer3", "Label2", "DownloadSource"
+		"ActionButtons", "Spacer2", "PC", "Spacer3", "Label2", "CC"
 	};
 
 	// Called when the node enters the scene tree for the first time.
@@ -248,6 +246,7 @@ public class GodotPanel : Panel
 		}
 		CentralStore.Versions.Remove(gle.GodotVersion);
 		CentralStore.Instance.SaveDatabase();
+		EmitSignal("godot_removed");
 		await PopulateList(1);
 	}
 
@@ -389,14 +388,12 @@ public class GodotPanel : Panel
 			foreach (GodotVersion gdv in CentralStore.Versions) {
 				GodotLineEntry gle = MainWindow._plScenes["GodotLineEntry"].Instance<GodotLineEntry>();
 				gle.GodotVersion = gdv;
-				gle.Mono = gdv.IsMono;
 				gle.Downloaded = true;
 				if (CentralStore.Settings.SelfContainedEditors)
 				{
 					gle.ToggleSettingsShared();
 					gle.ToggleSettingsLinked();
 				}
-
 				gle.SettingsShared = CentralStore.Settings.SettingsShare.Contains(gdv.Id);
 				gle.SettingsLinked = CentralStore.Settings.SettingsShare.Contains(gdv.SharedSettings);
 				Installed.List.AddChild(gle);

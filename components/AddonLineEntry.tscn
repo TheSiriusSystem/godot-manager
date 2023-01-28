@@ -28,12 +28,11 @@ margin_left = 14.0
 margin_right = 46.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 32, 32 )
-mouse_default_cursor_shape = 2
 texture = ExtResource( 5 )
 expand = true
 stretch_mode = 6
 
-[node name="Spacer3" type="Control" parent="hc"]
+[node name="Spacer2" type="Control" parent="hc"]
 margin_left = 50.0
 margin_right = 60.0
 margin_bottom = 32.0
@@ -41,10 +40,8 @@ rect_min_size = Vector2( 10, 0 )
 
 [node name="AddonName" type="Label" parent="hc"]
 margin_left = 64.0
-margin_right = 884.0
+margin_right = 876.0
 margin_bottom = 32.0
-mouse_filter = 1
-mouse_default_cursor_shape = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 3 )
@@ -53,33 +50,34 @@ valign = 1
 clip_text = true
 
 [node name="AddonVersion" type="Label" parent="hc"]
-margin_left = 888.0
-margin_right = 976.0
+margin_left = 880.0
+margin_right = 968.0
 margin_bottom = 32.0
-mouse_filter = 1
-mouse_default_cursor_shape = 2
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 2 )
 text = "Version: 1.0.0"
 align = 1
 valign = 1
 
-[node name="Spacer4" type="Control" parent="hc"]
-margin_left = 980.0
-margin_right = 990.0
+[node name="Spacer3" type="Control" parent="hc"]
+margin_left = 972.0
+margin_right = 982.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 10, 0 )
 
 [node name="InstallUninstall" type="TextureRect" parent="hc"]
 self_modulate = Color( 0, 1, 0, 1 )
-margin_left = 994.0
-margin_top = 8.0
+margin_left = 986.0
+margin_top = 4.0
 margin_right = 1010.0
-margin_bottom = 24.0
+margin_bottom = 28.0
+rect_min_size = Vector2( 24, 24 )
+mouse_default_cursor_shape = 2
 size_flags_vertical = 4
 texture = ExtResource( 1 )
+stretch_mode = 4
 
-[node name="Spacer2" type="Control" parent="hc"]
+[node name="Spacer4" type="Control" parent="hc"]
 margin_left = 1014.0
 margin_right = 1024.0
 margin_bottom = 32.0

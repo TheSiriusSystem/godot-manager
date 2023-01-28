@@ -10,8 +10,6 @@ public class ProjectIconEntry : ColorRect
     public delegate void DoubleClicked(ProjectLineEntry self);
     [Signal]
     public delegate void RightClicked(ProjectLineEntry self);
-    [Signal]
-    public delegate void RightDoubleClicked(ProjectLineEntry self);
 #endregion
 
 #region Private Node Variables
@@ -75,13 +73,8 @@ public class ProjectIconEntry : ColorRect
         set {
             sProjectName = value;
             if (_projectName != null) {
-                Vector2 size = MainWindow._plFonts["DroidSansBold16"].GetStringSize(value);
-                if (size.x > 280) {
-                    _projectName.Align = Label.AlignEnum.Left;
-                } else {
-                    _projectName.Align = Label.AlignEnum.Center;
-                }
                 _projectName.Text = value;
+                _projectName.HintTooltip = _projectName.Text;
             }
         }
     }
@@ -96,8 +89,10 @@ public class ProjectIconEntry : ColorRect
 
         set {
             sProjectLocation = value;
-            if (_projectLocation != null)
+            if (_projectLocation != null) {
                 _projectLocation.Text = value.GetBaseDir().NormalizePath();
+                _projectLocation.HintTooltip = _projectLocation.Text;
+            }
         }
     }
 
@@ -126,15 +121,12 @@ public class ProjectIconEntry : ColorRect
                 GodotVersion gv = CentralStore.Instance.FindVersion(value);
                 if (gv != null) {
                     _godotVersion.Text = gv.GetDisplayName();
-                    Vector2 size = MainWindow._plFonts["DroidSans14"].GetStringSize(gv.GetDisplayName());
-                    if (size.x > 280) {
-                        _godotVersion.Align = Label.AlignEnum.Left;
-                    } else {
-                        _godotVersion.Align = Label.AlignEnum.Center;
-                    }
+                    _godotVersion.HintTooltip = Tr("Using ") + _godotVersion.Text;
+                    _godotVersion.MouseFilter = MouseFilterEnum.Pass;
                 } else {
                     _godotVersion.Text = Tr("Unknown");
-                    _godotVersion.Align = Label.AlignEnum.Center;
+                    _godotVersion.HintTooltip = "";
+                    _godotVersion.MouseFilter = MouseFilterEnum.Ignore;
                 }
             }
         }
@@ -151,6 +143,18 @@ public class ProjectIconEntry : ColorRect
         Modulate = new Color(Modulate.r, Modulate.g, Modulate.b, !MissingProject ? 1.0f : 0.5f);
     }
 
+    [SignalHandler("mouse_entered")]
+	void OnMouseEntered() {
+		if (!Color.IsEqualApprox(new Color("31ffffff")))
+			Color = new Color("2a2e37");
+	}
+
+	[SignalHandler("mouse_exited")]
+	void OnMouseExited() {
+		if (!Color.IsEqualApprox(new Color("31ffffff")))
+			Color = new Color("002a2e37");
+	}
+
     [SignalHandler("gui_input")]
     void OnGuiInput(InputEvent inputEvent) {
         if (!(inputEvent is InputEventMouseButton))
@@ -163,16 +167,12 @@ public class ProjectIconEntry : ColorRect
             if (iemb.Doubleclick)
                 EmitSignal("DoubleClicked", this);
             else {
-                SelfModulate = new Color("ffffffff");
+                Color = new Color("31ffffff");
                 EmitSignal("Clicked", this);
             }
         } else if (iemb.ButtonIndex == (int)ButtonList.Right) {
-            if (iemb.Doubleclick)
-                EmitSignal("RightDoubleClicked", this);
-            else {
-                SelfModulate = new Color("ffffffff");
-                EmitSignal("RightClicked", this);
-            }
+            Color = new Color("31ffffff");
+            EmitSignal("RightClicked", this);
         }
     }
 }

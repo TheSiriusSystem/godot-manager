@@ -167,7 +167,7 @@ columns = 4
 
 [node name="Label" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 margin_top = 1.0
-margin_right = 158.0
+margin_right = 154.0
 margin_bottom = 20.0
 custom_fonts/font = ExtResource( 2 )
 text = "Editor Location:"
@@ -175,28 +175,30 @@ align = 2
 
 [node name="EngineLoc" type="LineEdit" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 178.0
-margin_right = 478.0
+margin_left = 174.0
+margin_right = 474.0
 margin_bottom = 21.0
 rect_min_size = Vector2( 300, 0 )
 
 [node name="EngineBrowse" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 498.0
-margin_right = 549.0
+margin_left = 494.0
+margin_right = 545.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Browse"
 
 [node name="EngineDefault" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 569.0
-margin_right = 648.0
+margin_left = 565.0
+margin_right = 644.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Use Default"
 
 [node name="Label2" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 margin_top = 42.0
-margin_right = 158.0
+margin_right = 154.0
 margin_bottom = 61.0
 custom_fonts/font = ExtResource( 2 )
 text = "Cache Location:"
@@ -204,31 +206,33 @@ align = 2
 
 [node name="CacheLoc" type="LineEdit" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 178.0
+margin_left = 174.0
 margin_top = 41.0
-margin_right = 478.0
+margin_right = 474.0
 margin_bottom = 62.0
 rect_min_size = Vector2( 300, 0 )
 
 [node name="CacheBrowse" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 498.0
+margin_left = 494.0
 margin_top = 41.0
-margin_right = 549.0
+margin_right = 545.0
 margin_bottom = 62.0
+mouse_default_cursor_shape = 2
 text = "Browse"
 
 [node name="CacheDefault" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 569.0
+margin_left = 565.0
 margin_top = 41.0
-margin_right = 648.0
+margin_right = 644.0
 margin_bottom = 62.0
+mouse_default_cursor_shape = 2
 text = "Use Deafult"
 
 [node name="Label3" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 margin_top = 83.0
-margin_right = 158.0
+margin_right = 154.0
 margin_bottom = 102.0
 custom_fonts/font = ExtResource( 2 )
 text = "Project Location:"
@@ -236,42 +240,49 @@ align = 2
 
 [node name="ProjectLoc" type="LineEdit" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 178.0
+margin_left = 174.0
 margin_top = 82.0
-margin_right = 478.0
+margin_right = 474.0
 margin_bottom = 103.0
 rect_min_size = Vector2( 300, 0 )
 
 [node name="ProjectBrowse" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 498.0
+margin_left = 494.0
 margin_top = 82.0
-margin_right = 549.0
+margin_right = 545.0
 margin_bottom = 103.0
+mouse_default_cursor_shape = 2
 text = "Browse"
 
 [node name="ProjectDefault" type="Button" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 unique_name_in_owner = true
-margin_left = 569.0
+margin_left = 565.0
 margin_top = 82.0
-margin_right = 648.0
+margin_right = 644.0
 margin_bottom = 103.0
+mouse_default_cursor_shape = 2
 text = "Use Default"
 
 [node name="Label4" type="Label" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
 margin_top = 123.0
-margin_right = 158.0
+margin_right = 154.0
 margin_bottom = 142.0
 custom_fonts/font = ExtResource( 2 )
 text = "System Integration:"
 align = 2
 
-[node name="TitleBar" type="CheckBox" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
-unique_name_in_owner = true
-margin_left = 178.0
+[node name="HBoxContainer" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid"]
+margin_left = 174.0
 margin_top = 123.0
-margin_right = 478.0
+margin_right = 474.0
 margin_bottom = 142.0
+
+[node name="TitleBar" type="CheckBox" parent="PC/CC/P/VB/MCContent/Wizard/Page2/VBoxContainer/Grid/HBoxContainer"]
+unique_name_in_owner = true
+margin_right = 147.0
+margin_bottom = 19.0
+mouse_default_cursor_shape = 2
 text = "Use System Titlebar"
 
 [node name="Page3" type="Panel" parent="PC/CC/P/VB/MCContent/Wizard"]
@@ -368,6 +379,7 @@ unique_name_in_owner = true
 margin_left = 390.0
 margin_right = 435.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 size_flags_horizontal = 5
 text = "Cancel"
 
@@ -385,6 +397,7 @@ unique_name_in_owner = true
 margin_left = 602.0
 margin_right = 636.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 size_flags_vertical = 5
 text = "Next"
 

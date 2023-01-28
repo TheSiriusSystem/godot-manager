@@ -15,7 +15,8 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [node name="HeaderButton" type="PanelContainer"]
-rect_min_size = Vector2( 240, 0 )
+rect_min_size = Vector2( 250, 34 )
+mouse_default_cursor_shape = 2
 custom_styles/panel = SubResource( 3 )
 script = ExtResource( 2 )
 Title = "Header"
@@ -32,7 +33,7 @@ size_flags_vertical = 3
 [node name="Label" type="Label" parent="HC"]
 margin_top = 3.0
 margin_right = 47.0
-margin_bottom = 21.0
+margin_bottom = 20.0
 mouse_filter = 1
 text = "Header"
 

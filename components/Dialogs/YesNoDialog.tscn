@@ -105,10 +105,12 @@ custom_constants/separation = 40
 margin_right = 40.0
 margin_bottom = 24.0
 rect_min_size = Vector2( 40, 24 )
+mouse_default_cursor_shape = 2
 text = "Yes"
 
 [node name="Cancel" type="Button" parent="PC/CC/P/VB/MCContent/VC/CC/HC"]
 margin_left = 80.0
 margin_right = 102.0
 margin_bottom = 24.0
+mouse_default_cursor_shape = 2
 text = "No"

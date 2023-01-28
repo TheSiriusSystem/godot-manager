@@ -15,6 +15,7 @@ margin_top = 54.0
 margin_right = 160.0
 margin_bottom = 104.0
 rect_min_size = Vector2( 40, 50 )
+mouse_default_cursor_shape = 2
 color = Color( 0.219608, 0.239216, 0.290196, 1 )
 script = ExtResource( 1 )
 

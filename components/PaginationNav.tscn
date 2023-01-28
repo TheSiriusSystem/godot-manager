@@ -9,25 +9,26 @@ margin_right = 1024.0
 margin_bottom = 24.0
 theme = ExtResource( 2 )
 script = ExtResource( 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Controls" type="HBoxContainer" parent="."]
 margin_left = 405.0
 margin_right = 619.0
-margin_bottom = 20.0
+margin_bottom = 19.0
 custom_constants/separation = 10
 
 [node name="FirstPage" type="Button" parent="Controls"]
 margin_right = 30.0
-margin_bottom = 20.0
+margin_bottom = 19.0
+mouse_default_cursor_shape = 2
+disabled = true
 text = "First"
 
 [node name="PrevPage" type="Button" parent="Controls"]
 margin_left = 40.0
 margin_right = 97.0
-margin_bottom = 20.0
+margin_bottom = 19.0
+mouse_default_cursor_shape = 2
+disabled = true
 text = "Previous"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -36,28 +37,32 @@ __meta__ = {
 [node name="VSeparator" type="VSeparator" parent="Controls"]
 margin_left = 107.0
 margin_right = 111.0
-margin_bottom = 20.0
+margin_bottom = 19.0
 
 [node name="PageCount" type="HBoxContainer" parent="Controls"]
 margin_left = 121.0
 margin_right = 121.0
-margin_bottom = 20.0
+margin_bottom = 19.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="VSeparator2" type="VSeparator" parent="Controls"]
 margin_left = 131.0
 margin_right = 135.0
-margin_bottom = 20.0
+margin_bottom = 19.0
 
 [node name="NextPage" type="Button" parent="Controls"]
 margin_left = 145.0
 margin_right = 177.0
-margin_bottom = 20.0
+margin_bottom = 19.0
+mouse_default_cursor_shape = 2
+disabled = true
 text = "Next"
 
 [node name="LastPage" type="Button" parent="Controls"]
 margin_left = 187.0
 margin_right = 214.0
-margin_bottom = 20.0
+margin_bottom = 19.0
+mouse_default_cursor_shape = 2
+disabled = true
 text = "Last"

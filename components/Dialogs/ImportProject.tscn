@@ -134,6 +134,7 @@ custom_fonts/font = ExtResource( 2 )
 margin_left = 253.0
 margin_right = 304.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Browse"
 
 [node name="Location2" type="Label" parent="PC/CC/P/VB/MCContent/VB"]
@@ -147,6 +148,7 @@ text = "Editor Version:"
 margin_top = 89.0
 margin_right = 304.0
 margin_bottom = 110.0
+mouse_default_cursor_shape = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -170,6 +172,7 @@ size_flags_horizontal = 3
 margin_left = 80.0
 margin_right = 109.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Add"
 
 [node name="Sep2" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
@@ -182,6 +185,7 @@ size_flags_horizontal = 3
 margin_left = 194.0
 margin_right = 239.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Cancel"
 
 [node name="Sep3" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]

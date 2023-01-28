@@ -1,14 +1,8 @@
-.builds/
-.DS_Store
-
-# Godot 1 specific ignores
-.fscache
-
-# Godot 4+ specific ignores
-.godot/
+.[Bb]uilds/
 
 # Godot-specific ignores
 .import/
+.godot/
 export.cfg
 export_presets.cfg
 
@@ -19,3 +13,28 @@ export_presets.cfg
 .mono/
 data_*/
 mono_crash.*.json
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+
+# Visual Studio 2017 auto generated files
+Generated\ Files/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+.history/
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Linux
+*~
+.directory
+
+# macOS
+.DS_Store
+__MACOSX

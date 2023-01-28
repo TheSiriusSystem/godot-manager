@@ -7,13 +7,17 @@ using Godot.Sharp.Extras;
 
 public class NewsPanel : Panel
 {
+	const string GODOT_URL = "https://godotengine.org";
+	const string BLOG_URL = GODOT_URL + "/blog/";
+
 	[NodePath] private VBoxContainer NewsList = null;
 	[NodePath] private TextureRect RefreshIcon = null;
+	[NodePath] private PaginationNav PageCount = null;
 
-	private readonly Uri NEWS_URI = new Uri("https://godotengine.org/news/");
 	private GDCSHTTPClient _client = null;
 	private DownloadQueue _queue = null;
-	
+	private int _page = 1;
+
 	public override void _Ready()
 	{
 		_queue = new DownloadQueue();
@@ -32,53 +36,97 @@ public class NewsPanel : Panel
 	}
 
 	[SignalHandler("gui_input", nameof(RefreshIcon))]
-	private void OnGuiInput_RefreshIcon(InputEvent @event)
-	{
-		if (!(@event is InputEventMouseButton iemb))
-			return;
+    private void OnGuiInput_RefreshIcon(InputEvent @event)
+    {
+        if (!(@event is InputEventMouseButton iemb))
+            return;
 
-		if (iemb.ButtonIndex == 1 && iemb.Pressed)
-			RefreshNews();
+        if (iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left)
+		{
+			CentralStore.TotalNewsPages = 0;
+            RefreshNews();
+		}
+    }
+
+	[SignalHandler("page_changed", nameof(PageCount))]
+	private void OnNewsPageChanged(int page)
+	{
+		_page = page + 1;
+		RefreshNews();
 	}
 
-	private async void RefreshNews()
+	private async Task<HTTPResponse> ConnectToBlogPage(int page = 1)
 	{
-		if (NewsList.GetChildCount() != 0)
-		{
-			foreach (Node item in NewsList.GetChildren())
-			{
-				item.QueueFree();
-			}
-		}
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching News"));
-		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching articles from the Godot Engine website..."));
-		AppDialogs.BusyDialog.ShowDialog();
 		InitClient();
 
-		Task<HTTPClient.Status> cres = _client.StartClient(NEWS_URI.Host, NEWS_URI.Port, true);
+		Uri blogUri = new Uri(BLOG_URL + (page <= 1 ? "" : page.ToString() + "/"));
+		Task<HTTPClient.Status> cres = _client.StartClient(blogUri.Host, blogUri.Port, true);
 
 		while (!cres.IsCompleted)
 			await this.IdleFrame();
 
 		if (!_client.SuccessConnect(cres.Result))
 		{
-			return;
+			return null;
 		}
 
-		var tresult = _client.MakeRequest(NEWS_URI.PathAndQuery);
-		while (!tresult.IsCompleted)
+		var tres = _client.MakeRequest(blogUri.PathAndQuery);
+		while (!tres.IsCompleted)
 			await this.IdleFrame();
 		_client.Close();
 
-		var result = tresult.Result;
-
-		if (result.ResponseCode != 200)
+		if (tres.Result.ResponseCode != 200)
 		{
 			CleanupClient();
+			return null;
+		}
+
+		return tres.Result;
+	}
+
+	private async void RefreshNews()
+	{
+		Task<HTTPResponse> task = null;
+
+		NewsList.QueueFreeChildren();
+		AppDialogs.BusyDialog.ShowDialog();
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching News"));
+		if (CentralStore.TotalNewsPages <= 0)
+		{
+			PageCount.Visible = false;
+			AppDialogs.BusyDialog.UpdateByline(Tr("Getting pages from Godot Blog..."));
+			for (int i = 1; i <= 48; i++)
+			{
+				task = ConnectToBlogPage(i);
+				while (!task.IsCompleted)
+					await this.IdleFrame();
+				if (task.Result != null)
+				{
+					++CentralStore.TotalNewsPages;
+				}
+				else
+				{
+					break;
+				}
+			}
+			CentralStore.Instance.SaveDatabase();
+		}
+		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching article information from Godot Blog..."));
+		_page = Mathf.Clamp(_page, 1, CentralStore.TotalNewsPages);
+		task = ConnectToBlogPage(_page);
+		while (!task.IsCompleted)
+			await this.IdleFrame();
+		PageCount.UpdateConfig(CentralStore.TotalNewsPages);
+		PageCount.SetPage(_page - 1);
+
+		if (task.Result == null)
+		{
+			AppDialogs.BusyDialog.HideDialog();
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("Failed to connect to Godot Blog."));
 			return;
 		}
 
-		var feed = ParseNews(result.Body);
+		var feed = ParseNews(task.Result.Body);
 		foreach (Dictionary<string,string> item in feed)
 		{
 			var newsItem = MainWindow._plScenes["NewsItem"].Instance<NewsItem>();
@@ -86,8 +134,7 @@ public class NewsPanel : Panel
 			newsItem.Byline = $"    {item["author"]}{item["date"].Replace("&nbsp;", " ")}";
 			newsItem.Url = item["link"];
 			newsItem.Blerb = item["contents"];
-			
-			//newsItem.Image = item["image"];
+
 			Uri uri = new Uri(item["image"]);
 			string imgPath = $"{CentralStore.Settings.CachePath}/images/{uri.AbsolutePath.GetFile()}";
 			if (!SFile.Exists(imgPath.GetOSDir().NormalizePath()))
@@ -115,7 +162,7 @@ public class NewsPanel : Panel
 			{
 				newsItem.Avatar = imgPath.GetOSDir().NormalizePath();
 			}
-			
+
 			NewsList.AddChild(newsItem);
 		}
 		_queue.StartDownload();
@@ -185,113 +232,113 @@ public class NewsPanel : Panel
 		var parsed_news = new Array<Dictionary<string,string>>();
 
 		var xml = new XMLParser();
-		var error = xml.OpenBuffer(buffer.ToUTF8());
-		if (error != Error.Ok) return parsed_news;
-		while (true)
-		{
-			var err = xml.Read();
+        var error = xml.OpenBuffer(buffer.ToUTF8());
+        if (error != Error.Ok) return parsed_news;
+        while (true)
+        {
+            var err = xml.Read();
 			if (err != Error.Ok)
 			{
 				if (err != Error.FileEof)
 				{
-					GD.PrintErr($"Error reading XML contents. Error Code: {error}");
+					GD.PrintErr($"Failed to parse XML contents of \"{BLOG_URL}\". Error Code: {err}");
 				}
 				break;
 			}
 
-			if (xml.GetNodeType() != XMLParser.NodeType.Element || xml.GetNodeName() != "article") continue;
-			var tag_open_offset = xml.GetNodeOffset();
-			xml.SkipSection();
-			xml.Read();
-			var tag_close_offset = xml.GetNodeOffset();
-			parsed_news.Add(ParseNewsItem(buffer, tag_open_offset, tag_close_offset));
-		}
+            if (xml.GetNodeType() != XMLParser.NodeType.Element || xml.GetNodeName() != "article") continue;
+            var tag_open_offset = xml.GetNodeOffset();
+            xml.SkipSection();
+            xml.Read();
+            var tag_close_offset = xml.GetNodeOffset();
+            parsed_news.Add(ParseNewsItem(buffer, tag_open_offset, tag_close_offset));
+        }
 
 		return parsed_news;
 	}
 
 	private Dictionary<string, string> ParseNewsItem(string buffer, ulong begin_ofs, ulong end_ofs)
-	{
-		var parsed_item = new Dictionary<string, string>();
-		var xml = new XMLParser();
-		var error = xml.OpenBuffer(buffer.ToUTF8());
-		if (error != Error.Ok)
-		{
-			GD.PrintErr($"Error parsing news item. Error Code: {error}");
-			return null;
-		}
+    {
+        var parsed_item = new Dictionary<string, string>();
+        var xml = new XMLParser();
+        var error = xml.OpenBuffer(buffer.ToUTF8());
+        if (error != Error.Ok)
+        {
+            GD.PrintErr($"Failed to open XML raw buffer \"{buffer}\". Error Code: {error}");
+            return null;
+        }
 
-		xml.Seek(begin_ofs);
+        xml.Seek(begin_ofs);
 
-		while (xml.GetNodeOffset() != end_ofs)
-		{
-			if (xml.GetNodeType() == XMLParser.NodeType.Element)
-			{
-				switch (xml.GetNodeName())
-				{
-					case "div":
-						// <div class="thumbnail" style="background-image: url('https://godotengine.org/storage/app/uploads/....');" href="https://godotengine.org/article/.....">
-						if (xml.GetNamedAttributeValueSafe("class").Contains("thumbnail"))
-						{
-							var image_style = xml.GetNamedAttributeValueSafe("style");
-							var url_start = image_style.Find("'") + 1;
-							var url_end = image_style.FindLast("'");
-							var image_url = image_style.Substr(url_start, url_end - url_start);
+        while (xml.GetNodeOffset() != end_ofs)
+        {
+            if (xml.GetNodeType() == XMLParser.NodeType.Element)
+            {
+                switch (xml.GetNodeName())
+                {
+                    case "div":
+                        // <div class="thumbnail" style="background-image: url('https://godotengine.org/storage/app/uploads/....');" href="https://godotengine.org/article/.....">
+                        if (xml.GetNamedAttributeValueSafe("class") == "thumbnail")
+                        {
+                            var image_style = xml.GetNamedAttributeValueSafe("style");
+                            var url_start = image_style.Find("'") + 1;
+                            var url_end = image_style.FindLast("'");
+                            var image_url = image_style.Substr(url_start, url_end - url_start);
 
-							parsed_item["image"] = image_url;
-							parsed_item["link"] = xml.GetNamedAttributeValueSafe("href");
-						}
+                            parsed_item["image"] = GODOT_URL + image_url;
+                            parsed_item["link"] = GODOT_URL + xml.GetNamedAttributeValueSafe("href");
+                        }
 
-						break;
-					
-					case "h3":
-						// <h3>Article Title</h3>
-						xml.Read();
-						parsed_item["title"] = xml.GetNodeType() == XMLParser.NodeType.Text
-							? xml.GetNodeData().StripEdges()
-							: "";
+                        break;
+                    
+                    case "h3":
+                        // <h3>Article Title</h3>
+                        xml.Read();
+                        parsed_item["title"] = xml.GetNodeType() == XMLParser.NodeType.Text
+                            ? xml.GetNodeData().StripEdges()
+                            : "";
 
-						break;
-					case "span":
-						// <span class="date">&nbsp;-&nbsp;dd Month year</span>
-						if (xml.GetNamedAttributeValueSafe("class").Contains("date"))
-						{
-							xml.Read();
-							parsed_item["date"] = xml.GetNodeType() == XMLParser.NodeType.Text ? xml.GetNodeData() : "";
-						}
-						// <span class="by">Author Name</span>
-						if (xml.GetNamedAttributeValue("class").Contains("by"))
-						{
-							xml.Read();
-							parsed_item["author"] = xml.GetNodeType() == XMLParser.NodeType.Text
-								? xml.GetNodeData().StripEdges()
-								: "";
-						}
+                        break;
+                    case "span":
+                        // <span class="date">&nbsp;-&nbsp;dd Month year</span>
+                        if (xml.GetNamedAttributeValueSafe("class") == "date")
+                        {
+                            xml.Read();
+                            parsed_item["date"] = xml.GetNodeType() == XMLParser.NodeType.Text ? xml.GetNodeData() : "";
+                        }
+                        // <span class="by">Author Name</span>
+                        if (xml.GetNamedAttributeValueSafe("class") == "by")
+                        {
+                            xml.Read();
+                            parsed_item["author"] = xml.GetNodeType() == XMLParser.NodeType.Text
+                                ? xml.GetNodeData().StripEdges()
+                                : "";
+                        }
 
-						break;
-					case "p":
-						// <p class="excerpt">An excerpt of the blog entry to be read in.</p>
-						if (xml.GetNamedAttributeValue("class").Contains("excerpt"))
-						{
-							xml.Read();
-							parsed_item["contents"] =
-								xml.GetNodeType() == XMLParser.NodeType.Text ? xml.GetNodeData() : "";
-						}
+                        break;
+                    case "p":
+                        // <p class="excerpt">An excerpt of the blog entry to be read in.</p>
+                        if (xml.GetNamedAttributeValueSafe("class") == "excerpt")
+                        {
+                            xml.Read();
+                            parsed_item["contents"] =
+                                xml.GetNodeType() == XMLParser.NodeType.Text ? xml.GetNodeData() : "";
+                        }
 
-						break;
-					case "img":
-						// <img class="avatar" width="25" height="25" src="https://godotengine.org/storage/app/uploads/public/....." alt="">
-						if (xml.GetNamedAttributeValue("class").Contains("avatar"))
-						{
-							parsed_item["avatar"] = xml.GetNamedAttributeValue("src");
-						}
-						break;
-				}
-			}
+                        break;
+                    case "img":
+                        // <img class="avatar" width="25" height="25" src="https://godotengine.org/storage/app/uploads/public/....." alt="">
+                        if (xml.GetNamedAttributeValueSafe("class") == "avatar")
+                        {
+                            parsed_item["avatar"] = GODOT_URL + xml.GetNamedAttributeValueSafe("src");
+                        }
+                        break;
+                }
+            }
 
-			xml.Read();
-		}
+            xml.Read();
+        }
 
-		return parsed_item;
-	}
+        return parsed_item;
+    }
 }

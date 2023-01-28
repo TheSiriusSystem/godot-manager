@@ -27,6 +27,7 @@ margin_top = 15.0
 margin_right = 20.0
 margin_bottom = 36.0
 hint_tooltip = "Add"
+mouse_default_cursor_shape = 2
 icon = ExtResource( 3 )
 
 [node name="EditItem" type="Button" parent="VBMOD"]
@@ -34,6 +35,7 @@ margin_top = 41.0
 margin_right = 20.0
 margin_bottom = 62.0
 hint_tooltip = "Edit"
+mouse_default_cursor_shape = 2
 icon = ExtResource( 2 )
 
 [node name="RemoveItem" type="Button" parent="VBMOD"]
@@ -41,6 +43,7 @@ margin_top = 67.0
 margin_right = 20.0
 margin_bottom = 88.0
 hint_tooltip = "Remove"
+mouse_default_cursor_shape = 2
 icon = ExtResource( 1 )
 
 [node name="Spacer" type="Control" parent="."]

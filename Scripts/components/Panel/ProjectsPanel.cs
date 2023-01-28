@@ -177,11 +177,13 @@ public class ProjectsPanel : Panel
 
 	[SignalHandler("direction_changed", nameof(_projectName))]
 	void OnDirChanged_ProjectName(HeaderButton.SortDirection @dir) {
+		_godotVersion.Indeterminate();
 		PopulateListing();
 	}
 
 	[SignalHandler("direction_changed", nameof(_godotVersion))]
 	void OnDirChanged_GodotVersion(HeaderButton.SortDirection @dir) {
+		_projectName.Indeterminate();
 		PopulateListing();
 	}
 
@@ -232,7 +234,7 @@ public class ProjectsPanel : Panel
 		pie.ProjectFile = pf;
 		return pie;
 	}
-	
+
 	public CategoryList NewCL(string name) {
 		CategoryList clt = MainWindow._plScenes["CategoryList"].Instance<CategoryList>();
 		clt.Toggable = true;
@@ -277,18 +279,44 @@ public class ProjectsPanel : Panel
 			string pfPath = proj.NormalizePath();
 			if (!CentralStore.Instance.HasProject(pfPath))
 			{
-				ProjectFile pf = ProjectFile.ReadFromFile(pfPath, pfPath.EndsWith("engine.cfg") ? 1 : 3);
+				bool isOldPrj = pfPath.EndsWith("engine.cfg");
+				ProjectFile pf = ProjectFile.ReadFromFile(pfPath, isOldPrj);
 				if (pf == null) continue;
-				pf.GodotId = CentralStore.Versions[0].Id;
-				CentralStore.Projects.Add(pf);
-				added.Add(proj);
+
+				string gvId = "";
+				foreach (GodotVersion gdVers in CentralStore.Versions) {
+					int gdMajorVers = gdVers.GetMajorVersion();
+					int gdMinorVers = gdVers.GetMinorVersion();
+					if (isOldPrj) {
+						bool isGodot1Prj = SFile.Exists(pfPath.GetBaseDir().PlusFile(".fscache").NormalizePath());
+						if ((isGodot1Prj && gdMajorVers <= 1) || (!isGodot1Prj && gdMajorVers == 2)) {
+							gvId = gdVers.Id;
+							break;
+						}
+					} else {
+						ProjectConfig pc = new ProjectConfig();
+						if (pc.Load(pfPath) == Error.Ok) {
+							int cfgVers = pc.GetValue("header", "config_version", "3").ToInt();
+							if ((cfgVers == 3 && gdMajorVers == 3 && gdMinorVers == 0) || (cfgVers == 4 && gdMajorVers == 3 && gdMinorVers >= 1) || (cfgVers >= 5 && gdMajorVers >= 4)) {
+								gvId = gdVers.Id;
+								break;
+							}
+						}
+					}
+				}
+
+				if (!string.IsNullOrEmpty(gvId)) {
+					pf.GodotId = gvId;
+					CentralStore.Projects.Add(pf);
+					added.Add(proj);
+				}
 			}
 		}
 		return added;
 	}
 
 	public async void ScanForProjects(bool autoscan = false) {
-		if (CentralStore.Versions.Count <= 0)
+		if (CentralStore.Versions.Count == 0)
 		{
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can scan for projects."));
 			return;
@@ -513,12 +541,12 @@ public class ProjectsPanel : Panel
 				}
 			}
 
-			cclt.SortListing();
+			cclt.CallDeferred("SortListing");
 		}
 
 		PopulateSort();
 
-		if (_missingProjects.Count <= 0)
+		if (_missingProjects.Count == 0)
 			_actionButtons.SetHidden(6);
 		else
 			_actionButtons.SetVisible(6);
@@ -567,6 +595,21 @@ public class ProjectsPanel : Panel
 		}
 	}
 
+	public void RefreshList() {
+		_listView.QueueFreeChildren();
+		_gridView.QueueFreeChildren();
+		_categoryView.QueueFreeChildren();
+		clFavorites = null;
+		clUncategorized = null;
+		_currentPLE = null;
+		_currentPIE = null;
+		pleCache = null;
+		pieCache = null;
+		catCache = null;
+		cpleCache = null;
+		CallDeferred("PopulateListing");
+	}
+
 	public void OnProjectCreated(ProjectFile pf) {
 		PopulateListing();
 		ExecuteEditorProject(pf);
@@ -576,13 +619,13 @@ public class ProjectsPanel : Panel
 		if (_listView.GetChildren().Contains(ple)) {
 			foreach (ProjectLineEntry cple in _listView.GetChildren()) {
 				if (cple != ple)
-					cple.SelfModulate = new Color("00ffffff");
+					cple.Color = new Color("002a2e37");
 			}
 		} else {
 			foreach (CategoryList cl in _categoryView.GetChildren()) {
 				foreach (ProjectLineEntry cple in cl.List.GetChildren()) {
 					if (cple != ple)
-						cple.SelfModulate = new Color("00ffffff");
+						cple.Color = new Color("002a2e37");
 				}
 			}
 		}
@@ -702,8 +745,8 @@ public class ProjectsPanel : Panel
 				ExecuteProject(pf);
 				break;
 			case 3:     // Edit Project File
-				AppDialogs.EditProject.Connect("project_updated", this, "OnProjectUpdated", new Array {pf});
-				AppDialogs.EditProject.Connect("hide", this, "OnHide_EditProject");
+				AppDialogs.EditProject.Connect("project_updated", this, "OnProjectUpdated", new Array {pf}, (uint)ConnectFlags.Oneshot);
+				AppDialogs.EditProject.Connect("hide", this, "OnHide_EditProject", null, (uint)ConnectFlags.Oneshot);
 				AppDialogs.EditProject.ShowDialog(pf);
 				break;
 			case 4:     // Remove Project
@@ -741,8 +784,11 @@ public class ProjectsPanel : Panel
 	}
 
 	private void OnHide_EditProject() {
-		AppDialogs.EditProject.Disconnect("project_updated", this, "OnProjectUpdated");
-		AppDialogs.EditProject.Disconnect("hide", this, "OnHide_EditProject");
+		if (AppDialogs.EditProject.IsConnected("project_updated", this, "OnProjectUpdated"))
+			AppDialogs.EditProject.Disconnect("project_updated", this, "OnProjectUpdated");
+
+		if (AppDialogs.EditProject.IsConnected("hide", this, "OnHide_EditProject"))
+			AppDialogs.EditProject.Disconnect("hide", this, "OnHide_EditProject");
 	}
 
 	private void RemoveMissingProjects() {
@@ -774,59 +820,14 @@ public class ProjectsPanel : Panel
 		return folder.NormalizePath();
 	}
 
-	private void ExecuteProject(ProjectFile pf)
+	private void StartSharedSettings(GodotVersion gv)
 	{
-		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
-		if (gv == null)
-		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The editor version associated with this project was not found."));
-			return;
-		}
-
-		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
-		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} doesn't exist."), gv.GetDisplayName()));
-			return;
-		}
-
-		ProcessStartInfo psi = new ProcessStartInfo();
-		psi.FileName = gv.GetExecutablePath().GetOSDir();
-		psi.WorkingDirectory = pf.Location.GetBaseDir().GetOSDir().NormalizePath();
-		psi.UseShellExecute = !CentralStore.Settings.NoConsole;
-		psi.CreateNoWindow = CentralStore.Settings.NoConsole;
-
-		Process proc = Process.Start(psi);
-	}
-
-	private void UpdateIconsExcept(ProjectIconEntry pie) {
-		foreach (ProjectIconEntry cpie in _gridView.GetChildren()) {
-			if (cpie != pie)
-				cpie.SelfModulate = new Color("00ffffff");
-		}
-	}
-
-	private void ExecuteEditorProject(ProjectFile pf)
-	{
-		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
-		if (gv == null)
-		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The editor version associated with this project was not found."));
-			return;
-		}
-
-		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
-		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} doesn't exist."), gv.GetDisplayName()));
-			return;
-		}
-
 		if (!string.IsNullOrEmpty(gv.SharedSettings))
 		{
 			GodotVersion ssgv = CentralStore.Instance.FindVersion(gv.SharedSettings);
 			if (ssgv == null)
 			{
 				gv.SharedSettings = "";
-				AppDialogs.MessageDialog.ShowMessage(Tr("Warning"), "The instance of Shared Settings that was setup for this editor version no longer exists and has been removed.");
 				CentralStore.Instance.SaveDatabase();
 			}
 			else
@@ -852,6 +853,57 @@ public class ProjectsPanel : Panel
 					CopyRecursive(path, toPath);
 			}
 		}
+	}
+
+	private void ExecuteProject(ProjectFile pf)
+	{
+		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
+		if (gv == null)
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The editor version associated with this project was not found."));
+			return;
+		}
+
+		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} doesn't exist."), gv.GetDisplayName()));
+			return;
+		}
+
+		StartSharedSettings(gv);
+
+		ProcessStartInfo psi = new ProcessStartInfo();
+		psi.FileName = gv.GetExecutablePath().GetOSDir();
+		psi.WorkingDirectory = pf.Location.GetBaseDir().GetOSDir().NormalizePath();
+		psi.UseShellExecute = !CentralStore.Settings.NoConsole;
+		psi.CreateNoWindow = CentralStore.Settings.NoConsole;
+
+		Process proc = Process.Start(psi);
+	}
+
+	private void UpdateIconsExcept(ProjectIconEntry pie) {
+		foreach (ProjectIconEntry cpie in _gridView.GetChildren()) {
+			if (cpie != pie)
+				cpie.Color = new Color("002a2e37");
+		}
+	}
+
+	private void ExecuteEditorProject(ProjectFile pf)
+	{
+		GodotVersion gv = CentralStore.Instance.FindVersion(pf.GodotId);
+		if (gv == null)
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The editor version associated with this project was not found."));
+			return;
+		}
+
+		if (!SFile.Exists(gv.GetExecutablePath().GetOSDir()))
+		{
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), string.Format(Tr("The executable path for {0} doesn't exist."), gv.GetDisplayName()));
+			return;
+		}
+
+		StartSharedSettings(gv);
 
 		ProcessStartInfo psi = new ProcessStartInfo();
 		psi.FileName = gv.GetExecutablePath().GetOSDir();
@@ -942,6 +994,9 @@ public class ProjectsPanel : Panel
 				if (res.Result)
 					RemoveMissingProjects();
 				break;
+			case 7: // Refresh List
+				RefreshList();
+				break;
 		}
 	}
 
@@ -973,7 +1028,7 @@ public class ProjectsPanel : Panel
 			RemoveFolders(pf.Location.GetBaseDir());
 		if (_missingProjects.Contains(pf)) {
 			_missingProjects.Remove(pf);
-			if (_missingProjects.Count <= 0)
+			if (_missingProjects.Count == 0)
 				_actionButtons.SetHidden(6);
 		}
 		CentralStore.Projects.Remove(pf);
@@ -1071,12 +1126,10 @@ public class ProjectsPanel : Panel
 		// Sort by Godot Version
 		} else {
 			if (_godotVersion.Direction == HeaderButton.SortDirection.Up) {
-				fav = CentralStore.Projects.OrderBy(pf => CentralStore.Instance.GetVersion(pf.GodotId).Tag)
-						.ThenBy(pf => !CentralStore.Instance.GetVersion(pf.GodotId).IsMono);
+				fav = CentralStore.Projects.OrderBy(pf => CentralStore.Instance.GetVersion(pf.GodotId).Tag);
 				non_fav = null;
 			} else {
-				fav = CentralStore.Projects.OrderByDescending(pf => CentralStore.Instance.GetVersion(pf.GodotId).Tag)
-						.ThenByDescending(pf => !CentralStore.Instance.GetVersion(pf.GodotId).IsMono);
+				fav = CentralStore.Projects.OrderByDescending(pf => CentralStore.Instance.GetVersion(pf.GodotId).Tag);
 				non_fav = null;
 			}
 		}

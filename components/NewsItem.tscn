@@ -1,10 +1,14 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Scripts/components/NewsItem.cs" type="Script" id=2]
 [ext_resource path="res://Shaders/mask_texture.gdshader" type="Shader" id=3]
 [ext_resource path="res://Assets/images/circle_mask.png" type="Texture" id=4]
 [ext_resource path="res://Assets/Icons/icon_thumbnail_wait.svg" type="Texture" id=5]
+[ext_resource path="res://Assets/Icons/godot.svg" type="Texture" id=6]
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 1, 1, 1, 1 )
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.294118, 0.317647, 0.388235, 1 )
@@ -18,9 +22,12 @@ shader = ExtResource( 3 )
 shader_param/mask = ExtResource( 4 )
 
 [node name="NewsItem" type="Panel"]
+self_modulate = Color( 0.164706, 0.180392, 0.215686, 0 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 rect_min_size = Vector2( 0, 160 )
+mouse_default_cursor_shape = 2
+custom_styles/panel = SubResource( 3 )
 script = ExtResource( 2 )
 
 [node name="vb" type="VBoxContainer" parent="."]
@@ -54,6 +61,7 @@ margin_left = 14.0
 margin_right = 39.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 25, 25 )
+texture = ExtResource( 6 )
 expand = true
 stretch_mode = 6
 

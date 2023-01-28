@@ -122,9 +122,9 @@ public class EditCustomGodot : ReferenceRect
                 version.Tag = _Tag.Text;
                 version.Location = _Location.Text.GetBaseDir();
 #if GODOT_MACOS || GODOT_OSX
-		version.ExecutableName = !version.Tag.ToLower().Contains("mono") ? "Godot" : "Godot_mono";
+				version.ExecutableName = !version.Tag.ToLower().Contains("mono") ? "Godot" : "Godot_mono";
 #else
-		version.ExecutableName = _Location.Text.GetFile();
+				version.ExecutableName = _Location.Text.GetFile();
 #endif
             }
         }

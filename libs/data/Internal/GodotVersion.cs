@@ -11,7 +11,6 @@ public class GodotVersion : Object {
 	[JsonProperty] public string ExecutableName; // Name of the Final Executable
 	[JsonProperty] public string CacheLocation; // Location of where the cache file is.
 	[JsonProperty] public string Url;	// URL downloaded from (Will match Location for Custom)
-	[JsonProperty] public bool HideConsole;	// If we should hide the console for Godot Editor.
 	[JsonProperty] public GithubVersion GithubVersion;
 	[JsonProperty] public MirrorVersion MirrorVersion;
 	[JsonProperty] public string SharedSettings;
@@ -21,7 +20,6 @@ public class GodotVersion : Object {
 		Tag = "";
 		Location = "";
 		Url = "";
-		HideConsole = false;
 		SharedSettings = "";
 	}
 

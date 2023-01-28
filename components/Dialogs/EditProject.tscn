@@ -163,6 +163,7 @@ text = "Editor Version:"
 margin_top = 97.0
 margin_right = 534.0
 margin_bottom = 118.0
+mouse_default_cursor_shape = 2
 
 [node name="ProjectDescriptionHeader" type="Label" parent="PC/CC/P/VB/MCContent/VC"]
 margin_top = 125.0
@@ -199,6 +200,7 @@ size_flags_horizontal = 3
 margin_left = 156.0
 margin_right = 189.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Save"
 
 [node name="Sep2" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
@@ -211,6 +213,7 @@ size_flags_horizontal = 3
 margin_left = 349.0
 margin_right = 394.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Cancel"
 
 [node name="Sep3" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]

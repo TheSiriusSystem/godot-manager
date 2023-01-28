@@ -74,7 +74,6 @@ public class AddonInstaller : ReferenceRect
 		IgnoreFiles.Add("res://engine.cfg");
 		IgnoreFiles.Add("res://project.godot");
 		IgnoreFiles.Add("res://default_env.tres");
-		IgnoreFiles.Add("res://.fscache");
 		IgnoreFiles.Add("res://.gitignore");
 		IgnoreFiles.Add("res://.gitattributes");
 		foreach (string fileName in new string[] {"README", "READ_ME", "LICENSE", "LICENCE", "CODE_OF_CONDUCT", "CODEOF_CONDUCT", "CODE_OFCONDUCT", "CODEOFCONDUCT", "CONTRIBUTE", "CONTRIBUTED", "CONTRIBUTING", "CONTRIBUTOR", "CONTRIBUTORS", "SECURITY", "CREDITS", "TODO", "TODO_LIST", "CHANGES", "CHANGELOG", "CHANGE_LOG", "UPDATELOG", "UPDATE_LOG"}) {
@@ -150,7 +149,7 @@ public class AddonInstaller : ReferenceRect
 				selectedFiles++;
 			}
 		}
-		if (selectedFiles <= 0) {
+		if (selectedFiles == 0) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to select an addon file."));
 			return;
 		}

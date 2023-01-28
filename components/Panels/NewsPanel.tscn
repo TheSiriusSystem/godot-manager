@@ -1,10 +1,11 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Scripts/components/Panel/NewsPanel.cs" type="Script" id=2]
 [ext_resource path="res://Assets/Icons/check_for_updates.png" type="Texture" id=3]
+[ext_resource path="res://components/PaginationNav.tscn" type="PackedScene" id=6]
 
-[sub_resource type="StyleBoxFlat" id=1]
+[sub_resource type="StyleBoxFlat" id=2]
 bg_color = Color( 0.294118, 0.317647, 0.388235, 1 )
 corner_radius_top_left = 20
 corner_radius_top_right = 20
@@ -37,7 +38,7 @@ margin_right = 210.0
 margin_bottom = 35.0
 rect_min_size = Vector2( 210, 30 )
 custom_fonts/font = ExtResource( 1 )
-custom_styles/normal = SubResource( 1 )
+custom_styles/normal = SubResource( 2 )
 text = "News"
 align = 1
 valign = 1
@@ -46,7 +47,7 @@ valign = 1
 margin_left = 214.0
 margin_right = 970.0
 margin_bottom = 40.0
-rect_min_size = Vector2( 100, 40 )
+rect_min_size = Vector2( 0, 40 )
 size_flags_horizontal = 3
 
 [node name="RefreshIcon" type="TextureRect" parent="VB/Header/HC"]
@@ -55,7 +56,8 @@ margin_left = 974.0
 margin_right = 1014.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 40, 0 )
-hint_tooltip = "Refresh News"
+hint_tooltip = "Refresh List"
+mouse_default_cursor_shape = 2
 texture = ExtResource( 3 )
 expand = true
 stretch_mode = 6
@@ -74,16 +76,27 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ScrollContainer" type="ScrollContainer" parent="VB/MC"]
+[node name="VBoxContainer" type="VBoxContainer" parent="VB/MC"]
 margin_left = 10.0
 margin_top = 10.0
 margin_right = 1014.0
 margin_bottom = 646.0
+
+[node name="PageCount" parent="VB/MC/VBoxContainer" instance=ExtResource( 6 )]
+unique_name_in_owner = true
+visible = false
+margin_top = 0.0
+margin_right = 1004.0
+margin_bottom = 19.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VB/MC/VBoxContainer"]
+margin_right = 1004.0
+margin_bottom = 636.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 follow_focus = true
 
-[node name="NewsList" type="VBoxContainer" parent="VB/MC/ScrollContainer"]
+[node name="NewsList" type="VBoxContainer" parent="VB/MC/VBoxContainer/ScrollContainer"]
 unique_name_in_owner = true
 margin_right = 1004.0
 margin_bottom = 636.0

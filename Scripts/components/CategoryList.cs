@@ -119,16 +119,6 @@ public class CategoryList : VBoxContainer
 			return _categoryList;
 		}
 	}
-
-	public ProjectLineEntry ProjectSelected {
-		get {
-			foreach (ProjectLineEntry ple in GetChildren()) {
-				if (ple.SelfModulate == new Color("ffffffff"))
-					return ple;
-			}
-			return null;
-		}
-	}
 #endregion
 
 	// Called when the node enters the scene tree for the first time.
@@ -173,9 +163,7 @@ public class CategoryList : VBoxContainer
 		EmitSignal("pin_toggled");
 	}
 
-	public async void SortListing() {
-		// Wait for 1 idle frame, so that QueueFree() executes.
-		await this.IdleFrame();
+	public void SortListing() {
 		Array<ProjectLineEntry> pleCache = new Array<ProjectLineEntry>();
 		Array<ProjectFile> pfCache = new Array<ProjectFile>();
 
@@ -237,7 +225,7 @@ public class CategoryList : VBoxContainer
 		ple.ProjectFile.CategoryId = (int)GetMeta("ID");
 		CentralStore.Instance.SaveDatabase();
 		EmitSignal("drag_drop_completed", parent, this, ple);
-		parent.SortListing();
-		SortListing();
+		parent.CallDeferred("SortListing");
+		CallDeferred("SortListing");
 	}
 }

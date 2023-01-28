@@ -99,6 +99,7 @@ public class CreateProject : ReferenceRect
 				_createBtn.Disabled = true;
 				break;
 		}
+		_createBtn.MouseDefaultCursorShape = !_createBtn.Disabled ? CursorShape.PointingHand : CursorShape.Arrow;
 	}
 #endregion
 
@@ -179,7 +180,7 @@ public class CreateProject : ReferenceRect
 		}
 
 		prj.CreateProject();
-		ProjectFile pf = ProjectFile.ReadFromFile(prj.ProjectLocation.PlusFile(pfName).NormalizePath(), gdMajorVers);
+		ProjectFile pf = ProjectFile.ReadFromFile(prj.ProjectLocation.PlusFile(pfName).NormalizePath(), (pfName == "engine.cfg"));
 		pf.GodotId = prj.GodotId;
 		pf.Assets = new Array<string>();
 
@@ -194,11 +195,15 @@ public class CreateProject : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_createFolder))]
 	void OnCreateFolderPressed() {
-		string path = _projectLocation.Text;
-		string newDir = path.Join(_projectName.Text).NormalizePath();
-		Directory.CreateDirectory(newDir);
-		_projectLocation.Text = newDir;
-		TestPath(newDir);
+		try {
+			string path = _projectLocation.Text;
+			string newDir = path.Join(_projectName.Text).NormalizePath();
+			Directory.CreateDirectory(newDir);
+			_projectLocation.Text = newDir;
+			TestPath(newDir);
+		} catch (System.Exception ex) {
+			AppDialogs.MessageDialog.ShowMessage(Tr("Mono Error"), Tr(!string.IsNullOrEmpty(ex.Message) ? ex.Message : "A unknown error has occurred."));
+		}
 	}
 
 	[SignalHandler("pressed", nameof(_browseLocation))]
@@ -214,7 +219,7 @@ public class CreateProject : ReferenceRect
 		_projectLocation.Text = bfdir;
 		AppDialogs.BrowseFolderDialog.Visible = false;
 		TestPath(bfdir);
-		if (bfdir.IsDirEmpty() && _projectName.Text == "New Game Project")
+		if (bfdir.IsDirEmpty() && (string.IsNullOrEmpty(_projectName.Text) || _projectName.Text == "New Game Project"))
 			_projectName.Text = bfdir.GetFile().Capitalize();
 	}
 
@@ -292,17 +297,14 @@ public class CreateProject : ReferenceRect
 	}
 
 	public void ShowDialog() {
-		if (CentralStore.Versions.Count <= 0)
-		{
-			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can create a project."));
-			return;
-		}
-
 		_godotVersion.Clear();
-		for (int indx = 0; indx < CentralStore.Versions.Count; indx++)
-		{
+		for (int indx = 0; indx < CentralStore.Versions.Count; indx++) {
 			_godotVersion.AddItem(CentralStore.Versions[indx].GetDisplayName(), indx);
 			_godotVersion.SetItemMetadata(indx, CentralStore.Versions[indx]);
+		}
+		if (_godotVersion.GetItemCount() == 0) {
+			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can create a project."));
+			return;
 		}
 
 		_tabs.CurrentTab = 0;
@@ -322,21 +324,32 @@ public class CreateProject : ReferenceRect
 		Visible = true;
 	}
 
-	[SignalHandler("text_changed", nameof(_projectLocation))]
-	void OnProjectLocation_TextChanged(string new_text) {
-		TestPath(new_text);
-	}
-
-	private void TestPath(string path) {
-		if (!Directory.Exists(path)) {
-			ShowMessage(Tr("The path specified doesn't exist."), DirError.ERROR);
+	[SignalHandler("text_changed", nameof(_projectName))]
+	private void TestName(string name) {
+		if (!TestPath(_projectLocation.Text)) {
 			return;
 		}
+
+		TestPath(_projectLocation.Text);
+		if (string.IsNullOrEmpty(name)) {
+			ShowMessage(Tr("It would be a good idea to name your project."), DirError.WARNING);
+		}
+	}
+
+	[SignalHandler("text_changed", nameof(_projectLocation))]
+	private bool TestPath(string path) {
+		if (!Directory.Exists(path)) {
+			ShowMessage(Tr("The path specified doesn't exist."), DirError.ERROR);
+			return false;
+		}
+
+
 
 		if (!path.IsDirEmpty()) {
 			ShowMessage(Tr("The selected path is not empty. Choosing an empty folder is highly recommended."), DirError.WARNING);
 		} else {
 			ShowMessage("", DirError.OK);
 		}
+		return true;
 	}
 }

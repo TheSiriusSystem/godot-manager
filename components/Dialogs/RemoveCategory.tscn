@@ -145,6 +145,7 @@ size_flags_horizontal = 3
 margin_left = 71.0
 margin_right = 127.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Remove"
 
 [node name="Sep2" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
@@ -157,6 +158,7 @@ size_flags_horizontal = 3
 margin_left = 203.0
 margin_right = 248.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Cancel"
 
 [node name="Sep3" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]

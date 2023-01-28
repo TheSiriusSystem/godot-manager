@@ -12,8 +12,6 @@ public class ProjectLineEntry : ColorRect
 	[Signal]
 	public delegate void RightClicked(ProjectLineEntry self);
 	[Signal]
-	public delegate void RightDoubleClicked(ProjectLineEntry self);
-	[Signal]
 	public delegate void FavoriteUpdated(ProjectLineEntry self);
 	[Signal]
 	public delegate void DragStarted(ProjectLineEntry self);
@@ -103,8 +101,10 @@ public class ProjectLineEntry : ColorRect
 		}
 		set {
 			sName = value;
-			if (_name != null)
+			if (_name != null) {
 				_name.Text = value;
+				_name.HintTooltip = _name.Text;
+			}
 		}
 	}
 
@@ -119,6 +119,7 @@ public class ProjectLineEntry : ColorRect
 					_desc.Text = Tr("No Description");
 				else
 					_desc.Text = value;
+				_desc.HintTooltip = _desc.Text;
 			}
 		}
 	}
@@ -129,8 +130,10 @@ public class ProjectLineEntry : ColorRect
 		}
 		set {
 			sLocation = value;
-			if (_location != null)
+			if (_location != null) {
 				_location.Text = value.GetBaseDir().NormalizePath();
+				_location.HintTooltip = _location.Text;
+			}
 		}
 	}
 
@@ -138,15 +141,18 @@ public class ProjectLineEntry : ColorRect
 		get {
 			return sGodotVersion;
 		}
-		
 		set {
 			sGodotVersion = value;
 			if (_version != null) {
 				GodotVersion gv = CentralStore.Instance.FindVersion(value);
 				if (gv != null) {
 					_version.Text = gv.GetDisplayName();
+					_version.HintTooltip = Tr("Using ") + _version.Text;
+					_version.MouseFilter = MouseFilterEnum.Pass;
 				} else {
 					_version.Text = Tr("Unknown");
+					_version.HintTooltip = "";
+					_version.MouseFilter = MouseFilterEnum.Ignore;
 				}
 			}
 		}
@@ -173,6 +179,18 @@ public class ProjectLineEntry : ColorRect
 		EmitSignal("FavoriteUpdated", this);
 	}
 
+	[SignalHandler("mouse_entered")]
+	void OnMouseEntered() {
+		if (!Color.IsEqualApprox(new Color("31ffffff")))
+			Color = new Color("2a2e37");
+	}
+
+	[SignalHandler("mouse_exited")]
+	void OnMouseExited() {
+		if (!Color.IsEqualApprox(new Color("31ffffff")))
+			Color = new Color("002a2e37");
+	}
+
 	[SignalHandler("gui_input")]
 	void OnGuiInput(InputEvent inputEvent) {
 		if (!(inputEvent is InputEventMouseButton))
@@ -180,23 +198,18 @@ public class ProjectLineEntry : ColorRect
 		var iemb = inputEvent as InputEventMouseButton;
 		if (!iemb.Pressed)
 			return;
-		
+
 		if (iemb.ButtonIndex == (int)ButtonList.Left) {
 			if (iemb.Doubleclick)
 				EmitSignal("DoubleClicked", this);
 			else {
-				SelfModulate = new Color("ffffffff");
+				Color = new Color("31ffffff");
 				EmitSignal("Clicked", this);
 			}
 		} else if (iemb.ButtonIndex == (int)ButtonList.Right) {
-			if (iemb.Doubleclick)
-				EmitSignal("RightDoubleClicked", this);
-			else {
-				SelfModulate = new Color("ffffffff");
-				EmitSignal("RightClicked", this);
-			}
+			Color = new Color("31ffffff");
+			EmitSignal("RightClicked", this);
 		}
-		
 	}
 
 	// Test Drag and Drop

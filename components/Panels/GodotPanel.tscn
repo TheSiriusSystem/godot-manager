@@ -103,6 +103,7 @@ margin_top = 1.0
 margin_right = 61.0
 margin_bottom = 29.0
 rect_min_size = Vector2( 60, 0 )
+mouse_default_cursor_shape = 2
 text = "Tags"
 items = [ "Mono / C#", null, 1, false, false, 0, 0, null, "", false, "Release Type", null, 0, false, true, 1, 0, null, "", true, "Stable", null, 2, true, false, 2, 0, null, "", false, "Alpha", null, 2, false, false, 3, 0, null, "", false, "Beta", null, 2, false, false, 4, 0, null, "", false, "Release Candidate", null, 2, false, false, 5, 0, null, "", false ]
 
@@ -123,11 +124,18 @@ margin_bottom = 28.0
 custom_fonts/font = ExtResource( 4 )
 text = "Download Mirror:"
 
-[node name="DownloadSource" type="OptionButton" parent="VB/MC/HC"]
+[node name="CC" type="CenterContainer" parent="VB/MC/HC"]
 margin_left = 874.0
 margin_right = 1014.0
 margin_bottom = 40.0
+
+[node name="DownloadSource" type="OptionButton" parent="VB/MC/HC/CC"]
+margin_top = 9.0
+margin_right = 140.0
+margin_bottom = 30.0
 rect_min_size = Vector2( 140, 0 )
+mouse_default_cursor_shape = 2
+size_flags_vertical = 0
 text = "GitHub"
 items = [ "GitHub", null, false, 0, null, "TuxFamily", null, false, 1, null ]
 selected = 0

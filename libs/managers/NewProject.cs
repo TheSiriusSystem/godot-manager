@@ -129,17 +129,9 @@ public class NewProject : Object {
 					writer.WriteLine("* text=auto eol=lf");
 				}
 				using (StreamWriter writer = new StreamWriter(gitignorePath)) {
-					writer.WriteLine(".vs/");
-					writer.WriteLine(".DS_Store");
-					writer.WriteLine("");
-					writer.WriteLine("# Godot 1 specific ignores");
-					writer.WriteLine(".fscache");
-					writer.WriteLine("");
-					writer.WriteLine("# Godot 4+ specific ignores");
-					writer.WriteLine(".godot/");
-					writer.WriteLine("");
 					writer.WriteLine("# Godot-specific ignores");
 					writer.WriteLine(".import/");
+					writer.WriteLine(".godot/");
 					writer.WriteLine("export.cfg");
 					writer.WriteLine("export_presets.cfg");
 					writer.WriteLine("");
@@ -150,6 +142,31 @@ public class NewProject : Object {
 					writer.WriteLine(".mono/");
 					writer.WriteLine("data_*/");
 					writer.WriteLine("mono_crash.*.json");
+					writer.WriteLine("");
+					writer.WriteLine("# Visual Studio 2015/2017 cache/options directory");
+					writer.WriteLine(".vs/");
+					writer.WriteLine("");
+					writer.WriteLine("# Visual Studio 2017 auto generated files");
+					writer.WriteLine(@"Generated\ Files/");
+					writer.WriteLine("");
+					writer.WriteLine("# Visual Studio Code");
+					writer.WriteLine(".vscode/");
+					writer.WriteLine("*.code-workspace");
+					writer.WriteLine(".history/");
+					writer.WriteLine("");
+					writer.WriteLine("# Windows");
+					writer.WriteLine("Thumbs.db");
+					writer.WriteLine("Thumbs.db:encryptable");
+					writer.WriteLine("ehthumbs.db");
+					writer.WriteLine("ehthumbs_vista.db");
+					writer.WriteLine("");
+					writer.WriteLine("# Linux");
+					writer.WriteLine("*~");
+					writer.WriteLine(".directory");
+					writer.WriteLine("");
+					writer.WriteLine("# macOS");
+					writer.WriteLine(".DS_Store");
+					writer.WriteLine("__MACOSX");
 				}
 				break;
 		}

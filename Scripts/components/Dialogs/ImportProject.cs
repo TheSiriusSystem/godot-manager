@@ -45,7 +45,7 @@ public class ImportProject : ReferenceRect
 	}
 
 	public void ShowDialog(string location = "") {
-		if (CentralStore.Versions.Count <= 0)
+		if (CentralStore.Versions.Count == 0)
 		{
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("You need to add an editor version before you can import a project."));
 			return;
@@ -78,7 +78,7 @@ public class ImportProject : ReferenceRect
 			return;
 		}
 
-		ProjectFile pf = ProjectFile.ReadFromFile(_locationValue.Text, gdMajorVers);
+		ProjectFile pf = ProjectFile.ReadFromFile(_locationValue.Text, _locationValue.Text.EndsWith("engine.cfg"));
 		pf.GodotId = gdVers.Id;
 		CentralStore.Projects.Add(pf);
 		CentralStore.Instance.SaveDatabase();

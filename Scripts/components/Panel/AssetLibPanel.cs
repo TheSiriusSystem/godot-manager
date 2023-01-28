@@ -486,7 +486,6 @@ public class AssetLibPanel : Panel
         using (var fh = new FileStream(zipFile, FileMode.Create)) {
             using (var afh = new ZipArchive(fh, ZipArchiveMode.Create)) {
                 foreach (string entry in Directory.EnumerateFileSystemEntries(templatePath, "*", System.IO.SearchOption.AllDirectories)) {
-                    GD.Print(entry.GetFile());
                     if (entry == "." || entry == "..")
                         continue;
                     if (entry.EndsWith(".import"))
@@ -537,7 +536,7 @@ public class AssetLibPanel : Panel
 
 	private async Task Configure(bool projectsOnly)
 	{
-		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Assets"));
+		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Asset Downloads"));
 		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching asset information from Godot Asset Library..."));
 		AppDialogs.BusyDialog.ShowDialog();
 
@@ -598,7 +597,7 @@ public class AssetLibPanel : Panel
             else
                 pl.UpdateTemplates();
         } else {
-            AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Assets"));
+            AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Asset Downloads"));
             AppDialogs.BusyDialog.UpdateByline(Tr("Processing search results..."));
             AppDialogs.BusyDialog.ShowDialog();
 

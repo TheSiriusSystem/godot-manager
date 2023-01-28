@@ -1,4 +1,5 @@
 using Godot;
+using Godot.Sharp.Extras;
 using Godot.Collections;
 
 [Tool]
@@ -34,6 +35,7 @@ public class ActionButtons : PanelContainer
 			icon.RectMinSize = new Vector2(20,20);
 			icon.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
 			icon.Expand = true;
+			icon.MouseDefaultCursorShape = CursorShape.PointingHand;
 			icon_bg.AddChild(icon);
 			_icons.Add(icon_bg);
 			
@@ -81,6 +83,13 @@ public class ActionButtons : PanelContainer
 		if (inputEvent is InputEventMouseButton iemb && iemb.Pressed && iemb.ButtonIndex == (int)ButtonList.Left)
 		{
 			EmitSignal("clicked", index);
+		}
+	}
+
+	[SignalHandler("hide")]
+	void OnHide() {
+		foreach (ColorRect icon in _icons) {
+			Icon_MouseExited(icon);
 		}
 	}
 }

@@ -42,6 +42,12 @@ public class PaginationNav : CenterContainer
         _lastPage.Connect("pressed", this, "StepPage", new Array { -2 });
     }
 
+    void ToggleButton(int btnIndex, bool enabled) {
+        Button btn = _pageCount.GetChild(btnIndex) as Button;
+        btn.Disabled = !enabled;
+        btn.MouseDefaultCursorShape = enabled ? CursorShape.PointingHand : CursorShape.Arrow;
+    }
+
     public void UpdateConfig(int totalPages) {
         iTotalPages = totalPages;
         foreach (Button btn in abPages)
@@ -49,45 +55,54 @@ public class PaginationNav : CenterContainer
         abPages.Clear();
         for (int i = 0; i < totalPages; i++) {
             Button btn = new Button();
-            btn.Text = $"{i+1}";
-            btn.RectMinSize = new Vector2(25,0);
+            btn.Text = $"{i + 1}";
+            btn.RectMinSize = new Vector2(25, 0);
+            btn.MouseDefaultCursorShape = CursorShape.PointingHand;
             btn.Connect("pressed", this, "PageChanged", new Array { i });
             _pageCount.AddChild(btn);
             abPages.Add(btn);
+            if (i == iCurrentPage) {
+                btn.Disabled = true;
+            }
             if (i > 9) {
                 btn.Visible = false;
             }
         }
-        if (totalPages > 0) {
-            iCurrentPage = 0;
-            (_pageCount.GetChild(0) as Button).Disabled = true;
-            CheckPage();
-        }
+        CheckPage();
     }
 
     public void CheckPage() {
-        if (iCurrentPage == 0) {
+        if (iTotalPages > 1) {
+            Visible = true;
+            if (iCurrentPage == 0) {
+                _firstPage.Disabled = true;
+                _prevPage.Disabled = true;
+            } else {
+                _firstPage.Disabled = false;
+                _prevPage.Disabled = false;
+            }
+            if (iCurrentPage + 1 == iTotalPages) {
+                _lastPage.Disabled = true;
+                _nextPage.Disabled = true;
+            } else {
+                _lastPage.Disabled = false;
+                _nextPage.Disabled = false;
+            }
+        } else {
+            Visible = false;
             _firstPage.Disabled = true;
             _prevPage.Disabled = true;
-        } else {
-            _firstPage.Disabled = false;
-            _prevPage.Disabled = false;
-        }
-        if (iCurrentPage + 1 == iTotalPages) {
             _lastPage.Disabled = true;
             _nextPage.Disabled = true;
-        } else {
-            _lastPage.Disabled = false;
-            _nextPage.Disabled = false;
         }
-        int from = iCurrentPage - 5;
-        if (from < 0)
-            from = 0;
-        
-        int to = from + 9;
-        if (to > iTotalPages)
-            to = iTotalPages;
-        
+        _firstPage.MouseDefaultCursorShape = !_firstPage.Disabled ? CursorShape.PointingHand : CursorShape.Arrow;
+        _prevPage.MouseDefaultCursorShape = !_prevPage.Disabled ? CursorShape.PointingHand : CursorShape.Arrow;
+        _lastPage.MouseDefaultCursorShape = !_lastPage.Disabled ? CursorShape.PointingHand : CursorShape.Arrow;
+        _nextPage.MouseDefaultCursorShape = !_nextPage.Disabled ? CursorShape.PointingHand : CursorShape.Arrow;
+
+        int from = Mathf.Max(iCurrentPage - 5, 0);
+        int to = Mathf.Min(from + 9, iTotalPages);
+
         for (int i = 0; i < iTotalPages; i++) {
             if (i >= from && i <= to) {
                 abPages[i].Visible = true;
@@ -98,14 +113,14 @@ public class PaginationNav : CenterContainer
     }
 
     public void StepPage(int page) {
-        (_pageCount.GetChild(iCurrentPage) as Button).Disabled = false;
+        ToggleButton(iCurrentPage, true);
         if (page == 0)
             iCurrentPage = 0;
         else if (page == -2)
             iCurrentPage = iTotalPages - 1;
         else
             iCurrentPage += page;
-        (_pageCount.GetChild(iCurrentPage) as Button).Disabled = true;
+        ToggleButton(iCurrentPage, false);
         CheckPage();
         EmitSignal("page_changed", iCurrentPage);
     }
@@ -118,22 +133,22 @@ public class PaginationNav : CenterContainer
             return;
 
         CheckPage();
-        
+
         if (_pageCount.GetChildCount() > 0 && _pageCount.GetChildCount() > iCurrentPage)
-            (_pageCount.GetChild(iCurrentPage) as Button).Disabled = false;
-        
+            ToggleButton(iCurrentPage, true);
+
         iCurrentPage = page;
         if (_pageCount.GetChildCount() > 0 && _pageCount.GetChildCount() > iCurrentPage)
-            (_pageCount.GetChild(iCurrentPage) as Button).Disabled = true;
+            ToggleButton(iCurrentPage, false);
     }
 
     public void PageChanged(int page) {
         if (_pageCount.GetChildCount() > 0 && _pageCount.GetChildCount() > iCurrentPage)
-            (_pageCount.GetChild(iCurrentPage) as Button).Disabled = false;
+            ToggleButton(iCurrentPage, true);
         
         iCurrentPage = page;
         if (_pageCount.GetChildCount() > 0 && _pageCount.GetChildCount() > iCurrentPage)
-            (_pageCount.GetChild(iCurrentPage) as Button).Disabled = true;
+            ToggleButton(iCurrentPage, false);
         
         CheckPage();
         EmitSignal("page_changed", page);

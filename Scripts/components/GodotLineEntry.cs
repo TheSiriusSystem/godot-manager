@@ -32,22 +32,17 @@ public class GodotLineEntry : HBoxContainer
 	[NodePath("vc/VersionTag")]
 	private Label _label = null;
 	[NodePath("vc/GodotSize")]
-	private HBoxContainer _filesize = null;
+	private HBoxContainer _godotSize = null;
+	[NodePath("vc/GodotSize/ProgressBar")]
+	private ProgressBar _downloadProgress = null;
 	[NodePath("vc/GodotSize/Filesize")]
-	private Label _size = null;
+	private Label _filesize = null;
 	[NodePath("SettingsShare")]
 	private TextureRect _settingsShare = null;
 	[NodePath("Linked")]
 	private TextureRect _linked = null;
 	[NodePath("Download")]
 	private TextureRect _download = null;
-
-	[NodePath("vc/DownloadProgress")]
-	private HBoxContainer _downloadProgress = null;
-	[NodePath("vc/DownloadProgress/ProgressBar")]
-	private ProgressBar _progressBar = null;
-	[NodePath("vc/DownloadProgress/Filesize")]
-	private Label _fileSize = null;
 
 	[NodePath("vc/ETA")]
 	private HBoxContainer _eta = null;
@@ -56,16 +51,29 @@ public class GodotLineEntry : HBoxContainer
 	[NodePath("vc/ETA/HB2/DownloadSpeed")]
 	private Label _downloadSpeed = null;
 
-	[NodePath("vc/GodotLocation")]
-	private HBoxContainer _loc = null;
-	[NodePath("vc/GodotLocation/Location")]
-	private Label _location = null;
+	[NodePath("vc/Location")]
+	private Label _loc = null;
 
 	[NodePath("DownloadSpeedTimer")]
 	private Timer _downloadSpeedTimer = null;
 #endregion
 
 #region Private String Variables
+	private static Dictionary<string, string> byteNames = new Dictionary<string, string>()
+	{
+		{" B", " Byte(s)"},
+		{" KB", " Kilobyte(s)"},
+		{" MB", " Megabyte(s)"},
+		{" GB", " Gigabyte(s)"},
+		{" TB", " Terabyte(s)"},
+		{" PB", " Petabyte(s)"},
+		{" EB", " Exabyte(s)"},
+		{" ZB", " Zettabyte(s)"},
+		{" YB", " Yottabyte(s)"},
+		{" RB", " Ronnabyte(s)"},
+		{" QB", " Quettabyte(s)"}
+	};
+
 	private string sLabel = "Godot x.x.x";
 	private string sFilesize = "Unknown";
 	private string sLocation = @"E:\Apps\GodotManager\versions\x.x.x";
@@ -106,8 +114,6 @@ public class GodotLineEntry : HBoxContainer
 						Filesize = Util.FormatSize(value.MirrorVersion.PlatformDownloadSize);
 					}
 				}
-				if (_loc != null && _location != null)
-					_loc.Visible = true;
 			}
 		}
 	}
@@ -129,34 +135,26 @@ public class GodotLineEntry : HBoxContainer
 			gvGithubVersion = value;
 			if (value == null)
 				return;
-			if (_loc != null && _location != null)
-				_loc.Visible = false;
+			Label = value.Name + (!Mono ? "" : "-mono");
 #if GODOT_WINDOWS || GODOT_UWP
 			if (!Mono) {
-				Label = value.Name;
 				Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Standard.Win32_Size : value.Standard.Win64_Size);
 			} else {
-				Label = value.Name + "-mono";
 				Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Mono.Win32_Size : value.Mono.Win64_Size);
 			}
 #elif GODOT_LINUXBSD || GODOT_X11
 			if (!Mono) {
-				Label = value.Name;
 				Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Standard.Linux32_Size : value.Standard.Linux64_Size);
 			} else {
-				Label = value.Name + "-mono";
 				Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Mono.Linux32_Size : value.Mono.Linux64_Size);
 			}
 #elif GODOT_MACOS || GODOT_OSX
 			if (!Mono) {
-				Label = value.Name;
 				Filesize = Util.FormatSize(value.Standard.OSX_Size);
 			} else {
-				Label = value.Name + "-mono";
 				Filesize = Util.FormatSize(value.Mono.OSX_Size);
 			}
 #else
-			Label = value.Name;
 			Filesize = Util.FormatSize(0.0);
 #endif
 		}
@@ -170,8 +168,6 @@ public class GodotLineEntry : HBoxContainer
 			if (value == null)
 				return;
 			Label = value.Version;
-			if (_loc != null && _location != null)
-				_loc.Visible = false;
 #if GODOT_WINDOWS || GODOT_UWP
 			Filesize = Util.FormatSize(!Environment.Is64BitProcess ? value.Win32_Size : value.Win64_Size);
 #elif GODOT_LINUXBSD || GODOT_X11
@@ -188,8 +184,10 @@ public class GodotLineEntry : HBoxContainer
 		get => sLabel;
 		set {
 			sLabel = value;
-			if (_label != null)
+			if (_label != null) {
 				_label.Text = $"Godot {value}";
+				_label.HintTooltip = _label.Text;
+			}
 		}
 	}
 
@@ -197,8 +195,16 @@ public class GodotLineEntry : HBoxContainer
 		get => sFilesize;
 		set {
 			sFilesize = value;
-			if (_filesize != null && _size != null)
-				_size.Text = value;
+			if (_filesize != null) {
+				_filesize.Text = value;
+				foreach (string shortName in byteNames.Keys) {
+					string longName = _filesize.Text.Replace(shortName, byteNames[shortName]);
+					if (longName != _filesize.Text) {
+						_filesize.HintTooltip = longName;
+						break;
+					}
+				}
+			}
 		}
 	}
 
@@ -208,10 +214,9 @@ public class GodotLineEntry : HBoxContainer
 		set
 		{
 			sLocation = value;
-			if (_loc != null && _location != null) {
-				string path = sLocation.GetBaseDir().NormalizePath();
-				_location.Text = path;
-				_loc.Visible = true;
+			if (_loc != null) {
+				_loc.Text = sLocation.GetBaseDir().NormalizePath();
+				_loc.HintTooltip = _loc.Text;
 			}
 		}
 	}
@@ -281,25 +286,29 @@ public class GodotLineEntry : HBoxContainer
 		if (value) {
 			_download.Texture = MainWindow._plTextures["UninstallIcon"];
 			_download.SelfModulate = new Color("fc9c9c");
-		}
-		else {
+			_download.HintTooltip = !bDownloaded ? "Cancel" : "Remove";
+		} else {
 			_download.Texture = MainWindow._plTextures["DownloadIcon"];
 			_download.SelfModulate = new Color("7defa7");
+			_download.HintTooltip = "Download";
 		}
 	}
 
 	public void ToggleDownloadProgress(bool value) {
-		_filesize.Visible = !value;
 		_downloadProgress.Visible = value;
 		_eta.Visible = value;
+		_loc.Visible = !value;
 	}
 
 	public void StartDownloadStats(int totalSize) {
 		dtStartTime = DateTime.Now;
 		TotalSize = totalSize;
-		_progressBar.MinValue = 0;
-		_progressBar.MaxValue = totalSize;
-		_fileSize.Text = $"{Util.FormatSize(0)}/{Util.FormatSize(TotalSize)}";
+		_downloadProgress.MinValue = 0;
+		_downloadProgress.MaxValue = totalSize;
+		_filesize.Text = $"{Util.FormatSize(0.0)}/{Util.FormatSize(TotalSize)}";
+		_filesize.HintTooltip = "";
+		_filesize.Align = Godot.Label.AlignEnum.Right;
+		_filesize.MouseFilter = MouseFilterEnum.Ignore;
 		_downloadSpeedTimer.Start();
 	}
 
@@ -381,19 +390,19 @@ public class GodotLineEntry : HBoxContainer
 		Mutex mutex = new Mutex();
 		mutex.Lock();
 		var lbc = iLastByteCount;
-		var tb = _progressBar.Value;
+		var tb = _downloadProgress.Value;
 		var speed = tb - lbc;
 		adSpeedStack.Add(speed);
 		var avgSpeed = adSpeedStack.Sum() / adSpeedStack.Count;
 		_downloadSpeed.Text = $"{Util.FormatSize(avgSpeed)}/s";
 		TimeSpan elapsedTime = DateTime.Now - dtStartTime;
 		_etaRemaining.Text = elapsedTime.ToString("hh':'mm':'ss");
-		iLastByteCount = (int)_progressBar.Value;
+		iLastByteCount = (int)_downloadProgress.Value;
 		mutex.Unlock();
 	}
 
 	public void OnChunkReceived(int bytes) {
-		_progressBar.Value += bytes;
-		_fileSize.Text = $"{Util.FormatSize(_progressBar.Value)}/{Util.FormatSize(TotalSize)}";
+		_downloadProgress.Value += bytes;
+		_filesize.Text = $"{Util.FormatSize(_downloadProgress.Value)}/{Util.FormatSize(TotalSize)}";
 	}
 }

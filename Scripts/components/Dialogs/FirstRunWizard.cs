@@ -69,7 +69,7 @@ public class FirstRunWizard : ReferenceRect
 		TitleBar.Pressed = false;
 
 		Wizard.CurrentTab = 0;
-		PrevStep.Disabled = true;
+		UpdateControls();
 	}
 
 	public void ShowDialog() => Visible = true;
@@ -248,6 +248,7 @@ public class FirstRunWizard : ReferenceRect
 	void UpdateControls()
 	{
 		PrevStep.Disabled = (Wizard.CurrentTab <= 1);
+		PrevStep.MouseDefaultCursorShape = !PrevStep.Disabled ? CursorShape.PointingHand : CursorShape.Arrow;
 		NextStep.Text = Wizard.CurrentTab < Wizard.GetTabCount() - 1 ? "Next" : "Finish";
 	}
 }

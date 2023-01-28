@@ -279,7 +279,7 @@ public class DownloadAddon : ReferenceRect
 			else
 			{
 				iFileSize = -1;
-				_FileSize.Text = "0 B";
+				_FileSize.Text = "0.00 B";
 				_Eta.Text = "00:00:00";
 				_ProgressBar.Value = 0;
 				_ProgressBar.MaxValue = 100;
@@ -292,7 +292,7 @@ public class DownloadAddon : ReferenceRect
 			iFileSize = -1;
 			_ProgressBar.Value = 0;
 			_ProgressBar.MaxValue = 100;
-			_FileSize.Text = "0 B";
+			_FileSize.Text = "0.00 B";
 			_Eta.Text = "00:00:00";
 			Task task = StartIndeterminateTween();
 		}
@@ -315,8 +315,8 @@ public class DownloadAddon : ReferenceRect
 
 	public void LoadInformation() {
 		_FileName.Text = Asset.Title;
-		_FileSize.Text = "0 B";
-		_Speed.Text = "0 B/s";
+		_FileSize.Text = "0.00 B";
+		_Speed.Text = "0.00 B/s";
 		_Eta.Text = "00:00:00";
 		_ProgressBar.Value = 0;
 		_ProgressBar.MaxValue = 100;

@@ -103,6 +103,7 @@ margin_bottom = 31.0
 [node name="General" type="Button" parent="VB/Header/HC/PC/HC"]
 margin_right = 50.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 custom_colors/font_color_hover = Color( 0.0156863, 0.815686, 1, 1 )
 custom_colors/font_color_pressed = Color( 0.647059, 0.937255, 0.67451, 1 )
 custom_fonts/font = ExtResource( 3 )
@@ -123,6 +124,7 @@ __meta__ = {
 margin_left = 62.0
 margin_right = 112.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 custom_colors/font_color_hover = Color( 0.0156863, 0.815686, 1, 1 )
 custom_colors/font_color_pressed = Color( 0.647059, 0.937255, 0.67451, 1 )
 custom_fonts/font = ExtResource( 3 )
@@ -142,6 +144,7 @@ __meta__ = {
 margin_left = 124.0
 margin_right = 164.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 custom_colors/font_color_hover = Color( 0.0156863, 0.815686, 1, 1 )
 custom_colors/font_color_pressed = Color( 0.647059, 0.937255, 0.67451, 1 )
 custom_fonts/font = ExtResource( 3 )
@@ -161,6 +164,7 @@ __meta__ = {
 margin_left = 176.0
 margin_right = 261.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 custom_colors/font_color_hover = Color( 0.0156863, 0.815686, 1, 1 )
 custom_colors/font_color_pressed = Color( 0.647059, 0.937255, 0.67451, 1 )
 custom_fonts/font = ExtResource( 3 )
@@ -180,6 +184,7 @@ __meta__ = {
 margin_left = 273.0
 margin_right = 326.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 custom_colors/font_color_hover = Color( 0.0156863, 0.815686, 1, 1 )
 custom_colors/font_color_pressed = Color( 0.647059, 0.937255, 0.67451, 1 )
 custom_fonts/font = ExtResource( 3 )
@@ -232,7 +237,6 @@ size_flags_vertical = 3
 tabs_visible = false
 
 [node name="General" type="MarginContainer" parent="VB/MC/TC"]
-visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 custom_constants/margin_right = 5
@@ -275,6 +279,7 @@ size_flags_horizontal = 3
 margin_left = 754.0
 margin_right = 805.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Browse"
 
 [node name="Label2" type="Label" parent="VB/MC/TC/General/GC"]
@@ -304,15 +309,17 @@ size_flags_horizontal = 3
 margin_left = 754.0
 margin_right = 805.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Browse"
 
 [node name="Label3" type="Label" parent="VB/MC/TC/General/GC"]
 margin_top = 63.0
 margin_right = 179.0
 margin_bottom = 82.0
+hint_tooltip = "Choose the type of project list that will be shown on startup."
 mouse_filter = 1
 custom_fonts/font = ExtResource( 4 )
-text = "Startup Project View:"
+text = "Default Project View:"
 align = 2
 
 [node name="ProjectView" type="OptionButton" parent="VB/MC/TC/General/GC"]
@@ -320,6 +327,7 @@ margin_left = 189.0
 margin_top = 62.0
 margin_right = 994.0
 margin_bottom = 83.0
+mouse_default_cursor_shape = 2
 text = "List View"
 items = [ "List View", null, false, 0, null, "Icon View", null, false, 1, null, "Category View", null, false, 2, null, "Last View Used", null, false, 3, null ]
 selected = 0
@@ -328,16 +336,21 @@ selected = 0
 margin_top = 93.0
 margin_right = 179.0
 margin_bottom = 112.0
-mouse_filter = 1
 custom_fonts/font = ExtResource( 4 )
 text = "System Integration:"
 align = 2
 
-[node name="TitleBar" type="CheckBox" parent="VB/MC/TC/General/GC"]
+[node name="HBSI" type="HBoxContainer" parent="VB/MC/TC/General/GC"]
 margin_left = 189.0
 margin_top = 93.0
 margin_right = 994.0
 margin_bottom = 112.0
+custom_constants/separation = 16
+
+[node name="TitleBar" type="CheckBox" parent="VB/MC/TC/General/GC/HBSI"]
+margin_right = 147.0
+margin_bottom = 19.0
+mouse_default_cursor_shape = 2
 text = "Use System Titlebar"
 
 [node name="Label5" type="Label" parent="VB/MC/TC/General/GC"]
@@ -345,21 +358,26 @@ margin_top = 122.0
 margin_right = 179.0
 margin_bottom = 141.0
 custom_fonts/font = ExtResource( 4 )
-text = " Mirror Control:"
+text = "Mirror Control:"
 align = 2
 
-[node name="UseLastMirror" type="CheckBox" parent="VB/MC/TC/General/GC"]
+[node name="HBMC" type="HBoxContainer" parent="VB/MC/TC/General/GC"]
 margin_left = 189.0
 margin_top = 122.0
 margin_right = 994.0
 margin_bottom = 141.0
+custom_constants/separation = 16
+
+[node name="UseLastMirror" type="CheckBox" parent="VB/MC/TC/General/GC/HBMC"]
+margin_right = 177.0
+margin_bottom = 19.0
+mouse_default_cursor_shape = 2
 text = "Use Last Mirror Selected"
 
 [node name="Label6" type="Label" parent="VB/MC/TC/General/GC"]
 margin_top = 151.0
 margin_right = 179.0
 margin_bottom = 170.0
-mouse_filter = 1
 custom_fonts/font = ExtResource( 4 )
 text = "Editor Launch Options:"
 align = 2
@@ -374,6 +392,7 @@ custom_constants/separation = 16
 [node name="NoConsole" type="CheckBox" parent="VB/MC/TC/General/GC/HBLO"]
 margin_right = 172.0
 margin_bottom = 19.0
+mouse_default_cursor_shape = 2
 custom_fonts/font = ExtResource( 13 )
 text = "Launch Without Console"
 
@@ -381,6 +400,7 @@ text = "Launch Without Console"
 margin_left = 188.0
 margin_right = 359.0
 margin_bottom = 19.0
+mouse_default_cursor_shape = 2
 custom_fonts/font = ExtResource( 13 )
 text = "Separate Editor Profiles"
 
@@ -428,22 +448,30 @@ size_flags_horizontal = 3
 margin_left = 800.0
 margin_right = 851.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Browse"
 
 [node name="Label2" type="Label" parent="VB/MC/TC/Projects/GC"]
 margin_top = 31.0
 margin_right = 133.0
 margin_bottom = 50.0
-mouse_filter = 1
 custom_fonts/font = ExtResource( 4 )
 text = "Enable Autoscan:"
 align = 2
 
-[node name="AutoScanProjects" type="CheckBox" parent="VB/MC/TC/Projects/GC"]
-margin_left = 143.0
-margin_top = 31.0
+[node name="HBEA" type="HBoxContainer" parent="VB/MC/TC/Projects/GC"]
+margin_left = 189.0
+margin_top = 122.0
 margin_right = 994.0
-margin_bottom = 50.0
+margin_bottom = 141.0
+custom_constants/separation = 16
+
+[node name="AutoScanProjects" type="CheckBox" parent="VB/MC/TC/Projects/GC/HBEA"]
+margin_left = -46.0
+margin_top = -91.0
+margin_right = 805.0
+margin_bottom = -72.0
+mouse_default_cursor_shape = 2
 custom_fonts/font = ExtResource( 13 )
 text = "Scan each time Godot Manager is launched"
 
@@ -451,7 +479,6 @@ text = "Scan each time Godot Manager is launched"
 margin_top = 60.0
 margin_right = 133.0
 margin_bottom = 625.0
-mouse_filter = 1
 size_flags_vertical = 7
 custom_fonts/font = ExtResource( 4 )
 text = "Folders to Scan:"
@@ -466,6 +493,7 @@ margin_right = 994.0
 margin_bottom = 625.0
 
 [node name="About" type="VBoxContainer" parent="VB/MC/TC"]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 
@@ -615,6 +643,7 @@ __meta__ = {
 margin_top = 47.0
 margin_right = 231.0
 margin_bottom = 107.0
+mouse_default_cursor_shape = 2
 texture = ExtResource( 15 )
 
 [node name="Label4" type="Label" parent="VB/MC/TC/About/MC/VB/CenterContainer/HB/VB"]
@@ -633,6 +662,7 @@ margin_top = 174.0
 margin_right = 231.0
 margin_bottom = 234.0
 rect_min_size = Vector2( 210, 60 )
+mouse_default_cursor_shape = 2
 texture = ExtResource( 10 )
 expand = true
 stretch_mode = 6
@@ -658,6 +688,7 @@ margin_top = 47.0
 margin_right = 190.0
 margin_bottom = 107.0
 rect_min_size = Vector2( 190, 60 )
+mouse_default_cursor_shape = 2
 texture = ExtResource( 14 )
 expand = true
 stretch_mode = 6
@@ -678,6 +709,7 @@ margin_top = 174.0
 margin_right = 190.0
 margin_bottom = 234.0
 rect_min_size = Vector2( 190, 60 )
+mouse_default_cursor_shape = 2
 texture = ExtResource( 16 )
 expand = true
 stretch_mode = 6

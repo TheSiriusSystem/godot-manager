@@ -1,17 +1,17 @@
 [gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Resources/Fonts/droid-regular-14.tres" type="DynamicFont" id=1]
-[ext_resource path="res://Assets/Icons/missing_icon.svg" type="Texture" id=2]
+[ext_resource path="res://Assets/Icons/default_project_icon_v3.png" type="Texture" id=2]
 [ext_resource path="res://Resources/Fonts/droid-bold-16.tres" type="DynamicFont" id=3]
 [ext_resource path="res://Scripts/components/ProjectIconEntry.cs" type="Script" id=4]
 [ext_resource path="res://Resources/Fonts/droid-bold-14.tres" type="DynamicFont" id=5]
 
 [node name="ProjectIconEntry" type="ColorRect"]
-self_modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 rect_min_size = Vector2( 289, 131 )
-color = Color( 1, 1, 1, 0.192157 )
+mouse_default_cursor_shape = 2
+color = Color( 0.164706, 0.180392, 0.215686, 0 )
 script = ExtResource( 4 )
 
 [node name="cc" type="CenterContainer" parent="."]
@@ -45,10 +45,12 @@ stretch_mode = 6
 margin_top = 69.0
 margin_right = 280.0
 margin_bottom = 88.0
+hint_tooltip = "Project Name"
+mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 1
 custom_fonts/font = ExtResource( 3 )
-text = "Project Name"
+text = "New Game Project"
 align = 1
 clip_text = true
 
@@ -56,10 +58,12 @@ clip_text = true
 margin_top = 92.0
 margin_right = 280.0
 margin_bottom = 109.0
+hint_tooltip = "C:\\Users\\Godette\\Documents\\Godot Projects\\New Game Project"
+mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 1
 custom_fonts/font = ExtResource( 1 )
-text = "/home/eumario/Projects/Godot/ProjectName"
+text = "C:\\Users\\Godette\\Documents\\Godot Projects\\New Game Project"
 align = 1
 clip_text = true
 
@@ -67,6 +71,8 @@ clip_text = true
 margin_top = 113.0
 margin_right = 280.0
 margin_bottom = 130.0
+hint_tooltip = "Using Godot x.x.x"
+mouse_filter = 1
 size_flags_horizontal = 3
 size_flags_vertical = 1
 custom_fonts/font = ExtResource( 5 )

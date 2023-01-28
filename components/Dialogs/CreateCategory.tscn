@@ -23,9 +23,6 @@ corner_detail = 20
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 3 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PC" type="PanelContainer" parent="."]
 anchor_right = 1.0
@@ -147,6 +144,7 @@ size_flags_horizontal = 3
 margin_left = 75.0
 margin_right = 121.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Create"
 
 [node name="Sep2" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
@@ -159,6 +157,7 @@ size_flags_horizontal = 3
 margin_left = 200.0
 margin_right = 245.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Cancel"
 
 [node name="Sep3" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]

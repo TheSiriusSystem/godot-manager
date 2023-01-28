@@ -144,6 +144,7 @@ text = "New Game Project"
 margin_left = 393.0
 margin_right = 484.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Create Folder"
 
 [node name="Spacer2" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectName"]
@@ -190,6 +191,7 @@ margin_left = 424.0
 margin_right = 484.0
 margin_bottom = 21.0
 rect_min_size = Vector2( 60, 0 )
+mouse_default_cursor_shape = 2
 text = "Browse"
 
 [node name="Spacer2" type="Control" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/ProjectLocation"]
@@ -217,6 +219,7 @@ text = "Template Project:"
 margin_top = 176.0
 margin_right = 494.0
 margin_bottom = 197.0
+mouse_default_cursor_shape = 2
 text = "None"
 items = [ "None", null, false, 0, null ]
 selected = 0
@@ -232,8 +235,10 @@ text = "Editor Version:"
 margin_top = 236.0
 margin_right = 494.0
 margin_bottom = 257.0
+mouse_default_cursor_shape = 2
 
 [node name="Renderers" type="VBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
+visible = false
 margin_top = 267.0
 margin_right = 494.0
 margin_bottom = 421.0
@@ -260,6 +265,7 @@ size_flags_horizontal = 3
 [node name="1" type="CheckBox" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/Renderers/HB/Options"]
 margin_right = 113.0
 margin_bottom = 17.0
+mouse_default_cursor_shape = 2
 size_flags_horizontal = 3
 pressed = true
 group = SubResource( 6 )
@@ -299,6 +305,7 @@ metadata = [ {
 margin_top = 21.0
 margin_right = 113.0
 margin_bottom = 38.0
+mouse_default_cursor_shape = 2
 size_flags_horizontal = 3
 group = SubResource( 6 )
 text = "OpenGL ES 2.0"
@@ -340,6 +347,7 @@ visible = false
 margin_top = 42.0
 margin_right = 105.0
 margin_bottom = 59.0
+mouse_default_cursor_shape = 2
 size_flags_horizontal = 3
 group = SubResource( 6 )
 text = "Compatibility"
@@ -390,9 +398,9 @@ text = "The renderer can be changed later, but scenes may need to be adjusted."
 align = 1
 
 [node name="VersionControlMetadata" type="HBoxContainer" parent="PC/CC/P/VB/MCContent/TabContainer/Settings"]
-margin_top = 431.0
+margin_top = 267.0
 margin_right = 494.0
-margin_bottom = 452.0
+margin_bottom = 288.0
 custom_constants/separation = 10
 
 [node name="Header" type="Label" parent="PC/CC/P/VB/MCContent/TabContainer/Settings/VersionControlMetadata"]
@@ -407,6 +415,7 @@ margin_left = 196.0
 margin_right = 276.0
 margin_bottom = 21.0
 rect_min_size = Vector2( 80, 0 )
+mouse_default_cursor_shape = 2
 text = "None"
 items = [ "None", null, false, 0, null, "Git", null, false, 1, null ]
 selected = 0
@@ -462,6 +471,7 @@ size_flags_horizontal = 3
 margin_left = 131.0
 margin_right = 219.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Create & Edit"
 
 [node name="Sep2" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
@@ -474,6 +484,7 @@ size_flags_horizontal = 3
 margin_left = 354.0
 margin_right = 399.0
 margin_bottom = 21.0
+mouse_default_cursor_shape = 2
 text = "Cancel"
 
 [node name="Sep3" type="Control" parent="PC/CC/P/VB/MCButtons/HB"]
