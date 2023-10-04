@@ -225,7 +225,7 @@ public class GodotPanel : Panel
 					errDesc = string.Format("Unable to write to disk at \"{0}\".", installer.GodotVersion.CacheLocation);
 					break;
 				default:
-					errDesc = "A unknown error has occurred.";
+					errDesc = "An unknown error has occurred.";
 					break;
 			}
 
@@ -255,6 +255,8 @@ public class GodotPanel : Panel
 		Downloading.List.AddChild(gle);
 		Downloading.Visible = true;
 		gle.ToggleDownloadProgress(true);
+		gle.Disconnect("right_clicked", this, "OnRightClicked");
+		gle.Connect("right_clicked", this, "OnRightClicked", new Array { "Cancel", true });
 
 		if (gle.GithubVersion == null)
 			_installer = GodotInstaller.FromMirror(gle.MirrorVersion, IsMono());
@@ -264,8 +266,6 @@ public class GodotPanel : Panel
 		_installer.Connect("chunk_received", gle, "OnChunkReceived");
 		_installer.Connect("download_completed", this, "OnDownloadCompleted", new Array { gle }, (uint)ConnectFlags.Oneshot);
 		_installer.Connect("download_failed", this, "OnDownloadFailed", new Array { gle }, (uint)ConnectFlags.Oneshot);
-
-		gle.ToggleDownloadProgress(true);
 
 		gle.StartDownloadStats(_installer.DownloadSize);
 
@@ -331,7 +331,7 @@ public class GodotPanel : Panel
 		foreach (var id in CentralStore.Settings.SettingsShare)
 		{
 			var gv = CentralStore.Instance.FindVersion(id);
-			if (gv != null && gv != gle.GodotVersion && gv.GetMajorVersion() == gle.GodotVersion.GetMajorVersion())
+			if (gv != null && gv != gle.GodotVersion && Util.GetVersionComponentsFromString(gv.Tag)[0] == Util.GetVersionComponentsFromString(gle.GodotVersion.Tag)[0])
 				list[gv.Tag] = id;
 		}
 
@@ -372,7 +372,7 @@ public class GodotPanel : Panel
 				foreach (Node child in Available.List.GetChildren())
 					child.QueueFree();
 				break;
-			case 1:	// Installed Godots
+			case 1:	// Installed Editors
 				foreach (Node child in Installed.List.GetChildren())
 					child.QueueFree();
 				break;
@@ -398,7 +398,7 @@ public class GodotPanel : Panel
 				gle.SettingsLinked = CentralStore.Settings.SettingsShare.Contains(gdv.SharedSettings);
 				Installed.List.AddChild(gle);
 				gle.Connect("uninstall_clicked", this, "OnUninstallClicked");
-				gle.Connect("right_clicked", this, "OnRightClicked_Installed");
+				gle.Connect("right_clicked", this, "OnRightClicked", new Array { "Remove", false });
 				gle.Connect("settings_shared_clicked", this, "OnSettingsSharedClicked");
 				gle.Connect("link_settings_clicked", this, "OnLinkSettingsClicked");
 			}
@@ -431,29 +431,19 @@ public class GodotPanel : Panel
 				Available.List.AddChild(gle);
 				gle.Connect("install_clicked", this, "OnInstallClicked");
 				gle.Connect("uninstall_clicked", this, "OnUninstallClicked");
-				gle.Connect("right_clicked", this, "OnRightClicked_Installable");
+				gle.Connect("right_clicked", this, "OnRightClicked", new Array { "Download", true });
 			}
 		}
 
 		UpdateVisibility();
 	}
 
-	void OnRightClicked_Installable(GodotLineEntry gle)
+	void OnRightClicked(GodotLineEntry gle, string item0Text, bool disableItems)
 	{
 		_enginePopup.GodotLineEntry = gle;
-		_enginePopup.SetItemText(0, "Download");
+		_enginePopup.SetItemText(0, item0Text);
 		for (int indx = 1; indx < _enginePopup.GetItemCount(); indx++) {
-			_enginePopup.SetItemDisabled(indx, true);
-		}
-		_enginePopup.Popup_(new Rect2(GetGlobalMousePosition(), _enginePopup.RectSize));
-	}
-
-	void OnRightClicked_Installed(GodotLineEntry gle)
-	{
-		_enginePopup.GodotLineEntry = gle;
-		_enginePopup.SetItemText(0, "Remove");
-		for (int indx = 1; indx < _enginePopup.GetItemCount(); indx++) {
-			_enginePopup.SetItemDisabled(indx, false);
+			_enginePopup.SetItemDisabled(indx, disableItems);
 		}
 		_enginePopup.Popup_(new Rect2(GetGlobalMousePosition(), _enginePopup.RectSize));
 	}
@@ -463,15 +453,16 @@ public class GodotPanel : Panel
 		switch (id)
 		{
 			case 0:
-				if (_enginePopup.GodotLineEntry.Downloaded)
+				if (_enginePopup.GetItemText(id) != "Download")
 				{
-					// Remove
 					OnUninstallClicked(_enginePopup.GodotLineEntry);
 				}
 				else
 				{
-					// Download
+#pragma warning disable CS4014
 					OnInstallClicked(_enginePopup.GodotLineEntry);
+#pragma warning restore CS4014
+					_enginePopup.GodotLineEntry.ToggleDownloadUninstall(true);
 				}
 				break;
 			case 1:
