@@ -4,7 +4,7 @@ using Guid = System.Guid;
 
 [JsonObject(MemberSerialization.OptIn)]
 public class GodotVersion : Object {
-	[JsonProperty] public string Id; // This will be a UUID
+	[JsonProperty] public string Id; // This will be an UUID
 	[JsonProperty] public string Tag; // This will be used to display to the user
 	[JsonProperty] public bool IsMono; // This is used to determine if the file downloaded is Mono
 	[JsonProperty] public string Location; // Location of where Godot is
@@ -21,14 +21,6 @@ public class GodotVersion : Object {
 		Location = "";
 		Url = "";
 		SharedSettings = "";
-	}
-
-	public int GetMajorVersion() {
-		return Tag[!Tag.ToLower().StartsWith("v") ? 0 : 1].ToString().ToInt();
-	}
-
-	public int GetMinorVersion() {
-		return Tag[!Tag.ToLower().StartsWith("v") ? 2 : 3].ToString().ToInt();
 	}
 
 	public string GetDisplayName() {
