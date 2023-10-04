@@ -285,11 +285,10 @@ public class ProjectsPanel : Panel
 
 				string gvId = "";
 				foreach (GodotVersion gdVers in CentralStore.Versions) {
-					int gdMajorVers = gdVers.GetMajorVersion();
-					int gdMinorVers = gdVers.GetMinorVersion();
+					Array<ushort> versComps = Util.GetVersionComponentsFromString(gdVers.Tag);
 					if (isOldPrj) {
 						bool isGodot1Prj = SFile.Exists(pfPath.GetBaseDir().PlusFile(".fscache").NormalizePath());
-						if ((isGodot1Prj && gdMajorVers <= 1) || (!isGodot1Prj && gdMajorVers == 2)) {
+						if ((isGodot1Prj && versComps[0] <= 1) || (!isGodot1Prj && versComps[0] == 2)) {
 							gvId = gdVers.Id;
 							break;
 						}
@@ -297,7 +296,7 @@ public class ProjectsPanel : Panel
 						ProjectConfig pc = new ProjectConfig();
 						if (pc.Load(pfPath) == Error.Ok) {
 							int cfgVers = pc.GetValue("header", "config_version", "3").ToInt();
-							if ((cfgVers == 3 && gdMajorVers == 3 && gdMinorVers == 0) || (cfgVers == 4 && gdMajorVers == 3 && gdMinorVers >= 1) || (cfgVers >= 5 && gdMajorVers >= 4)) {
+							if ((cfgVers == 3 && versComps[0] == 3 && versComps[1] == 0) || (cfgVers == 4 && versComps[0] == 3 && versComps[1] >= 1) || (cfgVers >= 5 && versComps[0] >= 4)) {
 								gvId = gdVers.Id;
 								break;
 							}
@@ -832,7 +831,7 @@ public class ProjectsPanel : Panel
 			}
 			else
 			{
-				int gmv = gv.GetMajorVersion();
+				ushort gmv = Util.GetVersionComponentsFromString(gv.Tag)[0];
 				string fromPath = ssgv.Location.Join("editor_data");
 				string toPath = gv.Location.Join("editor_data");
 				Array<string> copies = new Array<string>();
@@ -947,7 +946,7 @@ public class ProjectsPanel : Panel
 	{
 		Array<string> files = new Array<string>();
 
-		int gmv = gv.GetMajorVersion();
+		ushort gmv = Util.GetVersionComponentsFromString(gv.Tag)[0];
 		string es = "editor_settings";
 		if (gmv <= 1) {
 			es = es + ".xml";

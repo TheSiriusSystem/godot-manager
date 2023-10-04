@@ -7,11 +7,10 @@ using StreamWriter = System.IO.StreamWriter;
 public class NewProject : Object {
 	public string ProjectName;
 	public string ProjectLocation;
-	public int VersionControlSystem;
+	public byte VersionControlSystem;
 	public AssetProject Template;
 	public string GodotId;
-	public int GodotMajorVersion;
-	public int GodotMinorVersion;
+	public Array<ushort> GodotVersionComponents;
 	public Array<AssetPlugin> Plugins;
 	public Dictionary ModifiedKeys;
 
@@ -33,7 +32,7 @@ public class NewProject : Object {
 
 	private void ExtractPlugins()
 	{
-		if ((GodotMajorVersion == 2 && GodotMinorVersion >= 1) || GodotMajorVersion >= 3) {
+		if ((GodotVersionComponents[0] == 2 && GodotVersionComponents[1] >= 1) || GodotVersionComponents[0] >= 3) {
 			string addonsPath = ProjectLocation.PlusFile("addons").NormalizePath();
 			if (!Directory.Exists(addonsPath))
 				Directory.CreateDirectory(addonsPath);
@@ -48,9 +47,9 @@ public class NewProject : Object {
 	private void CopyIcon()
 	{
 		Texture image = MainWindow._plTextures["DefaultIconV3"];
-		if (GodotMajorVersion <= 2) {
+		if (GodotVersionComponents[0] <= 2) {
 			image = MainWindow._plTextures["DefaultIconV1"];
-		} else if (GodotMajorVersion >= 4) {
+		} else if (GodotVersionComponents[0] >= 4) {
 			image = MainWindow._plTextures["DefaultIconV4"];
 		}
 		image.GetData().SavePng(ProjectLocation.PlusFile("icon.png").NormalizePath());
@@ -58,12 +57,12 @@ public class NewProject : Object {
 
 	private void CreateDefaultEnvironment()
 	{
-		if (GodotMajorVersion == 3) {
+		if (GodotVersionComponents[0] == 3) {
 			using (StreamWriter writer = new StreamWriter(ProjectLocation.PlusFile("default_env.tres").NormalizePath())) {
 				writer.WriteLine("[gd_resource type=\"Environment\" load_steps=2 format=2]");
-				if (GodotMinorVersion >= 5) writer.WriteLine("");
+				if (GodotVersionComponents[1] >= 5) writer.WriteLine("");
 				writer.WriteLine("[sub_resource type=\"ProceduralSky\" id=1]");
-				if (GodotMinorVersion >= 5) writer.WriteLine("");
+				if (GodotVersionComponents[1] >= 5) writer.WriteLine("");
 				writer.WriteLine("[resource]");
 				writer.WriteLine("background_mode = 2");
 				writer.WriteLine("background_sky = SubResource( 1 )");
@@ -75,29 +74,29 @@ public class NewProject : Object {
 	private void SetupProjectConfig()
 	{
 		ProjectConfig pf = new ProjectConfig();
-		string pfPath = ProjectLocation.PlusFile(GodotMajorVersion <= 2 ? "engine.cfg" : "project.godot").NormalizePath();
+		string pfPath = ProjectLocation.PlusFile(GodotVersionComponents[0] <= 2 ? "engine.cfg" : "project.godot").NormalizePath();
 
 		if (Template != null) pf.Load(pfPath);
-		if (GodotMajorVersion <= 2) {
+		if (GodotVersionComponents[0] <= 2) {
 			pf.SetValue("application", "name", $"\"{ProjectName}\"");
 			if (Template == null) pf.SetValue("application", "icon", "\"res://icon.png\"");
 		} else {
 			string cfgVers = "3";
-			if (GodotMajorVersion == 3 && GodotMinorVersion >= 1) {
+			if (GodotVersionComponents[0] == 3 && GodotVersionComponents[1] >= 1) {
 				cfgVers = "4";
-			} else if (GodotMajorVersion >= 4) {
+			} else if (GodotVersionComponents[0] >= 4) {
 				cfgVers = "5";
 			}
 
 			pf.SetValue("header", "config_version", cfgVers);
 			pf.SetValue("application", "config/name", $"\"{ProjectName}\"");
 			if (Template == null) pf.SetValue("application", "config/icon", "\"res://icon.png\"");
-			if (GodotMajorVersion == 3) {
+			if (GodotVersionComponents[0] == 3) {
 				if (Template == null) pf.SetValue("rendering", "environment/default_environment", "\"res://default_env.tres\"");
-				if (GodotMinorVersion >= 3) {
+				if (GodotVersionComponents[1] >= 3) {
 					pf.SetValue("physics", "common/enable_pause_aware_picking", "true");
 				}
-				if (GodotMinorVersion >= 5) {
+				if (GodotVersionComponents[1] >= 5) {
 					pf.SetValue("gui", "common/drop_mouse_on_gui_input_disabled", "true");
 				}
 			}

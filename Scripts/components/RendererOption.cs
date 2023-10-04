@@ -23,8 +23,8 @@ public class RendererOption : CheckBox
     void OnToggled(bool buttonPressed) {
         if (buttonPressed) {
             foreach (Dictionary meta in metadata) {
-                if ((_godotVersion.GetSelectedMetadata() as GodotVersion).GetMajorVersion() == (int)meta["version"]) {
-                    currentMeta = meta.Duplicate();
+                if (Util.GetVersionComponentsFromString((_godotVersion.GetSelectedMetadata() as GodotVersion).Tag)[0] == (int)meta["version"]) {
+                    currentMeta = meta;
                     _description.Text = Tr(@"" + (string)meta["description"]);
                     break;
                 }

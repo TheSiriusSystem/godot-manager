@@ -113,8 +113,8 @@ public class CreateProject : ReferenceRect
 	[SignalHandler("pressed", nameof(_createBtn))]
 	async void OnCreatePressed() {
 		GodotVersion gdVers = _godotVersion.GetSelectedMetadata() as GodotVersion;
-		int gdMajorVers = gdVers.GetMajorVersion();
-		string pfName = gdMajorVers <= 2 ? "engine.cfg" : "project.godot";
+		Array<ushort> gdVersComps = Util.GetVersionComponentsFromString(gdVers.Tag);
+		string pfName = gdVersComps[0] <= 2 ? "engine.cfg" : "project.godot";
 
 		AssetProject template = _templateProject.Selected <= 0 ? null : _templateProject.GetSelectedMetadata() as AssetProject;
 		if (template != null) {
@@ -164,13 +164,12 @@ public class CreateProject : ReferenceRect
 		NewProject prj = new NewProject {
 			ProjectName = _projectName.Text,
 			ProjectLocation = _projectLocation.Text,
-			VersionControlSystem = _vcMetadata.Selected,
+			VersionControlSystem = (byte)_vcMetadata.Selected,
 			Template = template,
 			GodotId = gdVers.Id,
-			GodotMajorVersion = gdMajorVers,
-			GodotMinorVersion = gdVers.GetMinorVersion(),
+			GodotVersionComponents = gdVersComps,
 			Plugins = new Array<AssetPlugin>(),
-			ModifiedKeys = modifiedKeys.Duplicate(true)
+			ModifiedKeys = modifiedKeys,
 		};
 
 		foreach (AddonLineEntry ale in _pluginList.GetChildren()) {
@@ -202,7 +201,7 @@ public class CreateProject : ReferenceRect
 			_projectLocation.Text = newDir;
 			TestPath(newDir);
 		} catch (System.Exception ex) {
-			AppDialogs.MessageDialog.ShowMessage(Tr("Mono Error"), Tr(!string.IsNullOrEmpty(ex.Message) ? ex.Message : "A unknown error has occurred."));
+			AppDialogs.MessageDialog.ShowMessage(Tr("Mono Error"), Tr(!string.IsNullOrEmpty(ex.Message) ? ex.Message : "An unknown error has occurred."));
 		}
 	}
 
@@ -237,8 +236,8 @@ public class CreateProject : ReferenceRect
 	[SignalHandler("item_selected", nameof(_godotVersion))]
 	void OnVersionSelected(int index) {
 		GodotVersion gdVers = _godotVersion.GetSelectedMetadata() as GodotVersion;
-		int gdMajorVers = gdVers.GetMajorVersion();
-		if (gdMajorVers <= 2 || (gdMajorVers == 3 && gdVers.GetMinorVersion() == 0))
+		Array<ushort> gdVersComps = Util.GetVersionComponentsFromString(gdVers.Tag);
+		if (gdVersComps[0] <= 2 || (gdVersComps[0] == 3 && gdVersComps[1] == 0))
 		{
 			_renderers.Visible = false;
 		}
@@ -252,7 +251,7 @@ public class CreateProject : ReferenceRect
 					option.EmitSignal("toggled", true);
 				option.Pressed = (option.Name == "1");
 				foreach (Dictionary meta in option.metadata) {
-					if (gdMajorVers == (int)meta["version"]) {
+					if (gdVersComps[0] == (int)meta["version"]) {
 						option.Visible = true;
 						option.Text = (string)meta["name"];
 						break;
@@ -269,8 +268,8 @@ public class CreateProject : ReferenceRect
 		foreach (AddonLineEntry node in _pluginList.GetChildren()) node.QueueFree();
 
 		GodotVersion gdVers = _godotVersion.GetSelectedMetadata() as GodotVersion;
-		int gdMajorVers = gdVers.GetMajorVersion();
-		if (gdMajorVers <= 1 || (gdMajorVers == 2 && gdVers.GetMinorVersion() == 0)) {
+		Array<ushort> gdVersComps = Util.GetVersionComponentsFromString(gdVers.Tag);
+		if (gdVersComps[0] <= 1 || (gdVersComps[0] == 2 && gdVersComps[1] == 0)) {
 			_sc.Visible = false;
 			_pluginErrorText.Visible = true;
 		} else {

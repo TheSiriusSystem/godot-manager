@@ -111,7 +111,7 @@ public class ProjectFile : Object {
 		ProjectConfig pf = new ProjectConfig();
 		var ret = pf.Load(Location);
 		if (ret == Error.Ok) {
-			if (CentralStore.Instance.GetVersion(GodotId).GetMajorVersion() <= 2) {
+			if (Util.GetVersionComponentsFromString(CentralStore.Instance.GetVersion(GodotId).Tag)[0] <= 2) {
 				pf.SetValue("application", "name", $"\"{this.Name}\"");
 				pf.SetValue("application", "icon", $"\"{this.Icon}\"");
 			} else {

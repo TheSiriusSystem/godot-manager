@@ -71,7 +71,7 @@ public class ImportProject : ReferenceRect
 		}
 
 		GodotVersion gdVers = CentralStore.Instance.GetVersion(_godotVersions.GetSelectedMetadata() as string);
-		int gdMajorVers = gdVers.GetMajorVersion();
+		ushort gdMajorVers = Util.GetVersionComponentsFromString(gdVers.Tag)[0];
 		if ((gdMajorVers <= 2 && !_locationValue.Text.EndsWith("engine.cfg")) || (gdMajorVers >= 3 && !_locationValue.Text.EndsWith("project.godot"))) {
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"),
 				string.Format(Tr("{0} is not a valid project file."), _locationValue.Text.GetFile()));
@@ -93,7 +93,7 @@ public class ImportProject : ReferenceRect
 
 	[SignalHandler("pressed", nameof(_locationBrowse))]
 	void OnLocationBrowsePressed() {
-		int gdMajorVers = CentralStore.Instance.GetVersion(_godotVersions.GetSelectedMetadata() as string).GetMajorVersion();
+		ushort gdMajorVers = Util.GetVersionComponentsFromString(CentralStore.Instance.GetVersion(_godotVersions.GetSelectedMetadata() as string).Tag)[0];
 		if (gdMajorVers <= 2) {
 			AppDialogs.ImportFileDialog.Filters = new string[] {"engine.cfg"};
 		} else {

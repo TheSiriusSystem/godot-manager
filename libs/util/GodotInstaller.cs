@@ -179,7 +179,7 @@ public class GodotInstaller : Object {
 		_version.ExecutableName = "Godot";
 		Util.Chmod(_version.GetExecutablePath(), 0755);
 #endif
-		if (CentralStore.Settings.SelfContainedEditors && _version.GetMajorVersion() >= 2) {
+		if (CentralStore.Settings.SelfContainedEditors && Util.GetVersionComponentsFromString(_version.Tag)[0] >= 2) {
 			File fh = new File();
 			if (fh.Open($"{_version.Location}/._sc_".GetOSDir().NormalizePath(), File.ModeFlags.Write) == Error.Ok) {
 				fh.StoreString("");

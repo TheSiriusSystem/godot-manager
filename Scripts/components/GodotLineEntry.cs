@@ -273,12 +273,18 @@ public class GodotLineEntry : HBoxContainer
 		Downloaded = bDownloaded;
 		adSpeedStack = new Array<double>();
 
+		Array<ushort> versionComponents = new Array<ushort>();
+
 		if (gvGodotVersion != null) {
-			IsGodotV1OrV2(gvGodotVersion.Tag);
+			versionComponents = Util.GetVersionComponentsFromString(gvGodotVersion.Tag);
 		} else if (gvGithubVersion != null) {
-			IsGodotV1OrV2(gvGithubVersion.Name);
+			versionComponents = Util.GetVersionComponentsFromString(gvGithubVersion.Name);
 		} else if (gvMirrorVersion != null) {
-			IsGodotV1OrV2(gvMirrorVersion.Version);
+			versionComponents = Util.GetVersionComponentsFromString(gvMirrorVersion.Version);
+		}
+
+		if (versionComponents[0] <= 2) {
+			_icon.Texture = MainWindow._plTextures["EditorIconV1"];
 		}
 	}
 
@@ -334,13 +340,6 @@ public class GodotLineEntry : HBoxContainer
 		}
 
 		_linked.Visible = true;
-	}
-
-	void IsGodotV1OrV2(string gdVersTag)
-	{
-		if (gdVersTag[!gdVersTag.ToLower().StartsWith("v") ? 0 : 1].ToString().ToInt() <= 2) {
-			_icon.Texture = MainWindow._plTextures["EditorIconV1"];
-		}
 	}
 
 	[SignalHandler("gui_input")]

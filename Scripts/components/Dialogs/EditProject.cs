@@ -13,31 +13,31 @@ public class EditProject : ReferenceRect
 
 #region Node Paths
 #region General Tab
-[NodePath("PC/CC/P")]
-Panel _Panel = null;
+	[NodePath("PC/CC/P")]
+	Panel _Panel = null;
 
-[NodePath("PC/CC/P/VB/MCContent/VC/HC/ProjectIcon")]
-TextureRect _Icon = null;
+	[NodePath("PC/CC/P/VB/MCContent/VC/HC/ProjectIcon")]
+	TextureRect _Icon = null;
 
-[NodePath("PC/CC/P/VB/MCContent/VC/HC/MC/VC/ProjectName")]
-LineEdit _ProjectName = null;
+	[NodePath("PC/CC/P/VB/MCContent/VC/HC/MC/VC/ProjectName")]
+	LineEdit _ProjectName = null;
 
-[NodePath("PC/CC/P/VB/MCContent/VC/GodotVersion")]
-OptionButton _GodotVersion = null;
+	[NodePath("PC/CC/P/VB/MCContent/VC/GodotVersion")]
+	OptionButton _GodotVersion = null;
 
-[NodePath("PC/CC/P/VB/MCContent/VC/ProjectDescriptionHeader")]
-Label _ProjectDescriptionHeader = null;
+	[NodePath("PC/CC/P/VB/MCContent/VC/ProjectDescriptionHeader")]
+	Label _ProjectDescriptionHeader = null;
 
-[NodePath("PC/CC/P/VB/MCContent/VC/ProjectDescription")]
-TextEdit _ProjectDescription = null;
+	[NodePath("PC/CC/P/VB/MCContent/VC/ProjectDescription")]
+	TextEdit _ProjectDescription = null;
 #endregion
 
 #region Dialog Controls
-[NodePath("PC/CC/P/VB/MCButtons/HB/SaveBtn")]
-Button _SaveBtn = null;
+	[NodePath("PC/CC/P/VB/MCButtons/HB/SaveBtn")]
+	Button _SaveBtn = null;
 
-[NodePath("PC/CC/P/VB/MCButtons/HB/CancelBtn")]
-Button _CancelBtn = null;
+	[NodePath("PC/CC/P/VB/MCButtons/HB/CancelBtn")]
+	Button _CancelBtn = null;
 #endregion
 #endregion
 
@@ -103,7 +103,8 @@ Button _CancelBtn = null;
 
 		_GodotVersion.Clear();
 		foreach (GodotVersion gdver in CentralStore.Versions) {
-			if ((pf.Location.EndsWith("engine.cfg") && gdver.GetMajorVersion() <= 2) || (pf.Location.EndsWith("project.godot") && gdver.GetMajorVersion() >= 3)) {
+			ushort gdmv = Util.GetVersionComponentsFromString(gdver.Tag)[0];
+			if ((gdmv <= 2 && pf.Location.EndsWith("engine.cfg")) || (gdmv >= 3 && pf.Location.EndsWith("project.godot"))) {
 				_GodotVersion.AddItem(gdver.GetDisplayName());
 				_GodotVersion.SetItemMetadata(_GodotVersion.GetItemCount() - 1, gdver.Id);
 				if (ProjectFile.GodotId == gdver.Id)
@@ -139,7 +140,7 @@ Button _CancelBtn = null;
 #region Event Handlers
 	[SignalHandler("pressed", nameof(_SaveBtn))]
 	void OnSaveBtnPressed() {
-		int gdmv = CentralStore.Instance.GetVersion(GodotId).GetMajorVersion();
+		ushort gdmv = Util.GetVersionComponentsFromString(CentralStore.Instance.GetVersion(GodotId).Tag)[0];
 		if ((gdmv <= 2 && _pf.Location.EndsWith("project.godot")) || (gdmv >= 3 && _pf.Location.EndsWith("engine.cfg")))
 		{
 			AppDialogs.MessageDialog.ShowMessage(Tr("Error"), Tr("The project cannot be associated with this editor version."));
