@@ -11,7 +11,7 @@ public class ItemListWithButtons : HBoxContainer
     [Signal] public delegate void remove_requested();
     #endregion
     
-    #region Nodc Paths
+    #region Node Paths
     [NodePath("VBMOD/AddItem")] Button _addItem = null;
     [NodePath("VBMOD/EditItem")] Button _editItem = null;
     [NodePath("VBMOD/RemoveItem")] Button _removeItem = null;
@@ -23,9 +23,6 @@ public class ItemListWithButtons : HBoxContainer
     {
         this.OnReady();
     }
-    #endregion
-
-    #region Private Functions
     #endregion
 
     #region Public Functions
