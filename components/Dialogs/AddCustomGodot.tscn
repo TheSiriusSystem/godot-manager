@@ -119,6 +119,7 @@ text = "Tag:"
 margin_top = 29.0
 margin_right = 304.0
 margin_bottom = 50.0
+hint_tooltip = "Detected Version 0.0.0"
 custom_fonts/font = ExtResource( 1 )
 
 [node name="LocationHeader" type="Label" parent="PC/CC/P/VB/MCContent/VB"]

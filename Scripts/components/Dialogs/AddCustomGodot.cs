@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Godot;
+using Godot.Collections;
 using Godot.Sharp.Extras;
 using Guid = System.Guid;
 using SFile = System.IO.File;
@@ -37,12 +38,19 @@ public class AddCustomGodot : ReferenceRect
 #region Public Functions
 	public void ShowDialog() {
 		_Tag.Text = "";
+		OnTagChanged("");
 		_Location.Text = "";
 		Visible = true;
 	}
 #endregion
 
 #region Events
+	[SignalHandler("text_changed", nameof(_Tag))]
+	void OnTagChanged(string text) {
+		Array<ushort> gdvercomps = Util.GetVersionComponentsFromString(text);
+		_Tag.HintTooltip = $"Detected Version {gdvercomps[0]}.{gdvercomps[1]}.{gdvercomps[2]}";
+	}
+
 	[SignalHandler("pressed", nameof(_Browse))]
 	void OnBrowsePressed() {
 		AppDialogs.BrowseGodotDialog.Connect("file_selected", this, "OnFileSelected", null, (uint)ConnectFlags.Oneshot);
@@ -58,6 +66,7 @@ public class AddCustomGodot : ReferenceRect
 			_Tag.Text = _Tag.Text.ReplaceN(str, "");
 		}
 		_Tag.Text = _Tag.Text.ReplaceN("_mono", "-mono");
+		OnTagChanged(_Tag.Text);
 		_Location.Text = file;
 	}
 
