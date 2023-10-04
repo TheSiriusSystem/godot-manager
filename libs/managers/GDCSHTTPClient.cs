@@ -31,7 +31,7 @@ public class GDCSHTTPClient : Node {
 	private string[] GetRequestHeaders() {
 		return new string[] {
 			"Accept: */*",
-			$"User-Agent: Godot-Manager/{VERSION.GodotManager}-{VERSION.Channel}"
+			$"User-Agent: Godot-Manager/{ProjectSettings.GetSetting("application/version_strings/app_version")}",
 		};
 	}
 

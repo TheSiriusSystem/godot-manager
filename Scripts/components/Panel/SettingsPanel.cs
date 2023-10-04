@@ -6,9 +6,8 @@ using System.Text.RegularExpressions;
 
 public class SettingsPanel : Panel
 {
-	#region Node Paths
-	
-	#region Page Buttons
+#region Node Paths
+#region Page Buttons
 	[NodePath("VB/Header/HC/PC/HC/General")]
 	Button _generalBtn = null;
 
@@ -23,17 +22,17 @@ public class SettingsPanel : Panel
 
 	[NodePath("VB/Header/HC/PC/HC/Licenses")]
 	Button _licensesBtn = null;
-	#endregion
+#endregion
 
-	#region Main Controls
+#region Main Controls
 	[NodePath("VB/MC/TC")]
 	TabContainer _pages = null;
 
 	[NodePath("VB/Header/HC/ActionButtons")]
 	ActionButtons _actionButtons = null;
-	#endregion
+#endregion
 
-	#region General Page
+#region General Page
 	[NodePath("VB/MC/TC/General/GC/HBIL/GodotInstallLocation")]
 	LineEdit _godotInstallLocation = null;
 
@@ -60,9 +59,9 @@ public class SettingsPanel : Panel
 
 	[NodePath("VB/MC/TC/General/GC/HBLO/EditorProfiles")]
 	CheckBox _editorProfiles = null;
-	#endregion
+#endregion
 
-	#region Projects Page
+#region Projects Page
 	[NodePath("VB/MC/TC/Projects/GC/HBPL/DefaultProjectLocation")]
 	LineEdit _defaultProjectLocation = null;
 
@@ -74,9 +73,9 @@ public class SettingsPanel : Panel
 
 	[NodePath("VB/MC/TC/Projects/GC/DirectoryScan")]
 	ItemListWithButtons _directoryScan = null;
-	#endregion
+#endregion
 
-	#region About Page
+#region About Page
 	[NodePath("VB/MC/TC/About/MC/VB/HBHeader/VB/VersionInfo")]
 	Label _versionInfo = null;
 	[NodePath("VB/MC/TC/About/MC/VB/HBHeader/VB/EmailWebsite")]
@@ -96,14 +95,14 @@ public class SettingsPanel : Panel
 
 	[NodePath("VB/MC/TC/About/MC/VB/CenterContainer/HB/VB2/Discord")]
 	TextureRect _discord = null;
-	#endregion
+#endregion
 
-	#region Contributions Page
+#region Contributions Page
 	[NodePath("VB/MC/TC/Contributions/Contributors")]
 	RichTextLabel _contributors = null;
-	#endregion
+#endregion
 	
-	#region Licenses Page
+#region Licenses Page
 	[NodePath("VB/MC/TC/Licenses")]
 	TabContainer _licenses = null;
 
@@ -112,29 +111,14 @@ public class SettingsPanel : Panel
 
 	[NodePath("VB/MC/TC/Licenses/Apache License")]
 	RichTextLabel _apacheLicense = null;
-	#endregion
+#endregion
+#endregion
 
-	#endregion
-
-	#region Version String for About
-	#endregion
-
-	#region Private Variables
+#region Private Variables
 	Array<string> _views;
-	// In Hours
-	double[] _dCheckInterval = new double[] {
-		1,      // 1 Hour
-		12,     // 12 hours
-		24,     // 1 day
-		168,    // 1 week
-		336,    // Bi-Weekly
-		720     // Monthly (30 Days)
-	};
 	bool bPInternal = false;
 	ActionStack _undoActions;
-
-	Regex IsNumeric = new Regex(@"\d+");
-	#endregion
+#endregion
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -154,7 +138,7 @@ public class SettingsPanel : Panel
 		updateActionButtons();
 
 		GetParent<TabContainer>().Connect("tab_changed", this, "OnPageChanged");
-		_versionInfo.Text = $"Version {VERSION.GodotManager}" + (!string.IsNullOrEmpty(VERSION.Channel) ? $"-{VERSION.Channel}" : "");
+		_versionInfo.Text = $"Version {ProjectSettings.GetSetting("application/version_strings/app_version")}";
 	}
 
 	void updateActionButtons() {
@@ -169,16 +153,16 @@ public class SettingsPanel : Panel
 		Engine.GetVersionInfo()["string"] +
 		"[/color][/cell][cell][color=yellow][url]https://godotengine.org[/url][/color][/cell]" +
 		"[cell][color=aqua]GodotSharpExtras[/color][/cell][cell][color=white]" +
-		VERSION.GodotSharpExtras +
+		ProjectSettings.GetSetting("application/version_strings/godotsharpextras_version") +
 		"[/color][/cell][cell][color=yellow][url]https://github.com/eumario/GodotSharpExtras[/url][/color][/cell]" +
 		"[cell][color=aqua]Json.NET[/color][/cell][cell][color=white]" + 
-		VERSION.NewtonsoftJSON +
+		ProjectSettings.GetSetting("application/version_strings/json.net_version") +
 		"[/color][/cell][cell][color=yellow][url]https://www.newtonsoft.com/json[/url][/color][/cell]" +
 		"[cell][color=aqua]ImageSharp[/color][/cell][cell][color=white]" +
-		VERSION.ImageSharp +
+		ProjectSettings.GetSetting("application/version_strings/imagesharp_version") +
 		"[/color][/cell][cell][color=yellow][url]https://sixlabors.com/products/imagesharp/[/url][/color][/cell]" +
 		"[cell][color=aqua]System.IO.Compression[/color][/cell][cell][color=white]" +
-		VERSION.SystemIOCompression +
+		ProjectSettings.GetSetting("application/version_strings/system.io.compression_version") +
 		"[/color][/cell][cell][color=yellow][url]https://www.nuget.org/packages/System.IO.Compression/[/url][/color][/cell][/table]";
 	}
 
@@ -228,7 +212,7 @@ public class SettingsPanel : Panel
 
 	void UpdateEditorSCMode() {
 		foreach (GodotVersion version in CentralStore.Versions) {
-			if (_editorProfiles.Pressed && version.GetMajorVersion() >= 2) {
+			if (_editorProfiles.Pressed && Util.GetVersionComponentsFromString(version.Tag)[0] >= 2) {
 				File fh = new File();
 				if (fh.Open($"{version.Location}/._sc_".GetOSDir().NormalizePath(), File.ModeFlags.Write) == Error.Ok) {
 					fh.StoreString("");

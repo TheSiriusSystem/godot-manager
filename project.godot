@@ -21,10 +21,13 @@ config/use_custom_user_dir=true
 config/custom_user_dir_name="Godot-Manager"
 run/low_processor_mode=true
 boot_splash/image="res://Assets/images/splash.png"
-boot_splash/fullsize=false
-boot_splash/use_filter=false
 boot_splash/bg_color=Color( 0.137255, 0.14902, 0.180392, 1 )
 config/icon="res://icon.png"
+version_strings/app_version="0.2.4 (unofficial)"
+version_strings/godotsharpextras_version="0.3.6"
+version_strings/json.net_version="13.0.3"
+version_strings/imagesharp_version="2.1.6"
+version_strings/system.io.compression_version="4.3.0"
 
 [display]
 
@@ -59,6 +62,11 @@ runtime/unhandled_exception_policy=1
 project/assembly_name="Godot-Manager"
 debugger_agent/wait_timeout=7000
 
+[physics]
+
+3d/physics_engine="GodotPhysics"
+3d/active_soft_world=false
+
 [rendering]
 
 quality/driver/driver_name="GLES2"
@@ -83,6 +91,7 @@ quality/shading/force_lambert_over_burley=true
 quality/shading/force_blinn_over_ggx=true
 quality/filters/anisotropic_filter_level=1
 gles2/compatibility/disable_half_float=true
+quality/lightmapping/use_bicubic_sampling=false
 environment/default_clear_color=Color( 0.137255, 0.14902, 0.180392, 1 )
 cpu_lightmapper/quality/low_quality_ray_count=0
 cpu_lightmapper/quality/medium_quality_ray_count=0
