@@ -3,12 +3,12 @@ using Godot.Sharp.Extras;
 
 public class NewsItem : Panel
 {
-    [NodePath("vb/Headline")] private Label _headline;
-    [NodePath("vb/hbby/Avatar")] private TextureRect _avatar;
-    [NodePath("vb/hbby/Byline")] private Label _byline;
+    [NodePath("vb/Headline")] private Label _headline = null;
+    [NodePath("vb/hbby/Avatar")] private TextureRect _avatar = null;
+    [NodePath("vb/hbby/Byline")] private Label _byline = null;
 
-    [NodePath("vb/hb/Image")] private TextureRect _image;
-    [NodePath("vb/hb/Blerb")] private RichTextLabel _blerb;
+    [NodePath("vb/hb/Image")] private TextureRect _image = null;
+    [NodePath("vb/hb/Blerb")] private RichTextLabel _blerb = null;
 
     private string _sHeadline;
     private string _sAvatar;
