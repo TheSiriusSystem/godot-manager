@@ -8,6 +8,7 @@ using FileInfo = System.IO.FileInfo;
 using Dir = System.IO.Directory;
 using SFile = System.IO.File;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.IO.Compression;
 
 public static class Util
@@ -26,6 +27,20 @@ public static class Util
 
 	public static string GetExtension(this string path) {
 		return Path.GetExtension(path);
+	}
+
+	public static Array<ushort> GetVersionComponentsFromString(string text) {
+		Array<ushort> versionComponents = new Array<ushort> { 0, 0, 0 };
+		Match resMatch = Regex.Match(text, @"^(?:\D+)?(?<Major>\d+)(?:\.(?<Minor>\d+))?(?:\.(?<Patch>\d+))?(?:.+?)?$");
+		if (resMatch.Success) {
+			ushort.TryParse(resMatch.Groups["Major"].Value, out ushort result);
+			versionComponents[0] = result;
+			ushort.TryParse(resMatch.Groups["Minor"].Value, out result);
+			versionComponents[1] = result;
+			ushort.TryParse(resMatch.Groups["Patch"].Value, out result);
+			versionComponents[2] = result;
+		}
+		return versionComponents;
 	}
 
 	static string[] ByteSizes = new string[] {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "RB", "QB"};
