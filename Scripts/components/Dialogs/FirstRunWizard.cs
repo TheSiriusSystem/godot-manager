@@ -148,7 +148,7 @@ public class FirstRunWizard : ReferenceRect
 		OriginalSettings[1] = CacheLoc.Text;
 		CacheLoc.Text = dir.GetOSDir().NormalizePath();
 		CentralStore.Settings.CachePath = CacheLoc.Text;
-		EnsureDirectoryExists(EngineLoc.Text);
+		EnsureDirectoryExists(CacheLoc.Text);
 	}
 
 	void OnDirSelected_ProjectBrowse(string dir)
@@ -156,7 +156,7 @@ public class FirstRunWizard : ReferenceRect
 		OriginalSettings[2] = ProjectLoc.Text;
 		ProjectLoc.Text = dir.GetOSDir().NormalizePath();
 		CentralStore.Settings.ProjectPath = ProjectLoc.Text;
-		EnsureDirectoryExists(EngineLoc.Text);
+		EnsureDirectoryExists(ProjectLoc.Text);
 	}
 
 	[SignalHandler("toggled", nameof(TitleBar))]
