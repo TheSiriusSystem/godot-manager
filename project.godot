@@ -70,7 +70,6 @@ debugger_agent/wait_timeout=7000
 [rendering]
 
 quality/driver/driver_name="GLES2"
-quality/driver/fallback_to_gles2=true
 quality/intended_usage/framebuffer_allocation=1
 quality/intended_usage/framebuffer_allocation.mobile=1
 vram_compression/import_etc2=false
@@ -86,6 +85,7 @@ quality/shadow_atlas/quadrant_3_subdiv=0
 quality/shadows/filter_mode=0
 quality/reflections/texture_array_reflections=false
 quality/reflections/high_quality_ggx=false
+quality/reflections/irradiance_max_size=32
 quality/shading/force_vertex_shading=true
 quality/shading/force_lambert_over_burley=true
 quality/shading/force_blinn_over_ggx=true
@@ -97,8 +97,6 @@ cpu_lightmapper/quality/low_quality_ray_count=0
 cpu_lightmapper/quality/medium_quality_ray_count=0
 cpu_lightmapper/quality/high_quality_ray_count=0
 cpu_lightmapper/quality/ultra_quality_ray_count=0
+quality/reflections/atlas_size=0
+quality/reflections/atlas_subdiv=0
 quality/depth/hdr=false
-limits/rendering/max_renderable_elements=1024
-limits/rendering/max_renderable_lights=16
-limits/rendering/max_renderable_reflections=8
-limits/rendering/max_lights_per_object=8
