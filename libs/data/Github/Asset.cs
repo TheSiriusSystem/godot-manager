@@ -11,9 +11,5 @@ namespace Github {
 		[JsonProperty] public string Label;
 		[JsonProperty] public int Size;
 		[JsonProperty] public int DownloadCount;
-
-		public static Asset FromJson(string data) {
-			return JsonConvert.DeserializeObject<Asset>(data,DefaultSettings.defaultJsonSettings);
-		}
 	}
 }

@@ -263,7 +263,6 @@ public class GodotPanel : Panel
 		else
 			_installer = GodotInstaller.FromGithub(gle.GithubVersion, IsMono());
 
-		_installer.Connect("chunk_received", gle, "OnChunkReceived");
 		_installer.Connect("download_completed", this, "OnDownloadCompleted", new Array { gle }, (uint)ConnectFlags.Oneshot);
 		_installer.Connect("download_failed", this, "OnDownloadFailed", new Array { gle }, (uint)ConnectFlags.Oneshot);
 
@@ -512,23 +511,14 @@ public class GodotPanel : Panel
 		}
 	}
 
-	private int downloadedBytes = 0;
-	void OnChunkReceived(int bytes) {
-		downloadedBytes += bytes;
-	}
-
 	public async Task GatherGithubReleases() {
 		AppDialogs.BusyDialog.UpdateHeader(Tr("Fetching Editor Downloads"));
 		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching release information from GitHub..."));
 		AppDialogs.BusyDialog.ShowDialog();
-		downloadedBytes = 0;
-		Github.Github.Instance.Connect("chunk_received", this, "OnChunkReceived");
 		var task = Github.Github.Instance.GetAllReleases();
 		while (!task.IsCompleted) {
 			await this.IdleFrame();
 		}
-
-		Github.Github.Instance.Disconnect("chunk_received", this, "OnChunkReceived");
 
 		foreach (Github.Release release in task.Result) {
 			GithubVersion gv = GithubVersion.FromAPI(release);
@@ -544,14 +534,10 @@ public class GodotPanel : Panel
 		AppDialogs.BusyDialog.UpdateHeader("Fetching Editor Downloads");
 		AppDialogs.BusyDialog.UpdateByline(Tr("Fetching release information from TuxFamily..."));
 		AppDialogs.BusyDialog.ShowDialog();
-		downloadedBytes = 0;
-		Mirrors.MirrorManager.Instance.Connect("chunk_received", this, "OnChunkReceived");
 		var task = Mirrors.MirrorManager.Instance.GetEngineLinks();
 
 		while (!task.IsCompleted)
 			await this.IdleFrame();
-
-		Mirrors.MirrorManager.Instance.Disconnect("chunk_received", this, "OnChunkReceived");
 
 		foreach (MirrorVersion version in task.Result) {
 			if (CentralStore.Instance.FindTuxfamilyVersion(version.Id) == null && version.PlatformDownloadSize > 0)

@@ -47,42 +47,6 @@ namespace Github {
 			Limit.Used = (response.Headers["X-RateLimit-Used"] as string).ToInt();
 		}
 
-		public async Task<Release> GetLatestRelease() {
-			Release ret = null;
-			Uri uri = new Uri("https://api.github.com/repos/godotengine/godot/releases/latest");
-			Task<HTTPClient.Status> cres = client.StartClient(uri.Host, uri.Port, true);
-
-			while (!cres.IsCompleted) {
-				await this.IdleFrame();
-			}
-
-			if (!client.SuccessConnect(cres.Result))
-				return ret;
-			
-			string path = uri.AbsolutePath;
-			var tresult = client.MakeRequest(path);
-			while (!tresult.IsCompleted) {
-				await this.IdleFrame();
-			}
-
-			Mutex mutex = new Mutex();
-			mutex.Lock();
-			HTTPResponse result = tresult.Result;
-			
-			client.Close();
-			
-			UpdateLimit(result);
-
-			if (result.ResponseCode != 200)
-				return null;
-			else
-				ret = JsonConvert.DeserializeObject<Release>(result.Body, DefaultSettings.defaultJsonSettings);
-
-			mutex.Unlock();
-
-			return ret;			
-		}
-
 		public async Task<Array<Release>> GetReleases(int per_page=0, int page=1) {
 			Array<Release> ret = new Array<Release>();
 			Uri uri = new Uri("https://api.github.com/repos/godotengine/godot/releases");
