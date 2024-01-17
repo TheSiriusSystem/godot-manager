@@ -6,7 +6,8 @@ using Environment = System.Environment;
 [JsonObject(MemberSerialization.OptIn)]
 public class GithubVersion : Object
 {
-	[JsonProperty] public string Name;	// Github.Release.Name
+	[JsonProperty] public string Name; // Github.Release.Name
+	[JsonProperty] public string TagName; // Github.Release.TagName
 	[JsonProperty] public VersionUrls Standard; // See VersionUrls
 	[JsonProperty] public VersionUrls Mono; // See VersionUrls
 
@@ -110,7 +111,7 @@ public class GithubVersion : Object
 
 	public static GithubVersion FromAPI(Github.Release release) {
 		GithubVersion api = new GithubVersion();
-		api.Name = release.Name;
+		api.Name = !string.IsNullOrEmpty(release.Name) ? release.Name : release.TagName;
 		foreach (string str in new string[] {"_stable", "-stable"}) {
 			api.Name = api.Name.ReplaceN(str, "");
 		}
