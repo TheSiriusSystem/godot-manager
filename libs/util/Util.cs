@@ -63,7 +63,7 @@ public static class Util
 	}
 
 	public static string NormalizeFileName(this string text) {
-		foreach (char invalidChar in System.IO.Path.GetInvalidFileNameChars()) {
+		foreach (char invalidChar in Path.GetInvalidFileNameChars()) {
 			text = text.Replace(invalidChar, '\0');
 		}
 		return text;
@@ -79,14 +79,8 @@ public static class Util
 		return path;
 	}
 
-	public static string Join(this string[] parts, string separator) {
-		return string.Join(separator, parts);
-	}
-
-	public static string GetParentFolder(this string path) {
-		return path.GetBaseDir().GetBaseDir();
-	}
-
+	public static string Join(this string[] parts, string separator) => string.Join(separator, parts);
+	public static string GetParentFolder(this string path) => path.GetBaseDir().GetBaseDir();
 	public static bool IsDirEmpty(this string path) => !Dir.Exists(path) || !Dir.EnumerateFileSystemEntries(path).Any();
 
 	public static string GetUserFolder(params string[] parts)
@@ -164,21 +158,6 @@ public static class Util
 		return obj.ToSignal(Engine.GetMainLoop(), "idle_frame");
 	}
 
-	public static SignalAwaiter WaitTimer(this Godot.Node obj, int milliseconds) {
-		return obj.ToSignal(obj.GetTree().CreateTimer(milliseconds / 1000.0f), "timeout");
-	}
-
-	public static SignalAwaiter WaitTimer(this Godot.Node obj, float seconds) {
-		return obj.ToSignal(obj.GetTree().CreateTimer(seconds), "timeout");
-	}
-
-	public static string EngineVersion {
-		get {
-			Dictionary vers = Engine.GetVersionInfo();
-			return $"{vers["major"]}.{vers["minor"]}.{vers["patch"]}";
-		}
-	}
-
 	public static ImageTexture LoadImage(string path) {
 		var image = new Image();
 		
@@ -235,17 +214,5 @@ public static class Util
 			fh.Read(buffer, 0, (int)zae.Length);
 		}
 		return buffer;
-	}
-
-	public static void UpdateTr(this PopupMenu self, int indx, string text) {
-		self.SetItemText(indx, text);
-	}
-
-	public static void UpdateTr(this OptionButton self, int indx, string text) {
-		self.GetPopup().SetItemText(indx, text);
-	}
-
-	public static void UpdateTr(this MenuButton self, int indx, string text) {
-		self.GetPopup().SetItemText(indx, text);
 	}
 }
