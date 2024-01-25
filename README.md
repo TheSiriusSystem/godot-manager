@@ -2,6 +2,8 @@
 
 # Godot Manager
 
+**NOTE:** the more I work on this fork, the more fragile the code seems like at times. maybe I might contribute some of the changes to the main project in the future, idk. just don't expect any new updates.
+
 Godot Manager is an **engine version and project management utility**, streamlining the Godot development experience.
 
 Godot Manager supports an assorted list of features, from categorization of your projects, associating your projects with a specific version of Godot, as well as downloading Templates and Plugins that can be used in creating new projects.
